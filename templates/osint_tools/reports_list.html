@@ -181,7 +181,7 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <i class="{{ report.session.tool.icon }} me-2" style="color: {{ report.session.tool.color }};"></i>
+                                            <i class="{{ report.session.tool.icon }} me-2 text-primary"></i>
                                             <div>
                                                 <small class="text-white">{{ report.session.tool.name }}</small>
                                                 <br><small class="text-muted">{{ report.session.target }}</small>
@@ -424,5 +424,4 @@ function scheduleReport() {
 }
 </script>
 
-<link rel="stylesheet" href="{% static 'css/osint-theme.css' %}">
 {% endblock content %}

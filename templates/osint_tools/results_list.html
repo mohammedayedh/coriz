@@ -172,7 +172,7 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <i class="{{ result.session.tool.icon }} me-2" style="color: {{ result.session.tool.color }};"></i>
+                                            <i class="{{ result.session.tool.icon }} me-2 text-primary"></i>
                                             <span>{{ result.session.tool.name }}</span>
                                         </div>
                                     </td>
@@ -184,7 +184,7 @@
                                     <td>
                                         <div class="btn-group" role="group">
                                             <button class="btn btn-sm btn-outline-primary" 
-                                                    onclick="viewResult({{ result.id }})" title="عرض التفاصيل">
+                                                    onclick="viewResult('{{ result.id|escapejs }}')" title="عرض التفاصيل">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                             {% if result.url %}
@@ -194,7 +194,7 @@
                                                 </a>
                                             {% endif %}
                                             <button class="btn btn-sm btn-outline-info" 
-                                                    onclick="copyToClipboard('{{ result.title }}')" title="نسخ">
+                                                    onclick="copyToClipboard('{{ result.title|escapejs }}')" title="نسخ">
                                                 <i class="fas fa-copy"></i>
                                             </button>
                                         </div>
@@ -273,6 +273,15 @@ function viewResult(resultId) {
     fetch(`/osint/results/${resultId}/detail/`)
         .then(response => response.json())
         .then(data => {
+            const linkHtml = data.url
+                ? `
+                    <div class="col-12">
+                        <h6>الرابط:</h6>
+                        <a href="${data.url}" target="_blank" class="text-primary">${data.url}</a>
+                    </div>
+                `
+                : '';
+
             document.getElementById('resultModalBody').innerHTML = `
                 <div class="row">
                     <div class="col-md-6">
@@ -287,12 +296,7 @@ function viewResult(resultId) {
                         <h6>الوصف:</h6>
                         <p>${data.description}</p>
                     </div>
-                    ${data.url ? `
-                    <div class="col-12">
-                        <h6>الرابط:</h6>
-                        <a href="${data.url}" target="_blank" class="text-primary">${data.url}</a>
-                    </div>
-                    ` : ''}
+                    ${linkHtml}
                     <div class="col-md-6">
                         <h6>مستوى الثقة:</h6>
                         <p>${data.confidence}</p>
@@ -326,5 +330,4 @@ function exportResults() {
 }
 </script>
 
-<link rel="stylesheet" href="{% static 'css/osint-theme.css' %}">
 {% endblock content %}

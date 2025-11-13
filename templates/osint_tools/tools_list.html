@@ -68,13 +68,13 @@
             {% for tool in page_obj %}
             <div class="col-lg-4 col-md-6">
                 <div class="card h-100 border-0 shadow-sm tool-card" data-tool-type="{{ tool.tool_type }}">
-                    <div class="card-header" style="background-color: {{ tool.color }}20; border-bottom: 2px solid {{ tool.color }}">
+                    <div class="card-header bg-body-tertiary border-bottom">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <i class="{{ tool.icon }} fa-2x" style="color: {{ tool.color }}"></i>
+                                <i class="{{ tool.icon }} fa-2x text-primary"></i>
                             </div>
                             <div class="text-end">
-                                <span class="badge" style="background-color: {{ tool.color }}">
+                                <span class="badge bg-primary-subtle text-primary fw-semibold">
                                     {{ tool.get_tool_type_display }}
                                 </span>
                             </div>
@@ -102,12 +102,12 @@
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div>
                                 {% if tool.requires_auth %}
-                                <span class="badge bg-warning">
+                                <span class="badge bg-warning text-dark">
                                     <i class="fas fa-lock me-1"></i>يتطلب مصادقة
                                 </span>
                                 {% endif %}
                                 {% if tool.api_key_required %}
-                                <span class="badge bg-info">
+                                <span class="badge bg-info text-dark">
                                     <i class="fas fa-key me-1"></i>مفتاح API
                                 </span>
                                 {% endif %}
@@ -223,213 +223,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<link rel="stylesheet" href="{% static 'css/osint-theme.css' %}">
-<style>
-/* تحسينات إضافية خاصة بصفحة الأدوات */
-.content-header h1 {
-    color: #00ff00 !important;
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-}
-
-.content-header p {
-    color: #e0e0e0 !important;
-    font-weight: 500;
-}
-
-.matrix-text small {
-    color: #00ff00 !important;
-    font-weight: bold;
-    letter-spacing: 2px;
-}
-
-/* تحسين بطاقات الأدوات */
-.tool-card {
-    background: linear-gradient(145deg, #1a1a1a, #2a2a2a) !important;
-    border: 2px solid #333333 !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
-    transition: all 0.3s ease;
-}
-
-.tool-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px rgba(0, 255, 0, 0.3) !important;
-    border-color: #00ff00 !important;
-}
-
-.tool-header {
-    border-bottom: 2px solid #00ff00 !important;
-    padding-bottom: 1rem;
-}
-
-.tool-title {
-    color: #ffffff !important;
-    font-weight: bold;
-    font-size: 1.1rem;
-}
-
-.tool-description {
-    color: #cccccc !important;
-    font-size: 0.9rem;
-    line-height: 1.5;
-}
-
-.tool-meta .badge {
-    font-weight: 600;
-    font-size: 0.8rem;
-}
-
-/* تحسين بطاقات المحتوى */
-.content-card {
-    background: linear-gradient(145deg, #1a1a1a, #2a2a2a) !important;
-    border: 1px solid #333333 !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
-}
-
-.content-card .card-header {
-    background: linear-gradient(90deg, #2a2a2a, #1a1a1a) !important;
-    border-bottom: 2px solid #00ff00 !important;
-}
-
-.content-card .card-header h5 {
-    color: #00ff00 !important;
-    font-weight: bold;
-    text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
-}
-
-/* تحسين الأزرار */
-.btn-outline-primary {
-    color: #00ff00 !important;
-    border-color: #00ff00 !important;
-    background: transparent !important;
-    font-weight: 600;
-}
-
-.btn-outline-primary:hover {
-    background: #00ff00 !important;
-    color: #000000 !important;
-    border-color: #00ff00 !important;
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
-}
-
-.btn-primary {
-    background: linear-gradient(45deg, #00ff00, #00cc00) !important;
-    border-color: #00ff00 !important;
-    color: #000000 !important;
-    font-weight: bold;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(45deg, #00cc00, #00ff00) !important;
-    box-shadow: 0 0 25px rgba(0, 255, 0, 0.6);
-}
-
-/* تحسين النماذج */
-.form-control {
-    background: rgba(0, 0, 0, 0.5) !important;
-    border: 1px solid #444444 !important;
-    color: #ffffff !important;
-}
-
-.form-control:focus {
-    background: rgba(0, 0, 0, 0.7) !important;
-    border-color: #00ff00 !important;
-    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
-    color: #ffffff !important;
-}
-
-.form-select {
-    background: rgba(0, 0, 0, 0.5) !important;
-    border: 1px solid #444444 !important;
-    color: #ffffff !important;
-}
-
-.form-select:focus {
-    background: rgba(0, 0, 0, 0.7) !important;
-    border-color: #00ff00 !important;
-    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
-    color: #ffffff !important;
-}
-
-/* تحسين الشارات */
-.badge.bg-success {
-    background: linear-gradient(45deg, #00ff00, #00cc00) !important;
-    color: #000000 !important;
-    font-weight: bold;
-}
-
-.badge.bg-info {
-    background: linear-gradient(45deg, #00bfff, #0080ff) !important;
-    color: #ffffff !important;
-    font-weight: bold;
-}
-
-.badge.bg-warning {
-    background: linear-gradient(45deg, #ffaa00, #ff8800) !important;
-    color: #000000 !important;
-    font-weight: bold;
-}
-
-.badge.bg-danger {
-    background: linear-gradient(45deg, #ff4444, #cc0000) !important;
-    color: #ffffff !important;
-    font-weight: bold;
-}
-
-.badge.bg-secondary {
-    background: linear-gradient(45deg, #666666, #444444) !important;
-    color: #ffffff !important;
-    font-weight: bold;
-}
-
-/* تحسين الحالة الفارغة */
-.empty-state {
-    background: rgba(0, 255, 0, 0.05);
-    border: 2px dashed rgba(0, 255, 0, 0.3);
-    border-radius: 15px;
-    padding: 3rem;
-}
-
-.empty-state i {
-    color: #666666 !important;
-}
-
-.empty-state p {
-    color: #cccccc !important;
-    font-weight: 500;
-}
-
-/* تحسين الترقيم */
-.pagination .page-item .page-link {
-    background-color: rgba(0, 0, 0, 0.8) !important;
-    border-color: #444444 !important;
-    color: #ffffff !important;
-}
-
-.pagination .page-item.active .page-link {
-    background-color: #00ff00 !important;
-    border-color: #00ff00 !important;
-    color: #000000 !important;
-}
-
-.pagination .page-item .page-link:hover {
-    background-color: rgba(0, 255, 0, 0.2) !important;
-    color: #00ff00 !important;
-    border-color: #00ff00 !important;
-}
-
-/* تحسين الاستجابة */
-@media (max-width: 768px) {
-    .content-header h1 {
-        font-size: 1.5rem;
-    }
-    
-    .tool-card {
-        margin-bottom: 1rem;
-    }
-    
-    .content-card {
-        margin-bottom: 1rem;
-    }
-}
-</style>
 {% endblock %}

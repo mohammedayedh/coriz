@@ -107,7 +107,7 @@
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <i class="{{ session.tool.icon }} me-2" style="color: {{ session.tool.color }};"></i>
+                                            <i class="{{ session.tool.icon }} me-2 text-primary"></i>
                                             <span>{{ session.tool.name }}</span>
                                         </div>
                                     </td>
@@ -135,10 +135,9 @@
                                     </td>
                                     <td>
                                         <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar bg-primary" role="progressbar" 
-                                                 style="width: {{ session.progress }}%" 
-                                                 aria-valuenow="{{ session.progress }}" 
-                                                 aria-valuemin="0" aria-valuemax="100">
+                                            <div class="progress-bar bg-primary" role="progressbar"
+                                                 aria-valuenow="{{ session.progress }}" aria-valuemin="0"
+                                                 aria-valuemax="100" style="width: {{ session.progress }}%">
                                                 {{ session.progress }}%
                                             </div>
                                         </div>
@@ -259,5 +258,4 @@ function stopSession(sessionId) {
 }
 </script>
 
-<link rel="stylesheet" href="{% static 'css/osint-theme.css' %}">
 {% endblock content %}
