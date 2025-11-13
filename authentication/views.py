@@ -48,9 +48,6 @@ def incr_rate(kind: str, ident: str):
     val = cache.get(key, 0)
     if val == 0:
         cache.set(key, 1, timeout=conf['window'])
-        messages.success(request, 'إن كانت البيانات صحيحة ستصل رسالة إعادة التعيين إن أمكن.')
-        incr_rate('password_reset', rl_ident)
-        return redirect('authentication:login')
     else:
         try:
             cache.incr(key)
@@ -60,6 +57,7 @@ def incr_rate(kind: str, ident: str):
 
 def reset_rate(kind: str, ident: str):
     cache.delete(_rl_key(kind, ident))
+
 
 def get_client_ip(request):
     """الحصول على عنوان IP للمستخدم"""
