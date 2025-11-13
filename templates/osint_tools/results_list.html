@@ -1,0 +1,330 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}نتائج OSINT - كوريزا{% endblock %}
+
+{% block meta_description %}عرض وتحليل جميع النتائج من أدوات OSINT{% endblock %}
+
+{% block content %}
+<!-- Override the main content -->
+<div class="content-header">
+    <div class="d-flex align-items-center mb-3">
+        <button class="btn btn-outline-primary me-3 sidebar-toggle" id="sidebarToggle" aria-label="تبديل الشريط الجانبي">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="fw-bold mb-0 cyber-text typewriter">
+            <i class="fas fa-chart-bar me-3"></i>نتائج OSINT
+        </h1>
+    </div>
+    <p class="text-secondary">عرض وتحليل جميع النتائج من أدوات OSINT</p>
+    <div class="matrix-text mt-2">
+        <small>RESULTS ANALYSIS</small>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-filter me-2"></i>فلترة النتائج
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="tool" class="form-label">الأداة</label>
+                        <select name="tool" id="tool" class="form-select">
+                            <option value="">جميع الأدوات</option>
+                            {% for tool in tools %}
+                                <option value="{{ tool.id }}" {% if request.GET.tool == tool.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ tool.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="result_type" class="form-label">نوع النتيجة</label>
+                        <select name="result_type" id="result_type" class="form-select">
+                            <option value="">جميع الأنواع</option>
+                            <option value="email" {% if request.GET.result_type == "email" %}selected{% endif %}>بريد إلكتروني</option>
+                            <option value="phone" {% if request.GET.result_type == "phone" %}selected{% endif %}>رقم هاتف</option>
+                            <option value="social" {% if request.GET.result_type == "social" %}selected{% endif %}>وسائل التواصل</option>
+                            <option value="domain" {% if request.GET.result_type == "domain" %}selected{% endif %}>نطاق</option>
+                            <option value="ip" {% if request.GET.result_type == "ip" %}selected{% endif %}>عنوان IP</option>
+                            <option value="person" {% if request.GET.result_type == "person" %}selected{% endif %}>شخص</option>
+                            <option value="organization" {% if request.GET.result_type == "organization" %}selected{% endif %}>منظمة</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="confidence" class="form-label">مستوى الثقة</label>
+                        <select name="confidence" id="confidence" class="form-select">
+                            <option value="">جميع المستويات</option>
+                            <option value="high" {% if request.GET.confidence == "high" %}selected{% endif %}>عالي</option>
+                            <option value="medium" {% if request.GET.confidence == "medium" %}selected{% endif %}>متوسط</option>
+                            <option value="low" {% if request.GET.confidence == "low" %}selected{% endif %}>منخفض</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="search" class="form-label">البحث</label>
+                        <input type="text" name="search" id="search" class="form-control" 
+                               placeholder="البحث في النتائج..." value="{{ request.GET.search }}">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>فلترة
+                        </button>
+                        <a href="{% url 'osint_tools:results_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-times me-2"></i>مسح الفلاتر
+                        </a>
+                        <button type="button" class="btn btn-success" onclick="exportResults()">
+                            <i class="fas fa-download me-2"></i>تصدير النتائج
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results List -->
+<div class="row">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>قائمة النتائج
+                    <span class="badge bg-primary ms-2">{{ results|length }}</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if results %}
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>النوع</th>
+                                    <th>العنوان</th>
+                                    <th>الوصف</th>
+                                    <th>الرابط</th>
+                                    <th>مستوى الثقة</th>
+                                    <th>الأداة</th>
+                                    <th>التاريخ</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in results %}
+                                <tr>
+                                    <td>
+                                        {% if result.result_type == 'email' %}
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-envelope me-1"></i>بريد إلكتروني
+                                            </span>
+                                        {% elif result.result_type == 'phone' %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-phone me-1"></i>هاتف
+                                            </span>
+                                        {% elif result.result_type == 'social' %}
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-share-alt me-1"></i>اجتماعي
+                                            </span>
+                                        {% elif result.result_type == 'domain' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-globe me-1"></i>نطاق
+                                            </span>
+                                        {% elif result.result_type == 'ip' %}
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-server me-1"></i>IP
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-light text-dark">
+                                                <i class="fas fa-info me-1"></i>{{ result.result_type }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong class="text-white">{{ result.title }}</strong>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ result.description|truncatechars:100 }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        {% if result.url %}
+                                            <a href="{{ result.url }}" target="_blank" class="text-primary">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if result.confidence == 'high' %}
+                                            <span class="badge bg-success">عالي</span>
+                                        {% elif result.confidence == 'medium' %}
+                                            <span class="badge bg-warning">متوسط</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">منخفض</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="{{ result.session.tool.icon }} me-2" style="color: {{ result.session.tool.color }};"></i>
+                                            <span>{{ result.session.tool.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ result.created_at|date:"Y-m-d H:i" }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    onclick="viewResult({{ result.id }})" title="عرض التفاصيل">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            {% if result.url %}
+                                                <a href="{{ result.url }}" target="_blank" 
+                                                   class="btn btn-sm btn-outline-success" title="فتح الرابط">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            {% endif %}
+                                            <button class="btn btn-sm btn-outline-info" 
+                                                    onclick="copyToClipboard('{{ result.title }}')" title="نسخ">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                        <nav aria-label="ترقيم الصفحات">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.result_type %}&result_type={{ request.GET.result_type }}{% endif %}">الأولى</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.result_type %}&result_type={{ request.GET.result_type }}{% endif %}">السابقة</a>
+                                    </li>
+                                {% endif %}
+
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        صفحة {{ page_obj.number }} من {{ page_obj.paginator.num_pages }}
+                                    </span>
+                                </li>
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.result_type %}&result_type={{ request.GET.result_type }}{% endif %}">التالية</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.result_type %}&result_type={{ request.GET.result_type }}{% endif %}">الأخيرة</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="empty-state text-center">
+                        <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                        <h4>لا توجد نتائج</h4>
+                        <p>لم يتم العثور على أي نتائج من أدوات OSINT بعد.</p>
+                        <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-primary">
+                            <i class="fas fa-tools me-2"></i>تصفح الأدوات
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Result Detail Modal -->
+<div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resultModalLabel">تفاصيل النتيجة</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+            </div>
+            <div class="modal-body" id="resultModalBody">
+                <!-- سيتم ملؤها بـ JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewResult(resultId) {
+    fetch(`/osint/results/${resultId}/detail/`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('resultModalBody').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>العنوان:</h6>
+                        <p>${data.title}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>النوع:</h6>
+                        <p>${data.result_type}</p>
+                    </div>
+                    <div class="col-12">
+                        <h6>الوصف:</h6>
+                        <p>${data.description}</p>
+                    </div>
+                    ${data.url ? `
+                    <div class="col-12">
+                        <h6>الرابط:</h6>
+                        <a href="${data.url}" target="_blank" class="text-primary">${data.url}</a>
+                    </div>
+                    ` : ''}
+                    <div class="col-md-6">
+                        <h6>مستوى الثقة:</h6>
+                        <p>${data.confidence}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>التاريخ:</h6>
+                        <p>${data.created_at}</p>
+                    </div>
+                </div>
+            `;
+            new bootstrap.Modal(document.getElementById('resultModal')).show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ في تحميل تفاصيل النتيجة');
+        });
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        alert('تم نسخ النص إلى الحافظة');
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+    });
+}
+
+function exportResults() {
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', 'csv');
+    window.open(`/osint/results/export/?${params.toString()}`, '_blank');
+}
+</script>
+
+<link rel="stylesheet" href="{% static 'css/osint-theme.css' %}">
+{% endblock content %}

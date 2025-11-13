@@ -1,0 +1,263 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}جلسات OSINT - كوريزا{% endblock %}
+
+{% block meta_description %}عرض وإدارة جميع جلسات أدوات OSINT الخاصة بك{% endblock %}
+
+{% block content %}
+<!-- Override the main content -->
+<div class="content-header">
+    <div class="d-flex align-items-center mb-3">
+        <button class="btn btn-outline-primary me-3 sidebar-toggle" id="sidebarToggle" aria-label="تبديل الشريط الجانبي">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="fw-bold mb-0 cyber-text typewriter">
+            <i class="fas fa-history me-3"></i>جلسات OSINT
+        </h1>
+    </div>
+    <p class="text-secondary">عرض وإدارة جميع جلسات أدوات OSINT الخاصة بك</p>
+    <div class="matrix-text mt-2">
+        <small>SESSIONS MANAGEMENT</small>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-filter me-2"></i>فلترة الجلسات
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="tool" class="form-label">الأداة</label>
+                        <select name="tool" id="tool" class="form-select">
+                            <option value="">جميع الأدوات</option>
+                            {% for tool in tools %}
+                                <option value="{{ tool.id }}" {% if request.GET.tool == tool.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ tool.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="status" class="form-label">الحالة</label>
+                        <select name="status" id="status" class="form-select">
+                            <option value="">جميع الحالات</option>
+                            <option value="running" {% if request.GET.status == "running" %}selected{% endif %}>قيد التشغيل</option>
+                            <option value="completed" {% if request.GET.status == "completed" %}selected{% endif %}>مكتملة</option>
+                            <option value="failed" {% if request.GET.status == "failed" %}selected{% endif %}>فشلت</option>
+                            <option value="cancelled" {% if request.GET.status == "cancelled" %}selected{% endif %}>ملغية</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="date_from" class="form-label">من تاريخ</label>
+                        <input type="date" name="date_from" id="date_from" class="form-control" value="{{ request.GET.date_from }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="date_to" class="form-label">إلى تاريخ</label>
+                        <input type="date" name="date_to" id="date_to" class="form-control" value="{{ request.GET.date_to }}">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>فلترة
+                        </button>
+                        <a href="{% url 'osint_tools:sessions_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-times me-2"></i>مسح الفلاتر
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sessions List -->
+<div class="row">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>قائمة الجلسات
+                    <span class="badge bg-primary ms-2">{{ sessions|length }}</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if sessions %}
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>الأداة</th>
+                                    <th>الهدف</th>
+                                    <th>الحالة</th>
+                                    <th>التقدم</th>
+                                    <th>تاريخ البدء</th>
+                                    <th>المدة</th>
+                                    <th>النتائج</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in sessions %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="{{ session.tool.icon }} me-2" style="color: {{ session.tool.color }};"></i>
+                                            <span>{{ session.tool.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <code class="text-primary">{{ session.target }}</code>
+                                    </td>
+                                    <td>
+                                        {% if session.status == 'running' %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-play me-1"></i>قيد التشغيل
+                                            </span>
+                                        {% elif session.status == 'completed' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>مكتملة
+                                            </span>
+                                        {% elif session.status == 'failed' %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times me-1"></i>فشلت
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-pause me-1"></i>{{ session.get_status_display }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-primary" role="progressbar" 
+                                                 style="width: {{ session.progress }}%" 
+                                                 aria-valuenow="{{ session.progress }}" 
+                                                 aria-valuemin="0" aria-valuemax="100">
+                                                {{ session.progress }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ session.created_at|date:"Y-m-d H:i" }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        {% if session.completed_at %}
+                                            <small class="text-muted">
+                                                {{ session.created_at|timesince:session.completed_at }}
+                                            </small>
+                                        {% else %}
+                                            <small class="text-muted">
+                                                {{ session.created_at|timesince }}
+                                            </small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ session.results_count }} نتيجة</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'osint_tools:session_detail' session.id %}" 
+                                               class="btn btn-sm btn-outline-primary" title="عرض التفاصيل">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if session.status == 'running' %}
+                                                <button class="btn btn-sm btn-outline-danger" 
+                                                        onclick="stopSession({{ session.id }})" title="إيقاف">
+                                                    <i class="fas fa-stop"></i>
+                                                </button>
+                                            {% endif %}
+                                            {% if session.results_count > 0 %}
+                                                <a href="{% url 'osint_tools:session_results' session.id %}" 
+                                                   class="btn btn-sm btn-outline-success" title="عرض النتائج">
+                                                    <i class="fas fa-chart-bar"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                        <nav aria-label="ترقيم الصفحات">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">الأولى</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">السابقة</a>
+                                    </li>
+                                {% endif %}
+
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        صفحة {{ page_obj.number }} من {{ page_obj.paginator.num_pages }}
+                                    </span>
+                                </li>
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">التالية</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">الأخيرة</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="empty-state text-center">
+                        <i class="fas fa-history fa-3x mb-3"></i>
+                        <h4>لا توجد جلسات</h4>
+                        <p>لم تقم بتشغيل أي أداة من أدوات OSINT بعد.</p>
+                        <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-primary">
+                            <i class="fas fa-tools me-2"></i>تصفح الأدوات
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function stopSession(sessionId) {
+    if (confirm('هل أنت متأكد من إيقاف هذه الجلسة؟')) {
+        fetch(`/osint/sessions/${sessionId}/stop/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('حدث خطأ في إيقاف الجلسة');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ في إيقاف الجلسة');
+        });
+    }
+}
+</script>
+
+<link rel="stylesheet" href="{% static 'css/osint-theme.css' %}">
+{% endblock content %}

@@ -1,0 +1,385 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}الملف الشخصي - لوحة التحكم{% endblock %}
+
+{% block content %}
+<!-- Override the main content -->
+<div class="content-header">
+    <div class="d-flex align-items-center mb-3">
+        <button class="btn btn-outline-primary me-3 sidebar-toggle" id="sidebarToggle" aria-label="تبديل الشريط الجانبي">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="fw-bold mb-0 cyber-text typewriter">
+            <i class="fas fa-user me-3"></i>الملف الشخصي
+        </h1>
+    </div>
+    <p class="text-secondary">إدارة معلوماتك الشخصية وإعدادات الحساب</p>
+    <div class="matrix-text mt-2">
+        <small>USER PROFILE MANAGEMENT</small>
+    </div>
+</div>
+
+<!-- Profile Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card cyber-border">
+            <div class="stat-icon">
+                <i class="fas fa-calendar-alt hacker-glow"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">{{ user.date_joined|date:"Y" }}</h3>
+                <p class="stat-label">سنة الانضمام</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card cyber-border">
+            <div class="stat-icon">
+                <i class="fas fa-tools hacker-glow"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number" id="totalOSINTSessions">0</h3>
+                <p class="stat-label">جلسات OSINT</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card cyber-border">
+            <div class="stat-icon">
+                <i class="fas fa-search hacker-glow"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number" id="totalResults">0</h3>
+                <p class="stat-label">نتائج مكتشفة</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card cyber-border">
+            <div class="stat-icon">
+                <i class="fas fa-file-alt hacker-glow"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number" id="totalReports">0</h3>
+                <p class="stat-label">تقارير منشأة</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Profile Content -->
+<div class="row g-4">
+    <!-- Profile Information -->
+    <div class="col-lg-4">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="fw-bold mb-0 cyber-text">
+                    <i class="fas fa-user-circle me-2"></i>معلومات الحساب
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="profile-avatar mb-3">
+                    <img src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" 
+                         alt="صورة الملف الشخصي" class="rounded-circle" width="120" height="120">
+                    <button class="btn btn-outline-primary btn-sm mt-2" onclick="changeAvatar()">
+                        <i class="fas fa-camera me-1"></i>تغيير الصورة
+                    </button>
+                </div>
+                
+                <h4 class="text-white mb-1">{{ user.get_full_name|default:user.username }}</h4>
+                <p class="text-muted mb-3">@{{ user.username }}</p>
+                
+                <div class="profile-info">
+                    <div class="info-item mb-2">
+                        <i class="fas fa-envelope me-2 text-primary"></i>
+                        <span>{{ user.email }}</span>
+                    </div>
+                    <div class="info-item mb-2">
+                        <i class="fas fa-calendar me-2 text-primary"></i>
+                        <span>انضم في {{ user.date_joined|date:"Y/m/d" }}</span>
+                    </div>
+                    <div class="info-item mb-2">
+                        <i class="fas fa-clock me-2 text-primary"></i>
+                        <span>آخر نشاط: {{ user.last_login|date:"Y/m/d H:i"|default:"غير محدد" }}</span>
+                    </div>
+                    <div class="info-item mb-2">
+                        <i class="fas fa-shield-alt me-2 text-primary"></i>
+                        <span>الحالة: {% if user.is_active %}نشط{% else %}معطل{% endif %}</span>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button class="btn btn-primary w-100" onclick="editProfile()">
+                        <i class="fas fa-edit me-2"></i>تعديل الملف الشخصي
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Profile Forms -->
+    <div class="col-lg-8">
+        <!-- Personal Information -->
+        <div class="content-card mb-4">
+            <div class="card-header">
+                <h5 class="fw-bold mb-0 cyber-text">
+                    <i class="fas fa-user-edit me-2"></i>المعلومات الشخصية
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="personalInfoForm">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="firstName" class="form-label">الاسم الأول</label>
+                            <input type="text" class="form-control" id="firstName" name="first_name" value="{{ user.first_name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="lastName" class="form-label">الاسم الأخير</label>
+                            <input type="text" class="form-control" id="lastName" name="last_name" value="{{ user.last_name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">رقم الهاتف</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ user.profile.phone|default:'' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="organization" class="form-label">المنظمة</label>
+                            <input type="text" class="form-control" id="organization" name="organization" value="{{ user.profile.organization|default:'' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="jobTitle" class="form-label">المسمى الوظيفي</label>
+                            <input type="text" class="form-control" id="jobTitle" name="job_title" value="{{ user.profile.job_title|default:'' }}">
+                        </div>
+                        <div class="col-12">
+                            <label for="bio" class="form-label">نبذة شخصية</label>
+                            <textarea class="form-control" id="bio" name="bio" rows="3" placeholder="اكتب نبذة مختصرة عن نفسك...">{{ user.profile.bio|default:'' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>حفظ المعلومات الشخصية
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Security Settings -->
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="fw-bold mb-0 cyber-text">
+                    <i class="fas fa-shield-alt me-2"></i>إعدادات الأمان
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="security-item">
+                            <h6 class="text-white">كلمة المرور</h6>
+                            <p class="text-muted small">آخر تغيير: غير محدد</p>
+                            <button class="btn btn-outline-warning btn-sm" onclick="changePassword()">
+                                <i class="fas fa-key me-1"></i>تغيير كلمة المرور
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="security-item">
+                            <h6 class="text-white">المصادقة الثنائية</h6>
+                            <p class="text-muted small">حالياً: معطل</p>
+                            <button class="btn btn-outline-info btn-sm" onclick="setupTwoFactor()">
+                                <i class="fas fa-mobile-alt me-1"></i>تفعيل المصادقة الثنائية
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="security-item">
+                            <h6 class="text-white">جلسات نشطة</h6>
+                            <p class="text-muted small">عدد الجلسات: 1</p>
+                            <button class="btn btn-outline-danger btn-sm" onclick="manageSessions()">
+                                <i class="fas fa-desktop me-1"></i>إدارة الجلسات
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="security-item">
+                            <h6 class="text-white">سجل الأمان</h6>
+                            <p class="text-muted small">آخر نشاط: الآن</p>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="viewSecurityLog()">
+                                <i class="fas fa-history me-1"></i>عرض السجل
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// حفظ المعلومات الشخصية
+document.getElementById('personalInfoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+    
+    fetch('/api/profile/update/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSuccess('تم حفظ المعلومات الشخصية بنجاح');
+        } else {
+            showError('فشل في حفظ المعلومات الشخصية');
+        }
+    })
+    .catch(error => {
+        console.error('خطأ في حفظ المعلومات الشخصية:', error);
+        showError('فشل في حفظ المعلومات الشخصية');
+    });
+});
+
+// تغيير صورة الملف الشخصي
+function changeAvatar() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            uploadAvatar(file);
+        }
+    };
+    input.click();
+}
+
+// رفع صورة الملف الشخصي
+function uploadAvatar(file) {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    
+    fetch('/api/profile/avatar/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSuccess('تم تحديث صورة الملف الشخصي');
+            document.querySelector('.profile-avatar img').src = data.avatar_url;
+        } else {
+            showError('فشل في تحديث صورة الملف الشخصي');
+        }
+    })
+    .catch(error => {
+        console.error('خطأ في تحديث صورة الملف الشخصي:', error);
+        showError('فشل في تحديث صورة الملف الشخصي');
+    });
+}
+
+// تعديل الملف الشخصي
+function editProfile() {
+    document.getElementById('personalInfoForm').scrollIntoView({ behavior: 'smooth' });
+}
+
+// تغيير كلمة المرور
+function changePassword() {
+    const currentPassword = prompt('أدخل كلمة المرور الحالية:');
+    if (!currentPassword) return;
+    
+    const newPassword = prompt('أدخل كلمة المرور الجديدة:');
+    if (!newPassword) return;
+    
+    const confirmPassword = prompt('أكد كلمة المرور الجديدة:');
+    if (newPassword !== confirmPassword) {
+        showError('كلمات المرور غير متطابقة');
+        return;
+    }
+    
+    fetch('/api/profile/change-password/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            current_password: currentPassword,
+            new_password: newPassword
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSuccess('تم تغيير كلمة المرور بنجاح');
+        } else {
+            showError(data.message || 'فشل في تغيير كلمة المرور');
+        }
+    })
+    .catch(error => {
+        console.error('خطأ في تغيير كلمة المرور:', error);
+        showError('فشل في تغيير كلمة المرور');
+    });
+}
+
+// إعداد المصادقة الثنائية
+function setupTwoFactor() {
+    showInfo('المصادقة الثنائية قيد التطوير');
+}
+
+// إدارة الجلسات
+function manageSessions() {
+    window.open('/dashboard/security/', '_blank');
+}
+
+// عرض سجل الأمان
+function viewSecurityLog() {
+    window.open('/dashboard/activity-log/', '_blank');
+}
+
+// تحميل إحصائيات المستخدم
+function loadUserStats() {
+    // إحصائيات وهمية للعرض
+    document.getElementById('totalOSINTSessions').textContent = '0';
+    document.getElementById('totalResults').textContent = '0';
+    document.getElementById('totalReports').textContent = '0';
+}
+
+// تحميل البيانات عند بدء الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    loadUserStats();
+});
+</script>
+
+<style>
+.profile-avatar img {
+    border: 3px solid var(--primary-color);
+    object-fit: cover;
+}
+
+.security-item {
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: rgba(0, 255, 0, 0.05);
+}
+</style>
+{% endblock %}

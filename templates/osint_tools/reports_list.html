@@ -1,0 +1,428 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}تقارير OSINT - كوريزا{% endblock %}
+
+{% block meta_description %}عرض وإدارة جميع التقارير المولدة من أدوات OSINT{% endblock %}
+
+{% block content %}
+<!-- Override the main content -->
+<div class="content-header">
+    <div class="d-flex align-items-center mb-3">
+        <button class="btn btn-outline-primary me-3 sidebar-toggle" id="sidebarToggle" aria-label="تبديل الشريط الجانبي">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="fw-bold mb-0 cyber-text typewriter">
+            <i class="fas fa-file-alt me-3"></i>تقارير OSINT
+        </h1>
+    </div>
+    <p class="text-secondary">عرض وإدارة جميع التقارير المولدة من أدوات OSINT</p>
+    <div class="matrix-text mt-2">
+        <small>REPORTS MANAGEMENT</small>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-plus me-2"></i>إجراءات سريعة
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <button class="btn btn-primary w-100" onclick="generateReport()">
+                            <i class="fas fa-file-plus me-2"></i>إنشاء تقرير جديد
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-success w-100" onclick="exportAllReports()">
+                            <i class="fas fa-download me-2"></i>تصدير جميع التقارير
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-info w-100" onclick="scheduleReport()">
+                            <i class="fas fa-clock me-2"></i>جدولة تقرير
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-filter me-2"></i>فلترة التقارير
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="report_type" class="form-label">نوع التقرير</label>
+                        <select name="report_type" id="report_type" class="form-select">
+                            <option value="">جميع الأنواع</option>
+                            <option value="summary" {% if request.GET.report_type == "summary" %}selected{% endif %}>ملخص</option>
+                            <option value="detailed" {% if request.GET.report_type == "detailed" %}selected{% endif %}>مفصل</option>
+                            <option value="executive" {% if request.GET.report_type == "executive" %}selected{% endif %}>تنفيذي</option>
+                            <option value="technical" {% if request.GET.report_type == "technical" %}selected{% endif %}>تقني</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="format" class="form-label">التنسيق</label>
+                        <select name="format" id="format" class="form-select">
+                            <option value="">جميع التنسيقات</option>
+                            <option value="pdf" {% if request.GET.format == "pdf" %}selected{% endif %}>PDF</option>
+                            <option value="html" {% if request.GET.format == "html" %}selected{% endif %}>HTML</option>
+                            <option value="csv" {% if request.GET.format == "csv" %}selected{% endif %}>CSV</option>
+                            <option value="json" {% if request.GET.format == "json" %}selected{% endif %}>JSON</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="date_from" class="form-label">من تاريخ</label>
+                        <input type="date" name="date_from" id="date_from" class="form-control" value="{{ request.GET.date_from }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="date_to" class="form-label">إلى تاريخ</label>
+                        <input type="date" name="date_to" id="date_to" class="form-control" value="{{ request.GET.date_to }}">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>فلترة
+                        </button>
+                        <a href="{% url 'osint_tools:reports_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-times me-2"></i>مسح الفلاتر
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reports List -->
+<div class="row">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>قائمة التقارير
+                    <span class="badge bg-primary ms-2">{{ reports|length }}</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if reports %}
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>العنوان</th>
+                                    <th>النوع</th>
+                                    <th>التنسيق</th>
+                                    <th>الجلسة</th>
+                                    <th>الحجم</th>
+                                    <th>تاريخ الإنشاء</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in reports %}
+                                <tr>
+                                    <td>
+                                        <strong class="text-white">{{ report.title }}</strong>
+                                        {% if report.description %}
+                                            <br><small class="text-muted">{{ report.description|truncatechars:50 }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if report.report_type == 'summary' %}
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-list me-1"></i>ملخص
+                                            </span>
+                                        {% elif report.report_type == 'detailed' %}
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-file-alt me-1"></i>مفصل
+                                            </span>
+                                        {% elif report.report_type == 'executive' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-chart-line me-1"></i>تنفيذي
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-cogs me-1"></i>تقني
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if report.format == 'pdf' %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-file-pdf me-1"></i>PDF
+                                            </span>
+                                        {% elif report.format == 'html' %}
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-file-code me-1"></i>HTML
+                                            </span>
+                                        {% elif report.format == 'csv' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-file-csv me-1"></i>CSV
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-file me-1"></i>{{ report.format|upper }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="{{ report.session.tool.icon }} me-2" style="color: {{ report.session.tool.color }};"></i>
+                                            <div>
+                                                <small class="text-white">{{ report.session.tool.name }}</small>
+                                                <br><small class="text-muted">{{ report.session.target }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if report.file %}
+                                            <small class="text-muted">{{ report.file.size|filesizeformat }}</small>
+                                        {% else %}
+                                            <small class="text-muted">-</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ report.created_at|date:"Y-m-d H:i" }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    onclick="viewReport({{ report.id }})" title="عرض التقرير">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            {% if report.file %}
+                                                <a href="{{ report.file.url }}" download 
+                                                   class="btn btn-sm btn-outline-success" title="تحميل">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
+                                            {% endif %}
+                                            <button class="btn btn-sm btn-outline-info" 
+                                                    onclick="shareReport({{ report.id }})" title="مشاركة">
+                                                <i class="fas fa-share"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" 
+                                                    onclick="deleteReport({{ report.id }})" title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                        <nav aria-label="ترقيم الصفحات">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1{% if request.GET.report_type %}&report_type={{ request.GET.report_type }}{% endif %}{% if request.GET.format %}&format={{ request.GET.format }}{% endif %}">الأولى</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.report_type %}&report_type={{ request.GET.report_type }}{% endif %}{% if request.GET.format %}&format={{ request.GET.format }}{% endif %}">السابقة</a>
+                                    </li>
+                                {% endif %}
+
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        صفحة {{ page_obj.number }} من {{ page_obj.paginator.num_pages }}
+                                    </span>
+                                </li>
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.report_type %}&report_type={{ request.GET.report_type }}{% endif %}{% if request.GET.format %}&format={{ request.GET.format }}{% endif %}">التالية</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.report_type %}&report_type={{ request.GET.report_type }}{% endif %}{% if request.GET.format %}&format={{ request.GET.format }}{% endif %}">الأخيرة</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="empty-state text-center">
+                        <i class="fas fa-file-alt fa-3x mb-3"></i>
+                        <h4>لا توجد تقارير</h4>
+                        <p>لم يتم إنشاء أي تقارير من أدوات OSINT بعد.</p>
+                        <button class="btn btn-primary" onclick="generateReport()">
+                            <i class="fas fa-file-plus me-2"></i>إنشاء تقرير جديد
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Report Modal -->
+<div class="modal fade" id="generateReportModal" tabindex="-1" aria-labelledby="generateReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark">
+            <div class="modal-header">
+                <h5 class="modal-title" id="generateReportModalLabel">إنشاء تقرير جديد</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+            </div>
+            <div class="modal-body">
+                <form id="generateReportForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="reportTitle" class="form-label">عنوان التقرير</label>
+                            <input type="text" class="form-control" id="reportTitle" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="reportType" class="form-label">نوع التقرير</label>
+                            <select class="form-select" id="reportType" required>
+                                <option value="summary">ملخص</option>
+                                <option value="detailed">مفصل</option>
+                                <option value="executive">تنفيذي</option>
+                                <option value="technical">تقني</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="reportFormat" class="form-label">التنسيق</label>
+                            <select class="form-select" id="reportFormat" required>
+                                <option value="pdf">PDF</option>
+                                <option value="html">HTML</option>
+                                <option value="csv">CSV</option>
+                                <option value="json">JSON</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="reportSession" class="form-label">الجلسة</label>
+                            <select class="form-select" id="reportSession" required>
+                                <option value="">اختر الجلسة</option>
+                                <!-- سيتم ملؤها بـ JavaScript -->
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="reportDescription" class="form-label">وصف التقرير</label>
+                            <textarea class="form-control" id="reportDescription" rows="3"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="submitGenerateReport()">إنشاء التقرير</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function generateReport() {
+    // تحميل الجلسات المتاحة
+    fetch('/osint/sessions/available/')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('reportSession');
+            select.innerHTML = '<option value="">اختر الجلسة</option>';
+            data.sessions.forEach(session => {
+                const option = document.createElement('option');
+                option.value = session.id;
+                option.textContent = `${session.tool_name} - ${session.target}`;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    
+    new bootstrap.Modal(document.getElementById('generateReportModal')).show();
+}
+
+function submitGenerateReport() {
+    const formData = {
+        title: document.getElementById('reportTitle').value,
+        report_type: document.getElementById('reportType').value,
+        format: document.getElementById('reportFormat').value,
+        session_id: document.getElementById('reportSession').value,
+        description: document.getElementById('reportDescription').value,
+    };
+    
+    fetch('/osint/reports/generate/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('حدث خطأ في إنشاء التقرير: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ في إنشاء التقرير');
+    });
+}
+
+function viewReport(reportId) {
+    window.open(`/osint/reports/${reportId}/view/`, '_blank');
+}
+
+function shareReport(reportId) {
+    // يمكن إضافة منطق المشاركة هنا
+    alert('ميزة المشاركة قيد التطوير');
+}
+
+function deleteReport(reportId) {
+    if (confirm('هل أنت متأكد من حذف هذا التقرير؟')) {
+        fetch(`/osint/reports/${reportId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('حدث خطأ في حذف التقرير');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ في حذف التقرير');
+        });
+    }
+}
+
+function exportAllReports() {
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', 'all');
+    window.open(`/osint/reports/export/?${params.toString()}`, '_blank');
+}
+
+function scheduleReport() {
+    alert('ميزة جدولة التقارير قيد التطوير');
+}
+</script>
+
+<link rel="stylesheet" href="{% static 'css/osint-theme.css' %}">
+{% endblock content %}

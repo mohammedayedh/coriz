@@ -1,0 +1,599 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}الإعدادات - لوحة التحكم{% endblock %}
+
+{% block content %}
+<!-- Override the main content -->
+<div class="content-header">
+    <div class="d-flex align-items-center mb-3">
+        <button class="btn btn-outline-primary me-3 sidebar-toggle" id="sidebarToggle" aria-label="تبديل الشريط الجانبي">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="fw-bold mb-0 cyber-text typewriter">
+            <i class="fas fa-cog me-3"></i>الإعدادات
+        </h1>
+    </div>
+    <p class="text-secondary">إدارة إعدادات النظام والتفضيلات الشخصية</p>
+    <div class="matrix-text mt-2">
+        <small>SYSTEM SETTINGS</small>
+    </div>
+</div>
+
+<!-- Settings Tabs -->
+<div class="row g-4">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="settingsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">
+                            <i class="fas fa-cog me-2"></i>عام
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="osint-tab" data-bs-toggle="tab" data-bs-target="#osint" type="button" role="tab">
+                            <i class="fas fa-tools me-2"></i>أدوات OSINT
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">
+                            <i class="fas fa-bell me-2"></i>الإشعارات
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
+                            <i class="fas fa-shield-alt me-2"></i>الأمان
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="appearance-tab" data-bs-toggle="tab" data-bs-target="#appearance" type="button" role="tab">
+                            <i class="fas fa-palette me-2"></i>المظهر
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="settingsTabContent">
+                    <!-- General Settings -->
+                    <div class="tab-pane fade show active" id="general" role="tabpanel">
+                        <form id="generalSettingsForm">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="language" class="form-label">اللغة</label>
+                                    <select class="form-select" id="language" name="language">
+                                        <option value="ar">العربية</option>
+                                        <option value="en">English</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="timezone" class="form-label">المنطقة الزمنية</label>
+                                    <select class="form-select" id="timezone" name="timezone">
+                                        <option value="Asia/Riyadh">الرياض (GMT+3)</option>
+                                        <option value="UTC">UTC (GMT+0)</option>
+                                        <option value="America/New_York">نيويورك (GMT-5)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="dateFormat" class="form-label">تنسيق التاريخ</label>
+                                    <select class="form-select" id="dateFormat" name="date_format">
+                                        <option value="Y-m-d">2024-01-01</option>
+                                        <option value="d/m/Y">01/01/2024</option>
+                                        <option value="m/d/Y">01/01/2024</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="timeFormat" class="form-label">تنسيق الوقت</label>
+                                    <select class="form-select" id="timeFormat" name="time_format">
+                                        <option value="24">24 ساعة (14:30)</option>
+                                        <option value="12">12 ساعة (2:30 PM)</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="autoSave" name="auto_save" checked>
+                                        <label class="form-check-label" for="autoSave">
+                                            حفظ تلقائي للإعدادات
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>حفظ الإعدادات العامة
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- OSINT Settings -->
+                    <div class="tab-pane fade" id="osint" role="tabpanel">
+                        <form id="osintSettingsForm">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="defaultTimeout" class="form-label">المهلة الافتراضية للأدوات (ثانية)</label>
+                                    <input type="number" class="form-control" id="defaultTimeout" name="default_timeout" value="300" min="60" max="3600">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="maxConcurrentTools" class="form-label">الحد الأقصى للأدوات المتزامنة</label>
+                                    <input type="number" class="form-control" id="maxConcurrentTools" name="max_concurrent_tools" value="3" min="1" max="10">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="outputFormat" class="form-label">تنسيق المخرجات الافتراضي</label>
+                                    <select class="form-select" id="outputFormat" name="output_format">
+                                        <option value="json">JSON</option>
+                                        <option value="csv">CSV</option>
+                                        <option value="txt">نص</option>
+                                        <option value="html">HTML</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="autoGenerateReports" class="form-label">إنشاء التقارير تلقائياً</label>
+                                    <select class="form-select" id="autoGenerateReports" name="auto_generate_reports">
+                                        <option value="never">أبداً</option>
+                                        <option value="on_success">عند النجاح فقط</option>
+                                        <option value="always">دائماً</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enableNotifications" name="enable_notifications" checked>
+                                        <label class="form-check-label" for="enableNotifications">
+                                            تفعيل إشعارات OSINT
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="saveRawData" name="save_raw_data" checked>
+                                        <label class="form-check-label" for="saveRawData">
+                                            حفظ البيانات الخام في التقارير
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>حفظ إعدادات OSINT
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Notifications Settings -->
+                    <div class="tab-pane fade" id="notifications" role="tabpanel">
+                        <form id="notificationsSettingsForm">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="emailNotifications" class="form-label">الإشعارات عبر البريد الإلكتروني</label>
+                                    <select class="form-select" id="emailNotifications" name="email_notifications">
+                                        <option value="disabled">معطل</option>
+                                        <option value="important">المهمة فقط</option>
+                                        <option value="all">جميع الإشعارات</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="browserNotifications" class="form-label">إشعارات المتصفح</label>
+                                    <select class="form-select" id="browserNotifications" name="browser_notifications">
+                                        <option value="disabled">معطل</option>
+                                        <option value="enabled">مفعل</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="soundNotifications" class="form-label">الإشعارات الصوتية</label>
+                                    <select class="form-select" id="soundNotifications" name="sound_notifications">
+                                        <option value="disabled">معطل</option>
+                                        <option value="enabled">مفعل</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="notificationFrequency" class="form-label">تكرار الإشعارات</label>
+                                    <select class="form-select" id="notificationFrequency" name="notification_frequency">
+                                        <option value="immediate">فوري</option>
+                                        <option value="hourly">كل ساعة</option>
+                                        <option value="daily">يومي</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <h6 class="text-white mb-3">أنواع الإشعارات</h6>
+                                    <div class="row g-2">
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="osintComplete" name="osint_complete" checked>
+                                                <label class="form-check-label" for="osintComplete">اكتمال أدوات OSINT</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="osintError" name="osint_error" checked>
+                                                <label class="form-check-label" for="osintError">أخطاء أدوات OSINT</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="systemAlerts" name="system_alerts" checked>
+                                                <label class="form-check-label" for="systemAlerts">تنبيهات النظام</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>حفظ إعدادات الإشعارات
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="tab-pane fade" id="security" role="tabpanel">
+                        <form id="securitySettingsForm">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="sessionTimeout" class="form-label">مهلة انتهاء الجلسة (دقيقة)</label>
+                                    <input type="number" class="form-control" id="sessionTimeout" name="session_timeout" value="60" min="15" max="480">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="maxLoginAttempts" class="form-label">الحد الأقصى لمحاولات تسجيل الدخول</label>
+                                    <input type="number" class="form-control" id="maxLoginAttempts" name="max_login_attempts" value="5" min="3" max="10">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="passwordMinLength" class="form-label">الحد الأدنى لطول كلمة المرور</label>
+                                    <input type="number" class="form-control" id="passwordMinLength" name="password_min_length" value="8" min="6" max="20">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="twoFactorAuth" class="form-label">المصادقة الثنائية</label>
+                                    <select class="form-select" id="twoFactorAuth" name="two_factor_auth">
+                                        <option value="disabled">معطل</option>
+                                        <option value="optional">اختياري</option>
+                                        <option value="required">مطلوب</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="logSecurityEvents" name="log_security_events" checked>
+                                        <label class="form-check-label" for="logSecurityEvents">
+                                            تسجيل أحداث الأمان
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="requireStrongPasswords" name="require_strong_passwords" checked>
+                                        <label class="form-check-label" for="requireStrongPasswords">
+                                            طلب كلمات مرور قوية
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>حفظ إعدادات الأمان
+                                </button>
+                                <button type="button" class="btn btn-outline-warning ms-2" onclick="changePassword()">
+                                    <i class="fas fa-key me-2"></i>تغيير كلمة المرور
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Appearance Settings -->
+                    <div class="tab-pane fade" id="appearance" role="tabpanel">
+                        <form id="appearanceSettingsForm">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="theme" class="form-label">المظهر</label>
+                                    <select class="form-select" id="theme" name="theme">
+                                        <option value="dark">داكن</option>
+                                        <option value="light">فاتح</option>
+                                        <option value="auto">تلقائي</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="accentColor" class="form-label">لون التمييز</label>
+                                    <select class="form-select" id="accentColor" name="accent_color">
+                                        <option value="green">أخضر</option>
+                                        <option value="blue">أزرق</option>
+                                        <option value="purple">بنفسجي</option>
+                                        <option value="red">أحمر</option>
+                                        <option value="orange">برتقالي</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="fontSize" class="form-label">حجم الخط</label>
+                                    <select class="form-select" id="fontSize" name="font_size">
+                                        <option value="small">صغير</option>
+                                        <option value="medium" selected>متوسط</option>
+                                        <option value="large">كبير</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="sidebarCollapsed" class="form-label">الشريط الجانبي</label>
+                                    <select class="form-select" id="sidebarCollapsed" name="sidebar_collapsed">
+                                        <option value="expanded">موسع</option>
+                                        <option value="collapsed">مطوي</option>
+                                        <option value="auto">تلقائي</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="animations" name="animations" checked>
+                                        <label class="form-check-label" for="animations">
+                                            تفعيل الحركات والانتقالات
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="compactMode" name="compact_mode">
+                                        <label class="form-check-label" for="compactMode">
+                                            الوضع المضغوط
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>حفظ إعدادات المظهر
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary ms-2" onclick="resetAppearance()">
+                                    <i class="fas fa-undo me-2"></i>إعادة تعيين المظهر
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// حفظ الإعدادات العامة
+document.getElementById('generalSettingsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveSettings('general', new FormData(this));
+});
+
+// حفظ إعدادات OSINT
+document.getElementById('osintSettingsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveSettings('osint', new FormData(this));
+});
+
+// حفظ إعدادات الإشعارات
+document.getElementById('notificationsSettingsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveSettings('notifications', new FormData(this));
+});
+
+// حفظ إعدادات الأمان
+document.getElementById('securitySettingsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveSettings('security', new FormData(this));
+});
+
+// حفظ إعدادات المظهر
+document.getElementById('appearanceSettingsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveSettings('appearance', new FormData(this));
+});
+
+// دالة حفظ الإعدادات
+function saveSettings(category, formData) {
+    const data = Object.fromEntries(formData.entries());
+    
+    fetch(`/api/settings/${category}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSuccess('تم حفظ الإعدادات بنجاح');
+            if (category === 'appearance') {
+                applyAppearanceSettings(data.settings);
+            }
+        } else {
+            showError('فشل في حفظ الإعدادات');
+        }
+    })
+    .catch(error => {
+        console.error('خطأ في حفظ الإعدادات:', error);
+        showError('فشل في حفظ الإعدادات');
+    });
+}
+
+// تطبيق إعدادات المظهر
+function applyAppearanceSettings(settings) {
+    if (settings.theme) {
+        document.body.setAttribute('data-theme', settings.theme);
+    }
+    
+    if (settings.accent_color) {
+        document.documentElement.style.setProperty('--primary-color', getColorValue(settings.accent_color));
+    }
+    
+    if (settings.font_size) {
+        document.body.setAttribute('data-font-size', settings.font_size);
+    }
+    
+    if (settings.sidebar_collapsed) {
+        const sidebar = document.querySelector('.sidebar');
+        if (settings.sidebar_collapsed === 'collapsed') {
+            sidebar.classList.add('collapsed');
+        } else {
+            sidebar.classList.remove('collapsed');
+        }
+    }
+}
+
+// الحصول على قيمة اللون
+function getColorValue(colorName) {
+    const colors = {
+        'green': '#00ff00',
+        'blue': '#007bff',
+        'purple': '#6f42c1',
+        'red': '#dc3545',
+        'orange': '#fd7e14'
+    };
+    return colors[colorName] || colors.green;
+}
+
+// تغيير كلمة المرور
+function changePassword() {
+    const currentPassword = prompt('أدخل كلمة المرور الحالية:');
+    if (!currentPassword) return;
+    
+    const newPassword = prompt('أدخل كلمة المرور الجديدة:');
+    if (!newPassword) return;
+    
+    const confirmPassword = prompt('أكد كلمة المرور الجديدة:');
+    if (newPassword !== confirmPassword) {
+        showError('كلمات المرور غير متطابقة');
+        return;
+    }
+    
+    fetch('/api/auth/change-password/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            current_password: currentPassword,
+            new_password: newPassword
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSuccess('تم تغيير كلمة المرور بنجاح');
+        } else {
+            showError(data.message || 'فشل في تغيير كلمة المرور');
+        }
+    })
+    .catch(error => {
+        console.error('خطأ في تغيير كلمة المرور:', error);
+        showError('فشل في تغيير كلمة المرور');
+    });
+}
+
+// إعادة تعيين المظهر
+function resetAppearance() {
+    if (confirm('هل تريد إعادة تعيين إعدادات المظهر إلى القيم الافتراضية؟')) {
+        fetch('/api/settings/appearance/reset/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccess('تم إعادة تعيين المظهر');
+                location.reload();
+            } else {
+                showError('فشل في إعادة تعيين المظهر');
+            }
+        })
+        .catch(error => {
+            console.error('خطأ في إعادة تعيين المظهر:', error);
+            showError('فشل في إعادة تعيين المظهر');
+        });
+    }
+}
+
+// تحميل الإعدادات عند بدء الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    loadSettings();
+});
+
+// تحميل الإعدادات
+function loadSettings() {
+    fetch('/api/settings/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                populateSettingsForms(data.settings);
+            }
+        })
+        .catch(error => {
+            console.error('خطأ في تحميل الإعدادات:', error);
+        });
+}
+
+// ملء نماذج الإعدادات
+function populateSettingsForms(settings) {
+    // ملء الإعدادات العامة
+    if (settings.general) {
+        Object.keys(settings.general).forEach(key => {
+            const element = document.getElementById(key);
+            if (element) {
+                element.value = settings.general[key];
+            }
+        });
+    }
+    
+    // ملء إعدادات OSINT
+    if (settings.osint) {
+        Object.keys(settings.osint).forEach(key => {
+            const element = document.getElementById(key);
+            if (element) {
+                element.value = settings.osint[key];
+            }
+        });
+    }
+    
+    // ملء إعدادات الإشعارات
+    if (settings.notifications) {
+        Object.keys(settings.notifications).forEach(key => {
+            const element = document.getElementById(key);
+            if (element) {
+                if (element.type === 'checkbox') {
+                    element.checked = settings.notifications[key];
+                } else {
+                    element.value = settings.notifications[key];
+                }
+            }
+        });
+    }
+    
+    // ملء إعدادات الأمان
+    if (settings.security) {
+        Object.keys(settings.security).forEach(key => {
+            const element = document.getElementById(key);
+            if (element) {
+                element.value = settings.security[key];
+            }
+        });
+    }
+    
+    // ملء إعدادات المظهر
+    if (settings.appearance) {
+        Object.keys(settings.appearance).forEach(key => {
+            const element = document.getElementById(key);
+            if (element) {
+                if (element.type === 'checkbox') {
+                    element.checked = settings.appearance[key];
+                } else {
+                    element.value = settings.appearance[key];
+                }
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

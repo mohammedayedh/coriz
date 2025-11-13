@@ -1,0 +1,435 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}أدوات OSINT - كوريزا{% endblock %}
+
+{% block meta_description %}استكشف مجموعة شاملة من أدوات OSINT المتقدمة{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="display-4 fw-bold cyber-text typewriter">
+                    <i class="fas fa-tools me-3"></i>أدوات OSINT المتقدمة
+                </h1>
+                <p class="lead text-secondary mt-3">
+                    مجموعة شاملة من الأدوات المتخصصة لجمع المعلومات المفتوحة
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search and Filter Section -->
+<section class="py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-4">
+                                <input type="text" name="search" class="form-control" placeholder="البحث في الأدوات..." value="{{ search_query }}">
+                            </div>
+                            <div class="col-md-3">
+                                <select name="type" class="form-select">
+                                    <option value="">جميع الأنواع</option>
+                                    {% for type_code, type_name in tool_types %}
+                                    <option value="{{ type_code }}" {% if tool_type == type_code %}selected{% endif %}>
+                                        {{ type_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-search me-1"></i>بحث
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-outline-secondary w-100">
+                                    <i class="fas fa-refresh me-1"></i>إعادة تعيين
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Tools Grid -->
+<section class="py-4">
+    <div class="container">
+        <div class="row g-4">
+            {% for tool in page_obj %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm tool-card" data-tool-type="{{ tool.tool_type }}">
+                    <div class="card-header" style="background-color: {{ tool.color }}20; border-bottom: 2px solid {{ tool.color }}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="{{ tool.icon }} fa-2x" style="color: {{ tool.color }}"></i>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge" style="background-color: {{ tool.color }}">
+                                    {{ tool.get_tool_type_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">{{ tool.name }}</h5>
+                        <p class="card-text text-muted">{{ tool.description|truncatewords:20 }}</p>
+                        
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    {{ tool.timeout }} ثانية
+                                </small>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-tachometer-alt me-1"></i>
+                                    {{ tool.rate_limit }}/ساعة
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                {% if tool.requires_auth %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-lock me-1"></i>يتطلب مصادقة
+                                </span>
+                                {% endif %}
+                                {% if tool.api_key_required %}
+                                <span class="badge bg-info">
+                                    <i class="fas fa-key me-1"></i>مفتاح API
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <span class="badge bg-success">
+                                    <i class="fas fa-chart-line me-1"></i>
+                                    {{ tool.success_rate|floatformat:1 }}%
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-play me-1"></i>
+                                {{ tool.usage_count }} استخدام
+                            </small>
+                            <div>
+                                <a href="{% url 'osint_tools:tool_detail' tool.slug %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-play me-1"></i>تشغيل
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">لا توجد أدوات متاحة</h4>
+                    <p class="text-muted">لم يتم العثور على أدوات تطابق معايير البحث</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <nav aria-label="صفحات الأدوات">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if tool_type %}&type={{ tool_type }}{% endif %}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tool_type %}&type={{ tool_type }}{% endif %}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tool_type %}&type={{ tool_type }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tool_type %}&type={{ tool_type }}{% endif %}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tool_type %}&type={{ tool_type }}{% endif %}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- JavaScript for Enhanced UX -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // إضافة تأثيرات تفاعلية للبطاقات
+    const toolCards = document.querySelectorAll('.tool-card');
+    
+    toolCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // فلترة الأدوات حسب النوع
+    const typeFilter = document.querySelector('select[name="type"]');
+    if (typeFilter) {
+        typeFilter.addEventListener('change', function() {
+            this.form.submit();
+        });
+    }
+});
+</script>
+
+<link rel="stylesheet" href="{% static 'css/osint-theme.css' %}">
+<style>
+/* تحسينات إضافية خاصة بصفحة الأدوات */
+.content-header h1 {
+    color: #00ff00 !important;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.content-header p {
+    color: #e0e0e0 !important;
+    font-weight: 500;
+}
+
+.matrix-text small {
+    color: #00ff00 !important;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+/* تحسين بطاقات الأدوات */
+.tool-card {
+    background: linear-gradient(145deg, #1a1a1a, #2a2a2a) !important;
+    border: 2px solid #333333 !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+    transition: all 0.3s ease;
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 255, 0, 0.3) !important;
+    border-color: #00ff00 !important;
+}
+
+.tool-header {
+    border-bottom: 2px solid #00ff00 !important;
+    padding-bottom: 1rem;
+}
+
+.tool-title {
+    color: #ffffff !important;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.tool-description {
+    color: #cccccc !important;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.tool-meta .badge {
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* تحسين بطاقات المحتوى */
+.content-card {
+    background: linear-gradient(145deg, #1a1a1a, #2a2a2a) !important;
+    border: 1px solid #333333 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+.content-card .card-header {
+    background: linear-gradient(90deg, #2a2a2a, #1a1a1a) !important;
+    border-bottom: 2px solid #00ff00 !important;
+}
+
+.content-card .card-header h5 {
+    color: #00ff00 !important;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+}
+
+/* تحسين الأزرار */
+.btn-outline-primary {
+    color: #00ff00 !important;
+    border-color: #00ff00 !important;
+    background: transparent !important;
+    font-weight: 600;
+}
+
+.btn-outline-primary:hover {
+    background: #00ff00 !important;
+    color: #000000 !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #00ff00, #00cc00) !important;
+    border-color: #00ff00 !important;
+    color: #000000 !important;
+    font-weight: bold;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #00cc00, #00ff00) !important;
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.6);
+}
+
+/* تحسين النماذج */
+.form-control {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid #444444 !important;
+    color: #ffffff !important;
+}
+
+.form-control:focus {
+    background: rgba(0, 0, 0, 0.7) !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    color: #ffffff !important;
+}
+
+.form-select {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid #444444 !important;
+    color: #ffffff !important;
+}
+
+.form-select:focus {
+    background: rgba(0, 0, 0, 0.7) !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    color: #ffffff !important;
+}
+
+/* تحسين الشارات */
+.badge.bg-success {
+    background: linear-gradient(45deg, #00ff00, #00cc00) !important;
+    color: #000000 !important;
+    font-weight: bold;
+}
+
+.badge.bg-info {
+    background: linear-gradient(45deg, #00bfff, #0080ff) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+}
+
+.badge.bg-warning {
+    background: linear-gradient(45deg, #ffaa00, #ff8800) !important;
+    color: #000000 !important;
+    font-weight: bold;
+}
+
+.badge.bg-danger {
+    background: linear-gradient(45deg, #ff4444, #cc0000) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+}
+
+.badge.bg-secondary {
+    background: linear-gradient(45deg, #666666, #444444) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+}
+
+/* تحسين الحالة الفارغة */
+.empty-state {
+    background: rgba(0, 255, 0, 0.05);
+    border: 2px dashed rgba(0, 255, 0, 0.3);
+    border-radius: 15px;
+    padding: 3rem;
+}
+
+.empty-state i {
+    color: #666666 !important;
+}
+
+.empty-state p {
+    color: #cccccc !important;
+    font-weight: 500;
+}
+
+/* تحسين الترقيم */
+.pagination .page-item .page-link {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    border-color: #444444 !important;
+    color: #ffffff !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #00ff00 !important;
+    border-color: #00ff00 !important;
+    color: #000000 !important;
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: rgba(0, 255, 0, 0.2) !important;
+    color: #00ff00 !important;
+    border-color: #00ff00 !important;
+}
+
+/* تحسين الاستجابة */
+@media (max-width: 768px) {
+    .content-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .tool-card {
+        margin-bottom: 1rem;
+    }
+    
+    .content-card {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+{% endblock %}

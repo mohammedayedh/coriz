@@ -1,0 +1,562 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}أدوات OSINT المتقدمة - كوريزا{% endblock %}
+
+{% block meta_description %}استكشف مجموعة شاملة من أدوات OSINT المتقدمة لجمع المعلومات المفتوحة{% endblock %}
+
+{% block content %}
+<!-- Override the main content -->
+<div class="content-header">
+    <div class="d-flex align-items-center mb-3">
+        <button class="btn btn-outline-primary me-3 sidebar-toggle" id="sidebarToggle" aria-label="تبديل الشريط الجانبي">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="fw-bold mb-0 cyber-text typewriter">
+            <i class="fas fa-tools me-3"></i>أدوات OSINT المتقدمة
+        </h1>
+    </div>
+    <p class="text-secondary">مجموعة شاملة من الأدوات المتخصصة لجمع المعلومات المفتوحة والاستخبارات السيبرانية</p>
+    <div class="matrix-text mt-2">
+        <small>OSINT TOOLS INITIALIZED</small>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card cyber-border">
+            <div class="stat-icon">
+                <i class="fas fa-tools hacker-glow"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">{{ stats.total_tools }}</h3>
+                <p class="stat-label">أداة متاحة</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card cyber-border">
+            <div class="stat-icon">
+                <i class="fas fa-play-circle hacker-glow"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">{{ stats.total_sessions }}</h3>
+                <p class="stat-label">جلسة تمت</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card cyber-border">
+            <div class="stat-icon">
+                <i class="fas fa-chart-line hacker-glow"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">{{ stats.total_results }}</h3>
+                <p class="stat-label">نتيجة مكتشفة</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card cyber-border">
+            <div class="stat-icon">
+                <i class="fas fa-file-alt hacker-glow"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">{{ stats.total_reports }}</h3>
+                <p class="stat-label">تقرير منشأ</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Grid -->
+<div class="row g-4">
+    <!-- Quick Actions -->
+    <div class="col-lg-8">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="fw-bold mb-0 cyber-text">
+                    <i class="fas fa-bolt me-2"></i>إجراءات سريعة
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-tools me-2"></i>تصفح الأدوات
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'osint_tools:sessions_list' %}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-history me-2"></i>الجلسات السابقة
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'osint_tools:results_list' %}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-search me-2"></i>النتائج المكتشفة
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'osint_tools:reports_list' %}" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-file-alt me-2"></i>التقارير
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Recent Sessions -->
+{% if recent_sessions %}
+<section class="py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clock me-2"></i>الجلسات الأخيرة
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>الأداة</th>
+                                        <th>الهدف</th>
+                                        <th>الحالة</th>
+                                        <th>النتائج</th>
+                                        <th>التاريخ</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for session in recent_sessions %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge" style="background-color: {{ session.tool.color }}">
+                                                <i class="{{ session.tool.icon }} me-1"></i>
+                                                {{ session.tool.name }}
+                                            </span>
+                                        </td>
+                                        <td>{{ session.target }}</td>
+                                        <td>
+                                            {% if session.status == 'completed' %}
+                                                <span class="badge bg-success">مكتملة</span>
+                                            {% elif session.status == 'running' %}
+                                                <span class="badge bg-warning">قيد التشغيل</span>
+                                            {% elif session.status == 'failed' %}
+                                                <span class="badge bg-danger">فشلت</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ session.get_status_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ session.results_count }}</span>
+                                        </td>
+                                        <td>{{ session.created_at|date:"Y-m-d H:i" }}</td>
+                                        <td>
+                                            <a href="{% url 'osint_tools:session_detail' session.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Popular Tools -->
+{% if popular_tools %}
+<section class="py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-star me-2"></i>الأدوات الأكثر استخداماً
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for tool in popular_tools %}
+                            <div class="col-md-4">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body text-center">
+                                        <div class="mb-3">
+                                            <i class="{{ tool.icon }} fa-3x" style="color: {{ tool.color }}"></i>
+                                        </div>
+                                        <h6 class="fw-bold">{{ tool.name }}</h6>
+                                        <p class="text-muted small">{{ tool.description|truncatewords:10 }}</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-primary">{{ tool.user_usage_count }} استخدام</span>
+                                            <a href="{% url 'osint_tools:tool_detail' tool.slug %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-play"></i> تشغيل
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Recent Results -->
+{% if recent_results %}
+<section class="py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-search me-2"></i>النتائج الأخيرة
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for result in recent_results %}
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="fw-bold mb-0">{{ result.title }}</h6>
+                                            {% if result.confidence == 'high' %}
+                                                <span class="badge bg-success">ثقة عالية</span>
+                                            {% elif result.confidence == 'medium' %}
+                                                <span class="badge bg-warning">ثقة متوسطة</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">ثقة منخفضة</span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="text-muted small mb-2">{{ result.description|truncatewords:15 }}</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <i class="fas fa-tag me-1"></i>{{ result.result_type }}
+                                            </small>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>{{ result.discovered_at|date:"Y-m-d" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- JavaScript for Real-time Updates -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // تحديث حالة الجلسات النشطة كل 5 ثوان
+    setInterval(function() {
+        // يمكن إضافة AJAX هنا لتحديث حالة الجلسات النشطة
+    }, 5000);
+});
+</script>
+
+{% endblock content %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/osint-theme.css' %}">
+<style>
+/* تحسين التباين والألوان لواجهات OSINT */
+.osint-dashboard {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    min-height: 100vh;
+}
+
+/* تحسين ألوان النصوص */
+.content-header h1 {
+    color: #00ff00 !important;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.content-header p {
+    color: #e0e0e0 !important;
+    font-weight: 500;
+}
+
+.matrix-text small {
+    color: #00ff00 !important;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+/* تحسين بطاقات الإحصائيات */
+.stat-card {
+    background: linear-gradient(145deg, #1a1a1a, #2a2a2a) !important;
+    border: 2px solid #00ff00 !important;
+    box-shadow: 0 8px 32px rgba(0, 255, 0, 0.2) !important;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 255, 0, 0.4) !important;
+    border-color: #00ff00 !important;
+}
+
+.stat-number {
+    color: #00ff00 !important;
+    font-weight: bold;
+    text-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+}
+
+.stat-label {
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* تحسين بطاقات المحتوى */
+.content-card {
+    background: linear-gradient(145deg, #1a1a1a, #2a2a2a) !important;
+    border: 1px solid #333333 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+.content-card .card-header {
+    background: linear-gradient(90deg, #2a2a2a, #1a1a1a) !important;
+    border-bottom: 2px solid #00ff00 !important;
+}
+
+.content-card .card-header h5 {
+    color: #00ff00 !important;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+}
+
+/* تحسين الأزرار */
+.btn-outline-primary {
+    color: #00ff00 !important;
+    border-color: #00ff00 !important;
+    background: transparent !important;
+    font-weight: 600;
+}
+
+.btn-outline-primary:hover {
+    background: #00ff00 !important;
+    color: #000000 !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #00ff00, #00cc00) !important;
+    border-color: #00ff00 !important;
+    color: #000000 !important;
+    font-weight: bold;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #00cc00, #00ff00) !important;
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.6);
+}
+
+/* تحسين قائمة الأنشطة */
+.activities-list .activity-item {
+    background: rgba(0, 255, 0, 0.05) !important;
+    border: 1px solid rgba(0, 255, 0, 0.2) !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.activities-list .activity-item:hover {
+    background: rgba(0, 255, 0, 0.1) !important;
+    border-color: #00ff00 !important;
+    transform: translateX(5px);
+}
+
+.activity-title a {
+    color: #ffffff !important;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.activity-title a:hover {
+    color: #00ff00 !important;
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+}
+
+.activity-meta .badge {
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.activity-meta small {
+    color: #cccccc !important;
+    font-weight: 500;
+}
+
+/* تحسين الشارات */
+.badge.bg-success {
+    background: linear-gradient(45deg, #00ff00, #00cc00) !important;
+    color: #000000 !important;
+    font-weight: bold;
+}
+
+.badge.bg-info {
+    background: linear-gradient(45deg, #00bfff, #0080ff) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+}
+
+.badge.bg-warning {
+    background: linear-gradient(45deg, #ffaa00, #ff8800) !important;
+    color: #000000 !important;
+    font-weight: bold;
+}
+
+.badge.bg-danger {
+    background: linear-gradient(45deg, #ff4444, #cc0000) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+}
+
+.badge.bg-secondary {
+    background: linear-gradient(45deg, #666666, #444444) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+}
+
+/* تحسين الحالة الفارغة */
+.empty-state {
+    background: rgba(0, 255, 0, 0.05);
+    border: 2px dashed rgba(0, 255, 0, 0.3);
+    border-radius: 15px;
+    padding: 3rem;
+}
+
+.empty-state i {
+    color: #666666 !important;
+}
+
+.empty-state p {
+    color: #cccccc !important;
+    font-weight: 500;
+}
+
+/* تحسين الروابط */
+.lane-link {
+    color: #00ff00 !important;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.lane-link:hover {
+    color: #ffffff !important;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+}
+
+/* تحسين النماذج */
+.form-control {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid #444444 !important;
+    color: #ffffff !important;
+}
+
+.form-control:focus {
+    background: rgba(0, 0, 0, 0.7) !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    color: #ffffff !important;
+}
+
+.form-label {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* تحسين الجداول */
+.table-dark {
+    background: rgba(0, 0, 0, 0.8) !important;
+}
+
+.table-dark th {
+    background: linear-gradient(90deg, #2a2a2a, #1a1a1a) !important;
+    color: #00ff00 !important;
+    font-weight: bold;
+    border-color: #444444 !important;
+}
+
+.table-dark td {
+    color: #ffffff !important;
+    border-color: #333333 !important;
+}
+
+.table-dark tbody tr:hover {
+    background: rgba(0, 255, 0, 0.1) !important;
+}
+
+/* تحسين التمرير */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #00ff00;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #00cc00;
+}
+
+/* تحسين الرسوم المتحركة */
+@keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(0, 255, 0, 0.8); }
+    100% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
+}
+
+.hacker-glow {
+    animation: glow 2s ease-in-out infinite;
+}
+
+/* تحسين الاستجابة */
+@media (max-width: 768px) {
+    .content-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .stat-card {
+        margin-bottom: 1rem;
+    }
+    
+    .content-card {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+{% endblock extra_css %}

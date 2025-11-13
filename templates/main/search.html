@@ -1,0 +1,509 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}البحث - كوريزا OSINT{% endblock %}
+
+{% block meta_description %}ابحث في أدوات OSINT والأمن السيبراني على منصة كوريزا{% endblock %}
+
+{% block content %}
+<!-- Search Header -->
+<section class="py-5 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold cyber-text typewriter">
+                    <i class="fas fa-search me-3"></i>البحث المتقدم
+                </h1>
+                <p class="lead text-secondary mt-3">
+                    ابحث في قاعدة بيانات أدوات OSINT والأمن السيبراني
+                </p>
+                <div class="matrix-text mt-3">
+                    <small>SEARCH INITIALIZED</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search Form -->
+<section class="py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="search-form-card cyber-border">
+                    <form method="GET" class="search-form">
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-lg" name="q" 
+                                   placeholder="ابحث عن أدوات OSINT، تقنيات الأمان، أو أي موضوع..." 
+                                   value="{{ query }}" required>
+                            <button class="btn btn-primary btn-lg" type="submit">
+                                <i class="fas fa-search me-2"></i>بحث
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search Results -->
+{% if query %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="search-results-header mb-4">
+                    <h3 class="cyber-text">
+                        <i class="fas fa-list me-2"></i>نتائج البحث
+                    </h3>
+                    <p class="text-secondary">
+                        {% if page_obj %}
+                            تم العثور على {{ results_count }} نتيجة لـ "{{ query }}"
+                        {% else %}
+                            لم يتم العثور على نتائج لـ "{{ query }}"
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        {% if page_obj %}
+        <div class="row g-4">
+            {% for post in page_obj %}
+            <div class="col-lg-6">
+                <div class="search-result-card cyber-border">
+                    <div class="result-content">
+                        <div class="result-meta mb-2">
+                            <span class="badge bg-primary">{{ post.category.name }}</span>
+                            <small class="text-secondary ms-2">
+                                <i class="fas fa-calendar me-1"></i>{{ post.published_at|date:"Y/m/d" }}
+                            </small>
+                        </div>
+                        <h5 class="result-title">
+                            <a href="{% url 'main:post_detail' post.slug %}" class="text-decoration-none">
+                                {{ post.title }}
+                            </a>
+                        </h5>
+                        <p class="result-excerpt">{{ post.excerpt|truncatewords:20 }}</p>
+                        <div class="result-stats">
+                            <small class="text-secondary">
+                                <i class="fas fa-user me-1"></i>{{ post.author.first_name|default:post.author.username }}
+                                <i class="fas fa-eye ms-3 me-1"></i>{{ post.views_count }}
+                                <i class="fas fa-comment ms-3 me-1"></i>{{ post.comments_count }}
+                            </small>
+                        </div>
+                        <div class="result-actions mt-3">
+                            <a href="{% url 'main:post_detail' post.slug %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i>اقرأ المزيد
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <nav aria-label="صفحات البحث">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?q={{ query }}&page=1">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?q={{ query }}&page={{ page_obj.previous_page_number }}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?q={{ query }}&page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?q={{ query }}&page={{ page_obj.next_page_number }}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?q={{ query }}&page={{ page_obj.paginator.num_pages }}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- No Results -->
+        <div class="row">
+            <div class="col-12 text-center py-5">
+                <div class="no-results">
+                    <i class="fas fa-search fa-4x text-secondary mb-4"></i>
+                    <h3 class="cyber-text mb-3">لا توجد نتائج</h3>
+                    <p class="text-secondary mb-4">
+                        لم نجد أي نتائج تطابق بحثك "{{ query }}"
+                    </p>
+                    <div class="search-suggestions">
+                        <h5 class="cyber-text mb-3">اقتراحات للبحث:</h5>
+                        <div class="suggestion-tags">
+                            <a href="?q=OSINT" class="suggestion-tag">OSINT</a>
+                            <a href="?q=الأمن السيبراني" class="suggestion-tag">الأمن السيبراني</a>
+                            <a href="?q=اختبار الاختراق" class="suggestion-tag">اختبار الاختراق</a>
+                            <a href="?q=تحليل الشبكات" class="suggestion-tag">تحليل الشبكات</a>
+                            <a href="?q=البحث الرقمي" class="suggestion-tag">البحث الرقمي</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% else %}
+<!-- Search Tips -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="search-tips-card cyber-border">
+                    <div class="card-header">
+                        <h3 class="cyber-text mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>نصائح البحث
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="tip-item">
+                                    <div class="tip-icon">
+                                        <i class="fas fa-search fa-2x text-primary"></i>
+                                    </div>
+                                    <h5 class="cyber-text">استخدم كلمات مفتاحية محددة</h5>
+                                    <p class="text-secondary small">
+                                        استخدم مصطلحات محددة مثل "OSINT" أو "الأمن السيبراني" للحصول على نتائج أفضل
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="tip-item">
+                                    <div class="tip-icon">
+                                        <i class="fas fa-filter fa-2x text-primary"></i>
+                                    </div>
+                                    <h5 class="cyber-text">جرب مصطلحات مختلفة</h5>
+                                    <p class="text-secondary small">
+                                        إذا لم تجد ما تبحث عنه، جرب مصطلحات مشابهة أو مترادفة
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="tip-item">
+                                    <div class="tip-icon">
+                                        <i class="fas fa-tags fa-2x text-primary"></i>
+                                    </div>
+                                    <h5 class="cyber-text">استخدم العلامات</h5>
+                                    <p class="text-secondary small">
+                                        تصفح العلامات والفئات للعثور على المحتوى ذي الصلة
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="tip-item">
+                                    <div class="tip-icon">
+                                        <i class="fas fa-list fa-2x text-primary"></i>
+                                    </div>
+                                    <h5 class="cyber-text">تصفح الفئات</h5>
+                                    <p class="text-secondary small">
+                                        استكشف الفئات المختلفة للعثور على أدوات OSINT متخصصة
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Searches -->
+<section class="py-5 bg-dark">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold cyber-text">
+                    <i class="fas fa-fire me-2"></i>البحثات الشائعة
+                </h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="popular-searches">
+                    <a href="?q=OSINT" class="popular-search-tag">
+                        <i class="fas fa-search me-2"></i>OSINT
+                    </a>
+                    <a href="?q=الأمن السيبراني" class="popular-search-tag">
+                        <i class="fas fa-shield-alt me-2"></i>الأمن السيبراني
+                    </a>
+                    <a href="?q=اختبار الاختراق" class="popular-search-tag">
+                        <i class="fas fa-bug me-2"></i>اختبار الاختراق
+                    </a>
+                    <a href="?q=تحليل الشبكات" class="popular-search-tag">
+                        <i class="fas fa-network-wired me-2"></i>تحليل الشبكات
+                    </a>
+                    <a href="?q=البحث الرقمي" class="popular-search-tag">
+                        <i class="fas fa-fingerprint me-2"></i>البحث الرقمي
+                    </a>
+                    <a href="?q=التحليل الأمني" class="popular-search-tag">
+                        <i class="fas fa-chart-line me-2"></i>التحليل الأمني
+                    </a>
+                    <a href="?q=المراقبة الأمنية" class="popular-search-tag">
+                        <i class="fas fa-eye me-2"></i>المراقبة الأمنية
+                    </a>
+                    <a href="?q=التحقيق الرقمي" class="popular-search-tag">
+                        <i class="fas fa-search-plus me-2"></i>التحقيق الرقمي
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.search-form-card {
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.search-form .input-group {
+    position: relative;
+}
+
+.search-form .form-control {
+    border-radius: 10px 0 0 10px;
+    border-right: none;
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+.search-form .btn {
+    border-radius: 0 10px 10px 0;
+    padding: 1rem 2rem;
+    font-weight: 600;
+}
+
+.search-results-header {
+    padding: 1rem 0;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.search-result-card {
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    transition: var(--transition);
+    height: 100%;
+}
+
+.search-result-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0, 139, 139, 0.2);
+}
+
+.result-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.result-title {
+    margin-bottom: 1rem;
+}
+
+.result-title a {
+    color: var(--text-primary);
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.result-title a:hover {
+    color: var(--primary-color);
+}
+
+.result-excerpt {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.result-stats {
+    margin-bottom: 1rem;
+}
+
+.result-actions {
+    margin-top: auto;
+}
+
+.no-results {
+    padding: 3rem;
+}
+
+.search-suggestions {
+    margin-top: 2rem;
+}
+
+.suggestion-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.suggestion-tag {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: var(--bg-primary);
+    color: var(--primary-color);
+    text-decoration: none;
+    border-radius: 25px;
+    transition: var(--transition);
+    border: 1px solid var(--border-color);
+}
+
+.suggestion-tag:hover {
+    background: var(--primary-color);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.search-tips-card {
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.search-tips-card .card-header {
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+.search-tips-card .card-body {
+    padding: 2rem;
+}
+
+.tip-item {
+    text-align: center;
+    padding: 1rem;
+}
+
+.tip-icon {
+    margin-bottom: 1rem;
+}
+
+.popular-searches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.popular-search-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: 25px;
+    transition: var(--transition);
+    border: 2px solid var(--border-color);
+    font-weight: 500;
+}
+
+.popular-search-tag:hover {
+    background: var(--primary-color);
+    color: var(--text-primary);
+    border-color: var(--primary-color);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 139, 139, 0.3);
+}
+
+.pagination .page-link {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+    transition: var(--transition);
+}
+
+.pagination .page-link:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .search-form-card {
+        padding: 1.5rem;
+    }
+    
+    .search-form .form-control {
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+    }
+    
+    .search-form .btn {
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .search-result-card {
+        padding: 1rem;
+    }
+    
+    .popular-searches {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .popular-search-tag {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+

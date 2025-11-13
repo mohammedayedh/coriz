@@ -1,0 +1,267 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}تسجيل الدخول - كوريزا OSINT{% endblock %}
+
+{% block meta_description %}سجل دخولك إلى منصة كوريزا OSINT للوصول إلى أدوات الأمن السيبراني وجمع المعلومات المفتوحة{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7">
+                <div class="auth-card">
+                    <div class="auth-header text-center mb-4">
+                        <img src="{% static 'images/logo.png' %}" alt="كوريزا OSINT" class="auth-logo mb-3">
+                        <h2 class="fw-bold cyber-text typewriter">
+                            تسجيل الدخول
+                        </h2>
+                        <p class="text-secondary">مرحباً بك في منصة الأمن السيبراني</p>
+                        <div class="matrix-text mt-2">
+                            <small>ACCESS GRANTED</small>
+                        </div>
+                    </div>
+                    
+                    <form method="post" class="auth-form">
+                        {% csrf_token %}
+                        
+                        <!-- Email Field -->
+                        <div class="form-group mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">
+                                <i class="fas fa-user me-2"></i>اسم المستخدم أو البريد الإلكتروني
+                            </label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Password Field -->
+                        <div class="form-group mb-3">
+                            <label for="{{ form.password.id_for_label }}" class="form-label">
+                                <i class="fas fa-lock me-2"></i>كلمة المرور
+                            </label>
+                            <div class="password-input-group">
+                                {{ form.password }}
+                                <button type="button" class="btn btn-outline-secondary password-toggle" onclick="togglePassword()">
+                                    <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                                </button>
+                            </div>
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Remember Me & Forgot Password -->
+                        <div class="form-group mb-3">
+                            <div class="row align-items-center">
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        {{ form.remember_me }}
+                                        <label class="form-check-label" for="{{ form.remember_me.id_for_label }}">
+                                            <i class="fas fa-check-circle me-1"></i>تذكرني
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <a href="{% url 'authentication:password_reset' %}" class="text-decoration-none text-secondary">
+                                        <i class="fas fa-key me-1"></i>نسيت كلمة المرور؟
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="form-group mb-3">
+                            <button type="submit" class="btn btn-primary w-100 btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>تسجيل الدخول
+                            </button>
+                        </div>
+                        
+                        <!-- Divider -->
+                        <div class="text-center mb-3">
+                            <span class="text-secondary">أو</span>
+                        </div>
+                        
+                        <!-- Social Login (Optional) -->
+                        <div class="social-login mb-3">
+                            <button type="button" class="btn btn-outline-primary w-100 mb-2">
+                                <i class="fab fa-github me-2"></i>تسجيل الدخول بـ GitHub
+                            </button>
+                            <button type="button" class="btn btn-outline-info w-100">
+                                <i class="fab fa-linkedin me-2"></i>تسجيل الدخول بـ LinkedIn
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Register Link -->
+                    <div class="auth-footer text-center mt-4">
+                        <p class="text-secondary">
+                            ليس لديك حساب؟ 
+                            <a href="{% url 'authentication:register' %}" class="text-primary fw-bold text-decoration-none">
+                                <i class="fas fa-user-secret me-1"></i>انضم للفريق
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    padding: 2rem 0;
+}
+
+.auth-card {
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    padding: 2.5rem;
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+}
+
+.auth-header h2 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.form-group {
+    position: relative;
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+    padding: 12px 15px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 255, 0, 0.25);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.password-input-group {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    z-index: 10;
+}
+
+.password-toggle:hover {
+    color: var(--text-primary);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #00cc00 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 255, 0, 0.3);
+    background: linear-gradient(135deg, #00cc00 0%, var(--primary-color) 100%);
+}
+
+.social-login .btn {
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.social-login .btn:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.auth-footer a:hover {
+    text-decoration: underline !important;
+    color: var(--primary-color) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .auth-card {
+        margin: 1rem;
+        padding: 2rem;
+    }
+    
+    .auth-container {
+        padding: 1rem 0;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePassword() {
+    const passwordField = document.getElementById('{{ form.password.id_for_label }}');
+    const toggleIcon = document.getElementById('passwordToggleIcon');
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordField.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+}
+
+// Auto-hide messages after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        setTimeout(() => {
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.hide();
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

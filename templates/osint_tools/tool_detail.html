@@ -1,0 +1,839 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ tool.name }} - أدوات OSINT{% endblock %}
+
+{% block meta_description %}{{ tool.description }}{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex align-items-center mb-4">
+                    <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-outline-secondary me-3">
+                        <i class="fas fa-arrow-right"></i> العودة للأدوات
+                    </a>
+                    <div>
+                        <i class="{{ tool.icon }} fa-3x me-3" style="color: {{ tool.color }}"></i>
+                    </div>
+                    <div>
+                        <h1 class="display-5 fw-bold mb-0">{{ tool.name }}</h1>
+                        <p class="lead text-muted mb-0">{{ tool.get_tool_type_display }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Tool Info Section -->
+<section class="py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header" style="background-color: {{ tool.color }}20; border-bottom: 2px solid {{ tool.color }}">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>معلومات الأداة
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ tool.description }}</p>
+                        
+                        <div class="row g-3 mt-3">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-clock text-primary me-2"></i>
+                                    <span class="fw-bold me-2">المهلة الزمنية:</span>
+                                    <span>{{ tool.timeout }} ثانية</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-tachometer-alt text-success me-2"></i>
+                                    <span class="fw-bold me-2">حد المعدل:</span>
+                                    <span>{{ tool.rate_limit }} طلب/ساعة</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-chart-line text-info me-2"></i>
+                                    <span class="fw-bold me-2">معدل النجاح:</span>
+                                    <span>{{ tool.success_rate|floatformat:1 }}%</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-play text-warning me-2"></i>
+                                    <span class="fw-bold me-2">عدد الاستخدامات:</span>
+                                    <span>{{ tool.usage_count }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            {% if tool.requires_auth %}
+                            <span class="badge bg-warning me-2">
+                                <i class="fas fa-lock me-1"></i>يتطلب مصادقة
+                            </span>
+                            {% endif %}
+                            {% if tool.api_key_required %}
+                            <span class="badge bg-info me-2">
+                                <i class="fas fa-key me-1"></i>يتطلب مفتاح API
+                            </span>
+                            {% endif %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-check me-1"></i>{{ tool.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tool Runner Section -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-play me-2"></i>تشغيل الأداة
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="tool-runner-form">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="target" class="form-label fw-bold">الهدف</label>
+                                <input type="text" class="form-control" id="target" name="target" 
+                                       placeholder="أدخل الهدف للبحث..." required>
+                                <div class="form-text">مثال: البريد الإلكتروني، اسم المستخدم، النطاق، عنوان IP</div>
+                            </div>
+                            
+                            {% if user_configs %}
+                            <div class="mb-3">
+                                <label for="config_id" class="form-label fw-bold">الإعدادات</label>
+                                <select class="form-select" id="config_id" name="config_id">
+                                    <option value="">استخدام الإعدادات الافتراضية</option>
+                                    {% for config in user_configs %}
+                                    <option value="{{ config.id }}">{{ config.config_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">خيارات إضافية</label>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="verbose" name="verbose">
+                                            <label class="form-check-label" for="verbose">
+                                                وضع مفصل
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="save_results" name="save_results" checked>
+                                            <label class="form-check-label" for="save_results">
+                                                حفظ النتائج
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-play me-2"></i>تشغيل الأداة
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Progress Section -->
+                        <div id="progress-section" class="mt-4" style="display: none;">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-spinner fa-spin me-2"></i>جاري التشغيل...
+                                    </h6>
+                                    <div class="progress mb-2">
+                                        <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <p id="current-step" class="text-muted mb-0">جاري التهيئة...</p>
+                                    <div class="mt-3" id="manual-check" style="display: none;">
+                                        <a href="#" id="check-results-btn" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye me-1"></i>تحقق من النتائج يدوياً
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <!-- User Stats -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>إحصائياتك
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h4 class="fw-bold text-success">{{ user_stats.sessions_count }}</h4>
+                                    <small class="text-muted">جلسة</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h4 class="fw-bold text-info">{{ user_stats.total_results }}</h4>
+                                    <small class="text-muted">نتيجة</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h4 class="fw-bold text-warning">{{ user_stats.completed_sessions }}</h4>
+                                    <small class="text-muted">مكتملة</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h4 class="fw-bold text-primary">{{ user_stats.success_rate|floatformat:1 }}%</h4>
+                                    <small class="text-muted">نجاح</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Sessions -->
+                {% if user_sessions %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history me-2"></i>الجلسات الأخيرة
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% for session in user_sessions %}
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 {% if not forloop.last %}border-bottom{% endif %}">
+                            <div>
+                                <small class="fw-bold">{{ session.target }}</small>
+                                <br>
+                                <small class="text-muted">{{ session.created_at|date:"Y-m-d H:i" }}</small>
+                            </div>
+                            <div class="text-end">
+                                {% if session.status == 'completed' %}
+                                <span class="badge bg-success">مكتملة</span>
+                                {% elif session.status == 'running' %}
+                                <span class="badge bg-warning">قيد التشغيل</span>
+                                {% elif session.status == 'failed' %}
+                                <span class="badge bg-danger">فشلت</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ session.get_status_display }}</span>
+                                {% endif %}
+                                <br>
+                                <small class="text-muted">{{ session.results_count }} نتيجة</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <div class="text-center mt-3">
+                            <a href="{% url 'osint_tools:sessions_list' %}?tool={{ tool.id }}" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-eye me-1"></i>عرض الكل
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- JavaScript for Tool Runner -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('tool-runner-form');
+    const progressSection = document.getElementById('progress-section');
+    const progressBar = document.getElementById('progress-bar');
+    const currentStep = document.getElementById('current-step');
+    const manualCheck = document.getElementById('manual-check');
+    const checkResultsBtn = document.getElementById('check-results-btn');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const target = document.getElementById('target').value.trim();
+        if (!target) {
+            alert('يرجى إدخال الهدف');
+            return;
+        }
+        
+        const formData = new FormData(form);
+        const configId = document.getElementById('config_id').value;
+        const options = {
+            verbose: document.getElementById('verbose').checked,
+            save_results: document.getElementById('save_results').checked
+        };
+        
+        // إظهار قسم التقدم
+        progressSection.style.display = 'block';
+        progressBar.style.width = '0%';
+        currentStep.textContent = 'جاري التهيئة...';
+        
+        // إرسال الطلب
+        fetch('{% url "osint_tools:run_tool" tool.slug %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            },
+            body: JSON.stringify({
+                target: target,
+                config_id: configId || null,
+                options: options
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentStep.textContent = 'تم بدء التشغيل بنجاح';
+                progressBar.style.width = '10%';
+                
+                // إظهار الزر اليدوي
+                manualCheck.style.display = 'block';
+                checkResultsBtn.dataset.sessionId = data.session_id;
+                
+                // مراقبة التقدم
+                monitorProgress(data.session_id);
+            } else {
+                alert('خطأ: ' + data.message);
+                progressSection.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ في الخادم');
+            progressSection.style.display = 'none';
+        });
+    });
+    
+    // معالج الزر اليدوي
+    checkResultsBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const sessionId = this.dataset.sessionId;
+        if (sessionId) {
+            window.location.href = `/osint/sessions/${sessionId}/`;
+        }
+    });
+    
+    function monitorProgress(sessionId) {
+        const interval = setInterval(function() {
+            fetch(`/osint/ajax/session-status/${sessionId}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                progressBar.style.width = data.progress + '%';
+                currentStep.textContent = data.current_step || 'جاري المعالجة...';
+                
+                if (data.status === 'completed') {
+                    clearInterval(interval);
+                    currentStep.textContent = 'تم الانتهاء بنجاح!';
+                    progressBar.classList.add('bg-success');
+                    
+                    // إعادة توجيه إلى صفحة النتائج
+                    setTimeout(function() {
+                        window.location.href = `/osint/sessions/${sessionId}/`;
+                    }, 2000);
+                } else if (data.status === 'failed') {
+                    clearInterval(interval);
+                    currentStep.textContent = 'فشل في التشغيل: ' + data.error_message;
+                    progressBar.classList.add('bg-danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error monitoring progress:', error);
+                // إذا كان هناك خطأ، توقف عن المراقبة بعد 30 ثانية
+                setTimeout(() => {
+                    clearInterval(interval);
+                    currentStep.textContent = 'انتهى الوقت المحدد - تحقق من النتائج يدوياً';
+                    progressBar.classList.add('bg-warning');
+                }, 30000);
+            });
+        }, 2000);
+    }
+});
+</script>
+
+<!-- محتوى إضافي لضمان التحميل الكامل -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>معلومات إضافية
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>حالة الأداة:</h6>
+                            <p class="text-muted">الأداة متاحة وجاهزة للاستخدام</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>آخر تحديث:</h6>
+                            <p class="text-muted">{{ tool.updated_at|date:"Y-m-d H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- محتوى إضافي لضمان اكتمال التحميل -->
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- معلومات إضافية -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle text-info me-2"></i>
+                        معلومات إضافية
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>تاريخ الإنشاء:</strong> {{ tool.created_at|date:"Y-m-d H:i" }}</p>
+                            <p><strong>آخر تحديث:</strong> {{ tool.updated_at|date:"Y-m-d H:i" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>الحالة:</strong> 
+                                {% if tool.status == 'active' %}
+                                    <span class="badge bg-success">نشط</span>
+                                {% elif tool.status == 'inactive' %}
+                                    <span class="badge bg-warning">غير نشط</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">غير محدد</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>عدد الاستخدامات:</strong> {{ tool.usage_count }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- معلومات تقنية -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cogs text-warning me-2"></i>
+                        المعلومات التقنية
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>متطلبات النظام:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i> Python 3.7+</li>
+                                <li><i class="fas fa-check text-success me-2"></i> متصفح حديث</li>
+                                <li><i class="fas fa-check text-success me-2"></i> اتصال بالإنترنت</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>الميزات المتاحة:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-star text-warning me-2"></i> بحث متقدم</li>
+                                <li><i class="fas fa-star text-warning me-2"></i> تقارير مفصلة</li>
+                                <li><i class="fas fa-star text-warning me-2"></i> تصدير البيانات</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- دليل الاستخدام -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-book text-primary me-2"></i>
+                        دليل الاستخدام
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6>الخطوة 1:</h6>
+                            <p>أدخل الهدف المراد البحث عنه في الحقل المخصص</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>الخطوة 2:</h6>
+                            <p>اضغط على زر "بدء البحث" لتنفيذ العملية</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>الخطوة 3:</h6>
+                            <p>انتظر النتائج ومراجعتها في الوقت الفعلي</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- نصائح الأمان -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-shield-alt text-danger me-2"></i>
+                        نصائح الأمان
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>تنبيه مهم:</h6>
+                        <ul class="mb-0">
+                            <li>استخدم هذه الأدوات لأغراض قانونية وأخلاقية فقط</li>
+                            <li>احترم خصوصية الآخرين وقوانين حماية البيانات</li>
+                            <li>لا تستخدم المعلومات لأغراض ضارة أو غير قانونية</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* تحسين التباين والألوان لواجهات OSINT */
+body {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    color: #ffffff !important;
+}
+
+/* تحسين ألوان النصوص الرئيسية */
+h1, h2, h3, h4, h5, h6 {
+    color: #00ff00 !important;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    font-weight: bold;
+}
+
+.display-5 {
+    color: #00ff00 !important;
+    text-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+}
+
+.lead {
+    color: #e0e0e0 !important;
+    font-weight: 500;
+}
+
+/* تحسين البطاقات */
+.card {
+    background: linear-gradient(145deg, #1a1a1a, #2a2a2a) !important;
+    border: 1px solid #333333 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+    color: #ffffff !important;
+}
+
+.card-header {
+    background: linear-gradient(90deg, #2a2a2a, #1a1a1a) !important;
+    border-bottom: 2px solid #00ff00 !important;
+    color: #00ff00 !important;
+    font-weight: bold;
+}
+
+.card-body {
+    color: #ffffff !important;
+}
+
+.card-text {
+    color: #cccccc !important;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+/* تحسين النصوص */
+p, span, div {
+    color: #ffffff !important;
+}
+
+.text-muted {
+    color: #999999 !important;
+}
+
+.text-primary {
+    color: #00ff00 !important;
+}
+
+.text-success {
+    color: #00ff00 !important;
+}
+
+.text-info {
+    color: #00bfff !important;
+}
+
+.text-warning {
+    color: #ffaa00 !important;
+}
+
+.text-danger {
+    color: #ff4444 !important;
+}
+
+.text-secondary {
+    color: #cccccc !important;
+}
+
+/* تحسين الأزرار */
+.btn {
+    font-weight: 600;
+    border-width: 2px;
+}
+
+.btn-outline-primary {
+    color: #00ff00 !important;
+    border-color: #00ff00 !important;
+    background: transparent !important;
+}
+
+.btn-outline-primary:hover {
+    background: #00ff00 !important;
+    color: #000000 !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #00ff00, #00cc00) !important;
+    border-color: #00ff00 !important;
+    color: #000000 !important;
+    font-weight: bold;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #00cc00, #00ff00) !important;
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.6);
+}
+
+.btn-outline-secondary {
+    color: #cccccc !important;
+    border-color: #666666 !important;
+    background: transparent !important;
+}
+
+.btn-outline-secondary:hover {
+    background: #666666 !important;
+    color: #ffffff !important;
+    border-color: #666666 !important;
+}
+
+/* تحسين النماذج */
+.form-control, .form-select {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid #444444 !important;
+    color: #ffffff !important;
+}
+
+.form-control:focus, .form-select:focus {
+    background: rgba(0, 0, 0, 0.7) !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    color: #ffffff !important;
+}
+
+.form-label {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* تحسين الجداول */
+.table {
+    color: #ffffff !important;
+}
+
+.table-dark {
+    background: rgba(0, 0, 0, 0.8) !important;
+}
+
+.table-dark th {
+    background: linear-gradient(90deg, #2a2a2a, #1a1a1a) !important;
+    color: #00ff00 !important;
+    font-weight: bold;
+    border-color: #444444 !important;
+}
+
+.table-dark td {
+    color: #ffffff !important;
+    border-color: #333333 !important;
+}
+
+.table-dark tbody tr:hover {
+    background: rgba(0, 255, 0, 0.1) !important;
+}
+
+/* تحسين الشارات */
+.badge {
+    font-weight: bold;
+    padding: 0.5rem 0.8rem;
+}
+
+.badge.bg-success {
+    background: linear-gradient(45deg, #00ff00, #00cc00) !important;
+    color: #000000 !important;
+}
+
+.badge.bg-info {
+    background: linear-gradient(45deg, #00bfff, #0080ff) !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-warning {
+    background: linear-gradient(45deg, #ffaa00, #ff8800) !important;
+    color: #000000 !important;
+}
+
+.badge.bg-danger {
+    background: linear-gradient(45deg, #ff4444, #cc0000) !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-secondary {
+    background: linear-gradient(45deg, #666666, #444444) !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-primary {
+    background: linear-gradient(45deg, #00ff00, #00cc00) !important;
+    color: #000000 !important;
+}
+
+/* تحسين الروابط */
+a {
+    color: #00ff00 !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    color: #ffffff !important;
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+}
+
+/* تحسين القوائم */
+.list-group-item {
+    background: rgba(0, 255, 0, 0.05) !important;
+    border: 1px solid rgba(0, 255, 0, 0.2) !important;
+    color: #ffffff !important;
+}
+
+.list-group-item:hover {
+    background: rgba(0, 255, 0, 0.1) !important;
+    border-color: #00ff00 !important;
+}
+
+/* تحسين التقدم */
+.progress {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid #444444 !important;
+}
+
+.progress-bar {
+    background: linear-gradient(45deg, #00ff00, #00cc00) !important;
+    color: #000000 !important;
+    font-weight: bold;
+}
+
+/* تحسين التنبيهات */
+.alert {
+    border: 2px solid;
+    font-weight: 600;
+}
+
+.alert-success {
+    background: rgba(0, 255, 0, 0.1) !important;
+    border-color: #00ff00 !important;
+    color: #00ff00 !important;
+}
+
+.alert-info {
+    background: rgba(0, 191, 255, 0.1) !important;
+    border-color: #00bfff !important;
+    color: #00bfff !important;
+}
+
+.alert-warning {
+    background: rgba(255, 170, 0, 0.1) !important;
+    border-color: #ffaa00 !important;
+    color: #ffaa00 !important;
+}
+
+.alert-danger {
+    background: rgba(255, 68, 68, 0.1) !important;
+    border-color: #ff4444 !important;
+    color: #ff4444 !important;
+}
+
+/* تحسين الأيقونات */
+.fas, .far, .fab {
+    color: #00ff00 !important;
+}
+
+.text-primary .fas, .text-primary .far, .text-primary .fab {
+    color: #00ff00 !important;
+}
+
+.text-success .fas, .text-success .far, .text-success .fab {
+    color: #00ff00 !important;
+}
+
+.text-info .fas, .text-info .far, .text-info .fab {
+    color: #00bfff !important;
+}
+
+.text-warning .fas, .text-warning .far, .text-warning .fab {
+    color: #ffaa00 !important;
+}
+
+.text-danger .fas, .text-danger .far, .text-danger .fab {
+    color: #ff4444 !important;
+}
+
+/* تحسين الاستجابة */
+@media (max-width: 768px) {
+    .display-5 {
+        font-size: 2rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .btn {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .display-5 {
+        font-size: 1.5rem;
+    }
+    
+    .card-text {
+        font-size: 1rem;
+    }
+}
+</style>
+{% endblock %}

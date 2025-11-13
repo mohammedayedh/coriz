@@ -1,0 +1,784 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}كوريزا OSINT - الواجهة الرئيسية المتقدمة{% endblock %}
+
+{% block meta_description %}الواجهة الرئيسية لكوريزا OSINT تقدم تجربة سيبرانية بصرية متكاملة مع وحدات استخبارات وأدوات تفاعلية{% endblock %}
+
+{% block content %}
+<div class="home-wrap">
+    <!-- aurora hero -->
+    <section class="hero aurora">
+        <div class="hero-background">
+            <span class="glow glow-one"></span>
+            <span class="glow glow-two"></span>
+            <span class="glow glow-three"></span>
+            <div class="grid-lines"></div>
+        </div>
+        <div class="container">
+            <div class="row gy-5 align-items-center">
+                <div class="col-xl-7 col-lg-6">
+                    <div class="hero-intro">
+                        <div class="hero-label">CORIZA // OPEN SOURCE INTELLIGENCE HUB</div>
+                        <h1 class="hero-heading">
+                            اجمع ضوء المصادر المفتوحة<br>
+                            <span>وارسم خريطة للمشهد المعلوماتي الكامل</span>
+                        </h1>
+                        <p class="hero-text">
+                            منصة كوريزا تُسخر شبكات OSINT، قواعد البيانات المفتوحة، وتدفق البيانات الاجتماعية في سير عمل موحد يتيح للمحللين اكتشاف العلاقات، تتبع الأفراد، وبناء ملفات استخباراتية دقيقة بدون الحاجة لمنصات SIEM تقليدية.
+                        </p>
+                        <div class="hero-actions">
+                            <a class="btn btn-primary btn-lg" href="{% url 'osint_tools:dashboard' %}">
+                                <i class="fas fa-tools me-2"></i>أدوات OSINT المتقدمة
+                            </a>
+                            <a class="btn btn-outline-primary btn-lg" href="{% url 'dashboard:index' %}">
+                                <i class="fas fa-compass me-2"></i>مركز الاستخبارات
+                            </a>
+                            <a class="btn btn-outline-secondary btn-lg" href="{% url 'main:posts_list' %}">
+                                <i class="fas fa-database me-2"></i>أدوات جمع البيانات
+                            </a>
+                        </div>
+                        <div class="hero-counters">
+                            <div class="counter">
+                                <span class="counter-value">{{ featured_posts|length|default:0 }}+</span>
+                                <span class="counter-caption">مصدر بيانات موثّق</span>
+                            </div>
+                            <div class="counter">
+                                <span class="counter-value">{{ latest_posts|length|default:0 }}</span>
+                                <span class="counter-caption">تحليل متداول يومياً</span>
+                            </div>
+                            <div class="counter">
+                                <span class="counter-value">{{ categories|length|default:0 }}</span>
+                                <span class="counter-caption">مجالات استخبارات متخصصة</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5 col-lg-6">
+                    <div class="hero-orbit">
+                        <div class="orbit-core">
+                            <img src="{% static 'images/logo.png' %}" alt="CORIZA" class="orbit-logo">
+                            <div class="orbit-ring ring-primary"></div>
+                            <div class="orbit-ring ring-secondary"></div>
+                            <div class="orbit-ring ring-tertiary"></div>
+                        </div>
+                        <div class="orbit-card card-primary">
+                            <span class="card-title">DATA PIPELINE</span>
+                            <span class="card-value">{{ latest_posts|length|default:0 }} تدفقات</span>
+                            <span class="card-meta">مصادر عامة متزامنة</span>
+                        </div>
+                        <div class="orbit-card card-secondary">
+                            <span class="card-title">ALERT VECTOR</span>
+                            <span class="card-value">{% if featured_posts %}{{ featured_posts.0.title|truncatewords:4 }}{% else %}لا إشارات جديدة{% endif %}</span>
+                            <span class="card-meta">أبرز القصص المفتوحة</span>
+                        </div>
+                        <div class="orbit-card card-tertiary">
+                            <span class="card-title">PROFILE BUILDER</span>
+                            <span class="card-value">READY</span>
+                            <span class="card-meta">أدوات إثراء الهوية الرقمية</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- modular lanes -->
+    <section class="lanes py-5">
+        <div class="container">
+            <div class="section-head">
+                <h2 class="section-title">مسارات جمع المعلومات المفتوحة</h2>
+                <p class="section-lead">حدد المرحلة التي تحتاجها: التنقيب عن المصادر، تحليل العلاقات، أو بناء الملفات الاستخباراتية.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-xl-3 col-md-6">
+                    <article class="lane-card">
+                        <div class="lane-icon"><i class="fas fa-tools"></i></div>
+                        <h5>أدوات OSINT المتقدمة</h5>
+                        <p>مجموعة شاملة من أدوات جمع المعلومات المفتوحة المتخصصة: GHunt، Sherlock، SpiderFoot، Maigret، Infoga، Harvester.</p>
+                        <a href="{% url 'osint_tools:dashboard' %}" class="lane-link">الوصول للأدوات</a>
+                    </article>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <article class="lane-card">
+                        <div class="lane-icon"><i class="fas fa-compass"></i></div>
+                        <h5>Pathfinder Recon</h5>
+                        <p>استكشاف المصادر المفتوحة، البحث المتقدم في البيانات العامة، والربط بين الحسابات الرقمية.</p>
+                        <a href="{% url 'main:posts_list' %}?category=recon" class="lane-link">تشغيل المسار</a>
+                    </article>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <article class="lane-card">
+                        <div class="lane-icon"><i class="fas fa-project-diagram"></i></div>
+                        <h5>Deep Mesh Monitor</h5>
+                        <p>تحليل العلاقات والرسوم البيانية، تحديد الشبكات المتصلة، وتتبع نقاط التأثير العامة.</p>
+                        <a href="{% url 'main:posts_list' %}?category=network" class="lane-link">تشغيل المسار</a>
+                    </article>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <article class="lane-card">
+                        <div class="lane-icon"><i class="fas fa-user-secret"></i></div>
+                        <h5>Shadow Trace</h5>
+                        <p>جمع بيانات الهوية الرقمية، تحليل البصمات الاجتماعية، ورصد النشاط في الأوساط شبه المغلقة.</p>
+                        <a href="{% url 'main:posts_list' %}?category=darkweb" class="lane-link">تشغيل المسار</a>
+                    </article>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <article class="lane-card">
+                        <div class="lane-icon"><i class="fas fa-flask"></i></div>
+                        <h5>Insight Lab Studio</h5>
+                        <p>إثراء البيانات، بناء ملفات استخبارات، وتوليد تقارير قابلة للمشاركة مع الفرق الميدانية.</p>
+                        <a href="{% url 'main:posts_list' %}?category=lab" class="lane-link">تشغيل المسار</a>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- intelligence ticker -->
+    {% if latest_posts %}
+    <section class="ticker py-5">
+        <div class="container">
+            <header class="section-head d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h2 class="section-title mb-1">سجل الإشارات اللحظية</h2>
+                    <p class="section-lead mb-0">التقاط فوري لآخر التحليلات والتقارير الواردة من فرق OSINT.</p>
+                </div>
+                <a class="btn btn-outline-primary" href="{% url 'main:posts_list' %}">
+                    <i class="fas fa-stream me-2"></i>عرض النطاق الكامل
+                </a>
+            </header>
+            <div class="row g-4">
+                {% for post in latest_posts|slice:":6" %}
+                <div class="col-xl-4 col-md-6">
+                    <article class="ticker-card">
+                        <div class="ticker-header">
+                            <span class="ticker-category">{{ post.category.name }}</span>
+                            <time class="ticker-time"><i class="fas fa-clock me-1"></i>{{ post.published_at|date:"Y/m/d H:i" }}</time>
+                        </div>
+                        <h5 class="ticker-title"><a href="{% url 'main:post_detail' post.slug %}">{{ post.title }}</a></h5>
+                        <p class="ticker-body">{{ post.excerpt|truncatewords:20 }}</p>
+                        <div class="ticker-meta">
+                            <span><i class="fas fa-eye me-1"></i>{{ post.views_count }}</span>
+                            <span><i class="fas fa-comment-alt me-1"></i>{{ post.comments_count }}</span>
+                            <span><i class="fas fa-user-secret me-1"></i>{{ post.author.first_name|default:post.author.username }}</span>
+                        </div>
+                    </article>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- holo grid -->
+    <section class="holo-grid py-5">
+        <div class="container">
+            <div class="row gy-4 align-items-center">
+                <div class="col-lg-6">
+                    <div class="holo-diagram">
+                        <div class="holo-core">CORE</div>
+                        <div class="holo-node node-one">SOC</div>
+                        <div class="holo-node node-two">CTI</div>
+                        <div class="holo-node node-three">DFIR</div>
+                        <div class="holo-node node-four">RED TEAM</div>
+                        <svg class="holo-lines" viewBox="0 0 400 400">
+                            <line x1="200" y1="200" x2="90" y2="130"></line>
+                            <line x1="200" y1="200" x2="310" y2="140"></line>
+                            <line x1="200" y1="200" x2="320" y2="280"></line>
+                            <line x1="200" y1="200" x2="90" y2="280"></line>
+                        </svg>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="holo-copy">
+                        <h2 class="section-title">لوحة التحكم متعددة الأبعاد</h2>
+                        <p class="section-lead">يجمع محرك كوريزا بين خطوط البيانات، خرائط التهديدات، ولوحات الاستجابة معاً لتقديم رؤية شاملة تتحرك مع نبض الهجمات السيبرانية.</p>
+                        <ul class="holo-list">
+                            <li><i class="fas fa-check-circle"></i> تنبيهات تكيفية تعتمد على سياق الحدث.</li>
+                            <li><i class="fas fa-check-circle"></i> تكامل لحظي مع مصادر استخبارات محلية وعالمية.</li>
+                            <li><i class="fas fa-check-circle"></i> دعم كامل لإجراءات DFIR وتقارير الحوادث.</li>
+                        </ul>
+                        <a href="{% url 'dashboard:index' %}" class="btn btn-primary">
+                            <i class="fas fa-layer-group me-2"></i>فتح اللوحة التفاعلية
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- featured lab -->
+    {% if featured_posts %}
+    <section class="lab py-5">
+        <div class="container">
+            <div class="section-head text-center">
+                <h2 class="section-title">مختبر الأدوات المختارة</h2>
+                <p class="section-lead">أدوات تمت مراجعتها من قبل خبراء المجتمع وجاهزة للدمج في عملياتك اليومية.</p>
+            </div>
+            <div class="row g-4">
+                {% for post in featured_posts|slice:":3" %}
+                <div class="col-lg-4">
+                    <article class="lab-card">
+                        <div class="lab-status">
+                            <span class="lab-signal"></span>
+                            <span class="lab-label">READY</span>
+                            <span class="lab-category">{{ post.category.name }}</span>
+                        </div>
+                        <h3 class="lab-title">{{ post.title }}</h3>
+                        <p class="lab-desc">{{ post.excerpt|truncatewords:22 }}</p>
+                        <div class="lab-meta">
+                            <span><i class="fas fa-eye me-1"></i>{{ post.views_count }}</span>
+                            <span><i class="fas fa-clock me-1"></i>{{ post.published_at|date:"Y/m/d" }}</span>
+                        </div>
+                        <a href="{% url 'main:post_detail' post.slug %}" class="btn btn-outline-primary">
+                            <i class="fas fa-vial me-2"></i>الدخول إلى المختبر
+                        </a>
+                    </article>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- control console -->
+    <section class="console py-5">
+        <div class="container">
+            <div class="row gy-4 align-items-center">
+                <div class="col-lg-7">
+                    <div class="console-screen">
+                        <div class="console-header">
+                            <span class="dot dot-red"></span>
+                            <span class="dot dot-yellow"></span>
+                            <span class="dot dot-green"></span>
+                            <span class="console-title">console://threat-monitor</span>
+                        </div>
+                        <div class="console-body">
+                            <code>
+                                $ activate threat-hunter --tier=advanced<br>
+                                initializing modules...<br>
+                                ▸ osint_recon       [ready]<br>
+                                ▸ dark_trace        [ready]<br>
+                                ▸ intel_aggregator  [ready]<br>
+                                <span class="console-highlight">awaiting commands...</span>
+                            </code>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="control-panel">
+                        <h3 class="cyber-text">مركز التحكم الميداني</h3>
+                        <p class="text-secondary mb-4">
+                            قم بتهيئة مسارات الاستجابة، جدولة عمليات المسح، وتكامل تقارير الحوادث لحظياً مع فريقك.
+                        </p>
+                        <div class="d-grid gap-3">
+                            <a href="{% url 'dashboard:index' %}" class="btn btn-primary">
+                                <i class="fas fa-play me-2"></i>بدء مهمة تلقائية
+                            </a>
+                            <a href="{% url 'main:contact' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-headset me-2"></i>تواصل مع خبير أمني
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- newsletter -->
+    <section class="intel-newsletter py-5">
+        <div class="container">
+            <div class="newsletter-box">
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-7">
+                        <h3 class="cyber-text mb-3">سجل في موجز الاستخبارات اللحظي</h3>
+                        <p class="text-secondary mb-0">
+                            اشترك لتصلك تحديثات يومية حول مؤشرات الاختراق، إسقاطات الثغرات، ونبض التهديدات السيبرانية العالمي.
+                        </p>
+                    </div>
+                    <div class="col-lg-5">
+                        <form action="{% url 'main:newsletter_subscribe' %}" method="POST" class="newsletter-form">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input type="email" class="form-control" name="email" placeholder="أدخل بريدك الإلكتروني" required>
+                                <button class="btn btn-primary" type="submit"><i class="fas fa-signal me-2"></i>اشترك الآن</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.home-wrap {
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Aurora hero */
+.hero.aurora {
+    position: relative;
+    padding: 140px 0 100px;
+    background: linear-gradient(135deg, #05070e 0%, #0a1428 40%, #231142 100%);
+    color: var(--text-light);
+}
+.hero .hero-background {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+.hero .glow {
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    filter: blur(110px);
+    opacity: 0.45;
+}
+.hero .glow-one { top: -120px; right: -80px; background: rgba(0,139,139,0.6); }
+.hero .glow-two { bottom: -150px; left: -120px; background: rgba(75,0,130,0.55); }
+.hero .glow-three { top: 40%; left: 30%; background: rgba(22,33,62,0.6); opacity: 0.35; }
+.hero .grid-lines {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(0deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(circle at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,1) 70%);
+}
+.hero .hero-intro {
+    position: relative;
+    z-index: 2;
+}
+.hero .hero-label {
+    display: inline-block;
+    padding: 0.45rem 1.5rem;
+    border-radius: 999px;
+    border: 1px solid rgba(0,139,139,0.4);
+    background: rgba(0,139,139,0.15);
+    color: var(--primary-color);
+    letter-spacing: 3px;
+    font-size: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+.hero .hero-heading {
+    font-size: clamp(2.5rem, 4vw, 3.8rem);
+    line-height: 1.25;
+    margin-bottom: 1.5rem;
+    font-family: var(--font-display);
+    text-shadow: 0 0 25px rgba(0,0,0,0.35);
+}
+.hero .hero-heading span {
+    color: var(--primary-color);
+    display: inline-block;
+}
+.hero .hero-text {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    max-width: 540px;
+    margin-bottom: 2rem;
+}
+.hero .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+.hero .hero-actions .btn { min-width: 220px; }
+.hero .hero-counters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+.hero .counter {
+    min-width: 150px;
+    padding: 1rem 1.25rem;
+    border-radius: 18px;
+    background: rgba(5,12,26,0.75);
+    border: 1px solid rgba(0,139,139,0.25);
+    backdrop-filter: blur(10px);
+    text-align: center;
+}
+.hero .counter-value {
+    display: block;
+    font-size: 1.9rem;
+    color: var(--primary-color);
+    font-family: var(--font-display);
+}
+.hero .counter-caption {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Orbit visuals */
+.hero .hero-orbit {
+    position: relative;
+    width: min(420px, 100%);
+    margin-inline: auto;
+}
+.hero .orbit-core {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(20,240,218,0.18), transparent 70%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.hero .orbit-logo {
+    height: 160px;
+    filter: drop-shadow(0 0 40px rgba(0,139,139,0.7));
+    animation: heroPulse 3.5s ease-in-out infinite;
+}
+.hero .orbit-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(0,139,139,0.3);
+}
+.hero .ring-primary { width: 85%; height: 85%; animation: orbitSpin 12s linear infinite; }
+.hero .ring-secondary { width: 60%; height: 60%; animation: orbitSpinReverse 10s linear infinite; }
+.hero .ring-tertiary { width: 40%; height: 40%; border-color: rgba(75,0,130,0.35); animation: orbitSpin 14s linear infinite; }
+.hero .orbit-card {
+    position: absolute;
+    width: 200px;
+    padding: 1.15rem 1.3rem;
+    border-radius: 18px;
+    background: rgba(5,10,22,0.82);
+    border: 1px solid rgba(0,139,139,0.35);
+    backdrop-filter: blur(12px);
+    color: var(--text-light);
+    box-shadow: 0 20px 50px rgba(3,8,20,0.35);
+}
+.hero .card-primary { top: -40px; left: -40px; }
+.hero .card-secondary { top: 20px; right: -50px; }
+.hero .card-tertiary { bottom: -40px; left: 10%; }
+.hero .orbit-card .card-title {
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    color: var(--text-secondary);
+}
+.hero .orbit-card .card-value {
+    display: block;
+    font-size: 1.4rem;
+    margin: 0.5rem 0;
+    color: var(--primary-color);
+}
+.hero .orbit-card .card-meta {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.65);
+}
+
+/* Shared sections */
+.section-head {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+.section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    color: var(--text-light);
+    margin-bottom: 0.75rem;
+}
+.section-lead {
+    color: var(--text-secondary);
+    max-width: 640px;
+    margin-inline: auto;
+}
+.lanes { background: rgba(11,12,16,0.4); }
+.lane-card {
+    background: rgba(22,33,62,0.6);
+    border: 1px solid rgba(0,139,139,0.4);
+    border-radius: 20px;
+    padding: 2rem 1.5rem;
+    height: 100%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+}
+.lane-icon {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1.25rem;
+}
+.lane-link {
+    display: inline-block;
+    margin-top: 1rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+.ticker { background: rgba(15,52,96,0.35); }
+.ticker-card {
+    position: relative;
+    background: rgba(11,12,16,0.8);
+    border: 1px solid rgba(0,139,139,0.35);
+    border-radius: 16px;
+    padding: 1.75rem;
+    height: 100%;
+    overflow: hidden;
+}
+.ticker-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent, rgba(0,139,139,0.1), transparent);
+    opacity: 0;
+    transition: opacity .3s;
+}
+.ticker-card:hover::after { opacity: 1; }
+.ticker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.ticker-category {
+    background: rgba(0,139,139,0.2);
+    border: 1px solid rgba(0,139,139,0.5);
+    border-radius: 999px;
+    padding: 0.3rem 0.9rem;
+    font-size: 0.75rem;
+}
+.ticker-time {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+.ticker-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+.ticker-title a {
+    color: var(--text-light);
+    text-decoration: none;
+}
+.ticker-title a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+.ticker-body {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    height: 4.8em; /* Show 3 lines of text */
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+.ticker-meta {
+    display: flex;
+    gap: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+.holo-grid { background: rgba(11,12,16,0.6); }
+.holo-diagram {
+    position: relative;
+    background: radial-gradient(circle at center, rgba(0,139,139,0.25), rgba(11,12,16,0.9));
+    border-radius: 24px;
+    padding: 3rem;
+    border: 1px solid rgba(0,139,139,0.3);
+    overflow: hidden;
+    min-height: 280px;
+}
+.holo-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-shadow: 0 0 15px rgba(0,139,139,0.6);
+}
+.holo-node {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(11,12,16,0.85);
+    border: 1px solid rgba(0,139,139,0.5);
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+.holo-node.node-one { top: 22%; left: 18%; }
+.holo-node.node-two { top: 20%; right: 15%; }
+.holo-node.node-three { bottom: 18%; right: 18%; }
+.holo-node.node-four { bottom: 20%; left: 20%; }
+.holo-lines {
+    position: absolute;
+    inset: 0;
+    stroke: rgba(0,139,139,0.45);
+    stroke-width: 1.5;
+}
+.holo-copy {
+    padding-left: 3rem;
+    border-left: 1px solid rgba(0,139,139,0.2);
+}
+.holo-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 1.5rem;
+}
+.holo-list li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+.holo-list li i {
+    margin-right: 0.75rem;
+    color: var(--primary-color);
+}
+.lab { background: rgba(15,52,96,0.3); }
+.lab-card {
+    background: rgba(11,12,16,0.85);
+    border: 1px solid rgba(0,139,139,0.3);
+    border-radius: 18px;
+    padding: 2rem;
+    height: 100%;
+    position: relative;
+}
+.lab-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.lab-signal {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #39ff14;
+    box-shadow: 0 0 12px rgba(57,255,20,0.8);
+    display: inline-block;
+    animation: blink 1.5s infinite;
+}
+.lab-label {
+    background: rgba(75,0,130,0.2);
+    border: 1px solid rgba(75,0,130,0.4);
+    border-radius: 999px;
+    padding: 0.25rem 0.9rem;
+    font-size: 0.8rem;
+}
+.lab-category {
+    background: rgba(75,0,130,0.2);
+    border: 1px solid rgba(75,0,130,0.4);
+    border-radius: 999px;
+    padding: 0.25rem 0.9rem;
+    font-size: 0.8rem;
+}
+.lab-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+.lab-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    height: 3.6em; /* Show 2 lines of text */
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+.lab-meta {
+    display: flex;
+    gap: 1.25rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 1.25rem 0;
+}
+.console { background: rgba(11,12,16,0.5); }
+.console-screen {
+    background: rgba(0,0,0,0.65);
+    border: 1px solid rgba(0,139,139,0.4);
+    border-radius: 20px;
+    overflow: hidden;
+    min-height: 200px;
+}
+.console-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    background: rgba(0,139,139,0.12);
+    border-bottom: 1px solid rgba(0,139,139,0.3);
+}
+.console-header .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+}
+.dot-red { background: #ff4d4f; }
+.dot-yellow { background: #ffc53d; }
+.dot-green { background: #73d13d; }
+.console-title { color: var(--text-secondary); font-size: 0.85rem; }
+.console-body {
+    padding: 1.5rem;
+    font-family: var(--font-mono);
+    color: var(--neon-cyan);
+    font-size: 0.95rem;
+}
+.console-highlight { color: #39ff14; }
+.control-panel {
+    padding-left: 3rem;
+    border-left: 1px solid rgba(0,139,139,0.2);
+}
+.intel-newsletter { background: rgba(15,52,96,0.25); }
+.newsletter-box {
+    background: rgba(11,12,16,0.85);
+    border: 1px solid rgba(0,139,139,0.35);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+.newsletter-form .form-control {
+    border-radius: 999px 0 0 999px;
+    padding: 0.85rem 1.5rem;
+    border: 1px solid rgba(0,139,139,0.5);
+    background: rgba(11,12,16,0.9);
+}
+.newsletter-form .btn {
+    border-radius: 0 999px 999px 0;
+    padding: 0.85rem 1.5rem;
+}
+
+@keyframes heroPulse {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.04); opacity: 1; }
+}
+@keyframes orbitSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+@keyframes orbitSpinReverse {
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0deg); }
+}
+
+@media (max-width: 992px) {
+    .hero .hero-actions .btn { width: 100%; }
+    .hero .hero-counters { justify-content: center; }
+    .hero .card-primary, .hero .card-secondary, .hero .card-tertiary { position: static; margin-top: 1rem; }
+    .hero .orbit-card { width: 100%; }
+}
+
+@media (max-width: 576px) {
+    .hero.aurora { padding: 120px 0 80px; }
+    .hero .hero-heading { font-size: 2.2rem; }
+    .hero .hero-counters { gap: 1rem; }
+    .hero .counter { flex: 1 1 calc(50% - 1rem); }
+}
+</style>
+{% endblock %}
+

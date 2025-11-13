@@ -1,0 +1,447 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}الإشعارات - لوحة التحكم{% endblock %}
+
+{% block content %}
+<!-- Override the main content -->
+<div class="content-header">
+    <div class="d-flex align-items-center mb-3">
+        <button class="btn btn-outline-primary me-3 sidebar-toggle" id="sidebarToggle" aria-label="تبديل الشريط الجانبي">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="fw-bold mb-0 cyber-text typewriter">
+            <i class="fas fa-bell me-3"></i>الإشعارات
+        </h1>
+    </div>
+    <p class="text-secondary">إدارة الإشعارات والتنبيهات في النظام</p>
+    <div class="matrix-text mt-2">
+        <small>NOTIFICATION CENTER</small>
+    </div>
+</div>
+
+<!-- Notification Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card cyber-border">
+            <div class="stat-icon">
+                <i class="fas fa-bell hacker-glow"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number" id="totalNotifications">0</h3>
+                <p class="stat-label">إجمالي الإشعارات</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card cyber-border">
+            <div class="stat-icon">
+                <i class="fas fa-envelope-open hacker-glow"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number" id="unreadNotifications">0</h3>
+                <p class="stat-label">غير مقروءة</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card cyber-border">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle hacker-glow"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number" id="urgentNotifications">0</h3>
+                <p class="stat-label">عاجلة</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card cyber-border">
+            <div class="stat-icon">
+                <i class="fas fa-tools hacker-glow"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number" id="osintNotifications">0</h3>
+                <p class="stat-label">إشعارات OSINT</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Controls -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="fw-bold mb-0 cyber-text">
+                    <i class="fas fa-cog me-2"></i>إعدادات الإشعارات
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-primary w-100" onclick="markAllAsRead()">
+                            <i class="fas fa-check-double me-2"></i>تحديد الكل كمقروء
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-danger w-100" onclick="clearAllNotifications()">
+                            <i class="fas fa-trash me-2"></i>مسح الكل
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-success w-100" onclick="refreshNotifications()">
+                            <i class="fas fa-sync-alt me-2"></i>تحديث
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-info w-100" onclick="toggleAutoRefresh()">
+                            <i class="fas fa-clock me-2"></i>تحديث تلقائي
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notifications List -->
+<div class="row g-4">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="fw-bold mb-0 cyber-text">
+                    <i class="fas fa-list me-2"></i>قائمة الإشعارات
+                </h5>
+                <div class="d-flex gap-2">
+                    <select class="form-select form-select-sm" id="filterType" onchange="filterNotifications()">
+                        <option value="all">جميع الإشعارات</option>
+                        <option value="unread">غير مقروءة</option>
+                        <option value="urgent">عاجلة</option>
+                        <option value="osint">OSINT</option>
+                        <option value="system">النظام</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="notificationsList">
+                    <!-- سيتم ملء البيانات عبر JavaScript -->
+                    <div class="text-center py-4">
+                        <i class="fas fa-spinner fa-spin fa-2x text-secondary mb-3"></i>
+                        <p class="text-secondary">جاري تحميل الإشعارات...</p>
+                    </div>
+                </div>
+                
+                <!-- Load More Button -->
+                <div class="text-center mt-4" id="loadMoreContainer" style="display: none;">
+                    <button class="btn btn-outline-primary" onclick="loadMoreNotifications()">
+                        <i class="fas fa-plus me-2"></i>تحميل المزيد
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let notifications = [];
+let currentPage = 1;
+let autoRefreshEnabled = false;
+let autoRefreshInterval;
+
+// تحميل الإشعارات
+function loadNotifications(page = 1, append = false) {
+    const filterType = document.getElementById('filterType').value;
+    const url = `/api/notifications/?page=${page}&type=${filterType}`;
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (append) {
+                notifications = [...notifications, ...data.results];
+            } else {
+                notifications = data.results;
+            }
+            
+            updateNotificationsList();
+            updateStatistics(data);
+            updateLoadMoreButton(data);
+        })
+        .catch(error => {
+            console.error('خطأ في تحميل الإشعارات:', error);
+            showError('فشل في تحميل الإشعارات');
+        });
+}
+
+// تحديث قائمة الإشعارات
+function updateNotificationsList() {
+    const container = document.getElementById('notificationsList');
+    
+    if (notifications.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-bell-slash fa-3x text-secondary mb-3"></i>
+                <p class="text-secondary fs-5">لا توجد إشعارات</p>
+                <p class="text-muted">ستظهر الإشعارات الجديدة هنا عند توفرها</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = notifications.map(notification => `
+        <div class="notification-item ${notification.is_read ? '' : 'unread'} mb-3 p-3 border rounded" 
+             onclick="markAsRead(${notification.id})">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas ${getNotificationIcon(notification.type)} me-2 text-${getNotificationColor(notification.type)}"></i>
+                        <h6 class="mb-0 ${notification.is_read ? 'text-muted' : 'text-white'}">
+                            ${notification.title}
+                        </h6>
+                        ${notification.is_urgent ? '<span class="badge bg-danger ms-2">عاجل</span>' : ''}
+                        ${!notification.is_read ? '<span class="badge bg-primary ms-2">جديد</span>' : ''}
+                    </div>
+                    <p class="text-muted mb-2">${notification.message}</p>
+                    <small class="text-secondary">
+                        <i class="fas fa-clock me-1"></i>
+                        ${new Date(notification.created_at).toLocaleString('ar-SA')}
+                    </small>
+                </div>
+                <div class="notification-actions">
+                    ${!notification.is_read ? `
+                        <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); markAsRead(${notification.id})">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    ` : ''}
+                    <button class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); deleteNotification(${notification.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// تحديث الإحصائيات
+function updateStatistics(data) {
+    document.getElementById('totalNotifications').textContent = data.total_count || 0;
+    document.getElementById('unreadNotifications').textContent = data.unread_count || 0;
+    document.getElementById('urgentNotifications').textContent = data.urgent_count || 0;
+    document.getElementById('osintNotifications').textContent = data.osint_count || 0;
+}
+
+// تحديث زر تحميل المزيد
+function updateLoadMoreButton(data) {
+    const container = document.getElementById('loadMoreContainer');
+    if (data.next) {
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+// تحديد أيقونة الإشعار
+function getNotificationIcon(type) {
+    const icons = {
+        'osint_complete': 'fa-check-circle',
+        'osint_error': 'fa-exclamation-triangle',
+        'osint_start': 'fa-play-circle',
+        'system': 'fa-cog',
+        'security': 'fa-shield-alt',
+        'info': 'fa-info-circle',
+        'warning': 'fa-exclamation-circle',
+        'default': 'fa-bell'
+    };
+    return icons[type] || icons.default;
+}
+
+// تحديد لون الإشعار
+function getNotificationColor(type) {
+    const colors = {
+        'osint_complete': 'success',
+        'osint_error': 'danger',
+        'osint_start': 'primary',
+        'system': 'secondary',
+        'security': 'warning',
+        'info': 'info',
+        'warning': 'warning',
+        'default': 'primary'
+    };
+    return colors[type] || colors.default;
+}
+
+// تحديد إشعار كمقروء
+function markAsRead(notificationId) {
+    fetch(`/api/notifications/${notificationId}/mark-read/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // تحديث الإشعار في القائمة
+            const notification = notifications.find(n => n.id === notificationId);
+            if (notification) {
+                notification.is_read = true;
+                updateNotificationsList();
+                updateStatistics({unread_count: Math.max(0, parseInt(document.getElementById('unreadNotifications').textContent) - 1)});
+            }
+        }
+    })
+    .catch(error => {
+        console.error('خطأ في تحديد الإشعار كمقروء:', error);
+    });
+}
+
+// تحديد جميع الإشعارات كمقروءة
+function markAllAsRead() {
+    if (confirm('هل تريد تحديد جميع الإشعارات كمقروءة؟')) {
+        fetch('/api/notifications/mark-all-read/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccess('تم تحديد جميع الإشعارات كمقروءة');
+                loadNotifications(1);
+            } else {
+                showError('فشل في تحديد الإشعارات كمقروءة');
+            }
+        })
+        .catch(error => {
+            console.error('خطأ في تحديد الإشعارات كمقروءة:', error);
+            showError('فشل في تحديد الإشعارات كمقروءة');
+        });
+    }
+}
+
+// حذف إشعار
+function deleteNotification(notificationId) {
+    if (confirm('هل تريد حذف هذا الإشعار؟')) {
+        fetch(`/api/notifications/${notificationId}/delete/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                notifications = notifications.filter(n => n.id !== notificationId);
+                updateNotificationsList();
+                showSuccess('تم حذف الإشعار');
+            } else {
+                showError('فشل في حذف الإشعار');
+            }
+        })
+        .catch(error => {
+            console.error('خطأ في حذف الإشعار:', error);
+            showError('فشل في حذف الإشعار');
+        });
+    }
+}
+
+// مسح جميع الإشعارات
+function clearAllNotifications() {
+    if (confirm('هل تريد مسح جميع الإشعارات؟ هذا الإجراء لا يمكن التراجع عنه.')) {
+        fetch('/api/notifications/clear-all/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccess('تم مسح جميع الإشعارات');
+                loadNotifications(1);
+            } else {
+                showError('فشل في مسح الإشعارات');
+            }
+        })
+        .catch(error => {
+            console.error('خطأ في مسح الإشعارات:', error);
+            showError('فشل في مسح الإشعارات');
+        });
+    }
+}
+
+// تحديث الإشعارات
+function refreshNotifications() {
+    loadNotifications(1);
+}
+
+// فلترة الإشعارات
+function filterNotifications() {
+    loadNotifications(1);
+}
+
+// تحميل المزيد من الإشعارات
+function loadMoreNotifications() {
+    currentPage++;
+    loadNotifications(currentPage, true);
+}
+
+// تبديل التحديث التلقائي
+function toggleAutoRefresh() {
+    autoRefreshEnabled = !autoRefreshEnabled;
+    const button = event.target;
+    
+    if (autoRefreshEnabled) {
+        button.innerHTML = '<i class="fas fa-pause me-2"></i>إيقاف التحديث التلقائي';
+        button.classList.remove('btn-outline-info');
+        button.classList.add('btn-info');
+        autoRefreshInterval = setInterval(refreshNotifications, 30000); // كل 30 ثانية
+    } else {
+        button.innerHTML = '<i class="fas fa-clock me-2"></i>تحديث تلقائي';
+        button.classList.remove('btn-info');
+        button.classList.add('btn-outline-info');
+        clearInterval(autoRefreshInterval);
+    }
+}
+
+// تحميل البيانات عند بدء الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    loadNotifications(1);
+});
+</script>
+
+<style>
+.notification-item {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.notification-item:hover {
+    background-color: rgba(0, 255, 0, 0.1);
+    border-color: var(--primary-color) !important;
+}
+
+.notification-item.unread {
+    border-left: 4px solid var(--primary-color);
+    background-color: rgba(0, 255, 0, 0.05);
+}
+
+.notification-actions {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.notification-item:hover .notification-actions {
+    opacity: 1;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}إنشاء تقرير - كوريزا OSINT{% endblock %}
+
+{% block content %}
+<div class="dashboard-container py-5">
+    <div class="container">
+        <div class="content-card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="fw-bold mb-0 cyber-text">
+                    <i class="fas fa-file-alt me-2"></i>إنشاء تقرير
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-secondary mb-4">قم بإنشاء تقرير حول نشاطاتك أو منشوراتك باستخدام القوالب المتاحة.</p>
+
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <div class="content-subcard mb-4">
+                            <h6 class="fw-bold mb-3">تقارير سريعة</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <button class="btn btn-outline-primary w-100 py-3">
+                                        <i class="fas fa-chart-area me-2"></i> تقرير التحليلات
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-outline-primary w-100 py-3">
+                                        <i class="fas fa-comments me-2"></i> تقرير التعليقات
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-outline-primary w-100 py-3">
+                                        <i class="fas fa-eye me-2"></i> تقرير المشاهدات
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-outline-primary w-100 py-3">
+                                        <i class="fas fa-database me-2"></i> تقرير المصادر
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-subcard">
+                            <h6 class="fw-bold mb-3">إنشاء تقرير مخصص</h6>
+                            <form>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">نوع التقرير</label>
+                                        <select class="form-select">
+                                            <option value="">اختر نوع التقرير</option>
+                                            <option value="analytics">تحليلات المنشورات</option>
+                                            <option value="engagement">تفاعل المستخدمين</option>
+                                            <option value="security">نشاطات الأمان</option>
+                                            <option value="custom">مخصص</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">نطاق التاريخ</label>
+                                        <select class="form-select">
+                                            <option value="last_7_days">آخر 7 أيام</option>
+                                            <option value="last_30_days">آخر 30 يوم</option>
+                                            <option value="last_90_days">آخر 90 يوم</option>
+                                            <option value="custom">مخصص</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">العنوان</label>
+                                        <input type="text" class="form-control" placeholder="أدخل عنوان التقرير">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">الوصف</label>
+                                        <textarea class="form-control" rows="4" placeholder="أضف وصفاً للتقرير"></textarea>
+                                    </div>
+                                    <div class="col-12 text-end">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-plus-circle me-2"></i>إنشاء التقرير
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="content-subcard mb-4">
+                            <h6 class="fw-bold mb-3">آخر التقارير</h6>
+                            {% if generated_reports %}
+                                <ul class="list-unstyled mb-0">
+                                    {% for report in generated_reports %}
+                                        <li class="d-flex align-items-center justify-content-between mb-3">
+                                            <div>
+                                                <h6 class="mb-1">{{ report.description|default:"تقرير بدون عنوان" }}</h6>
+                                                <small class="text-secondary">{{ report.created_at|date:"Y/m/d H:i" }}</small>
+                                            </div>
+                                            <a href="#" class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <div class="empty-state text-center py-4">
+                                    <i class="fas fa-file-excel fa-2x text-secondary mb-2"></i>
+                                    <p class="text-secondary mb-0">لا توجد تقارير منشأة بعد.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="content-subcard">
+                            <h6 class="fw-bold mb-3">نصائح للتقارير</h6>
+                            <ul class="list-unstyled text-secondary small mb-0">
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>حدد الهدف الرئيسي للتقرير.</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>استخدم البيانات الموثوقة من لوحة القيادة.</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>قم بتحديث التقارير بشكل دوري.</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>شارك التقارير مع فريقك لاتخاذ قرارات أفضل.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.content-subcard {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.content-subcard + .content-subcard {
+    margin-top: 1.5rem;
+}
+</style>
+{% endblock %}
+

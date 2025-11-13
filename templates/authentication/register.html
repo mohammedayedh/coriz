@@ -1,0 +1,445 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}انضم للفريق - كوريزا OSINT{% endblock %}
+
+{% block meta_description %}انضم إلى مجتمع كوريزا OSINT للمختصين في الأمن السيبراني وجمع المعلومات المفتوحة{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="auth-card">
+                    <div class="auth-header text-center mb-4">
+                        <img src="{% static 'images/logo.png' %}" alt="كوريزا OSINT" class="auth-logo mb-3">
+                        <h2 class="fw-bold cyber-text typewriter">
+                            انضم للفريق
+                        </h2>
+                        <p class="text-secondary">انضم إلى مجتمع مختصي الأمن السيبراني</p>
+                        <div class="matrix-text mt-2">
+                            <small>JOIN THE MATRIX</small>
+                        </div>
+                    </div>
+                    
+                    <form method="post" class="auth-form" id="registerForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- First Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                    <i class="fas fa-user me-2"></i>الاسم الأول
+                                </label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.first_name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Last Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                    <i class="fas fa-user me-2"></i>اسم العائلة
+                                </label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.last_name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Username -->
+                        <div class="form-group mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">
+                                <i class="fas fa-at me-2"></i>اسم المستخدم
+                            </label>
+                            {{ form.username }}
+                            <div class="form-text text-secondary">سيتم استخدامه في رابط ملفك الشخصي</div>
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Email -->
+                        <div class="form-group mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                <i class="fas fa-envelope me-2"></i>البريد الإلكتروني
+                            </label>
+                            {{ form.email }}
+                            <div class="form-text text-secondary">سنرسل لك رابط تفعيل الحساب</div>
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Phone -->
+                        <div class="form-group mb-3">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                <i class="fas fa-phone me-2"></i>رقم الهاتف (اختياري)
+                            </label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.phone.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Password -->
+                        <div class="form-group mb-3">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label">
+                                <i class="fas fa-lock me-2"></i>كلمة المرور
+                            </label>
+                            <div class="password-input-group">
+                                {{ form.password1 }}
+                                <button type="button" class="btn btn-outline-secondary password-toggle" onclick="togglePassword('{{ form.password1.id_for_label }}', 'password1ToggleIcon')">
+                                    <i class="fas fa-eye" id="password1ToggleIcon"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength mt-2">
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar" id="passwordStrength" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="text-secondary" id="passwordStrengthText">أدخل كلمة مرور قوية</small>
+                            </div>
+                            {% if form.password1.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.password1.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Confirm Password -->
+                        <div class="form-group mb-3">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label">
+                                <i class="fas fa-lock me-2"></i>تأكيد كلمة المرور
+                            </label>
+                            <div class="password-input-group">
+                                {{ form.password2 }}
+                                <button type="button" class="btn btn-outline-secondary password-toggle" onclick="togglePassword('{{ form.password2.id_for_label }}', 'password2ToggleIcon')">
+                                    <i class="fas fa-eye" id="password2ToggleIcon"></i>
+                                </button>
+                            </div>
+                            <div class="password-match mt-2">
+                                <small class="text-secondary" id="passwordMatchText"></small>
+                            </div>
+                            {% if form.password2.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.password2.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Terms and Conditions -->
+                        <div class="form-group mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                                <label class="form-check-label" for="termsCheck">
+                                    <i class="fas fa-shield-alt me-1"></i>أوافق على <a href="{% url 'main:terms_of_service' %}" target="_blank" class="text-primary">شروط الخدمة</a> 
+                                    و <a href="{% url 'main:privacy_policy' %}" target="_blank" class="text-primary">سياسة الخصوصية</a>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="form-group mb-3">
+                            <button type="submit" class="btn btn-primary w-100 btn-lg" id="submitBtn">
+                                <i class="fas fa-user-secret me-2"></i>انضم للفريق
+                            </button>
+                        </div>
+                        
+                        <!-- Divider -->
+                        <div class="text-center mb-3">
+                            <span class="text-secondary">أو</span>
+                        </div>
+                        
+                        <!-- Social Register (Optional) -->
+                        <div class="social-register mb-3">
+                            <button type="button" class="btn btn-outline-primary w-100 mb-2">
+                                <i class="fab fa-github me-2"></i>التسجيل بـ GitHub
+                            </button>
+                            <button type="button" class="btn btn-outline-info w-100">
+                                <i class="fab fa-linkedin me-2"></i>التسجيل بـ LinkedIn
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Login Link -->
+                    <div class="auth-footer text-center mt-4">
+                        <p class="text-secondary">
+                            لديك حساب بالفعل؟ 
+                            <a href="{% url 'authentication:login' %}" class="text-primary fw-bold text-decoration-none">
+                                <i class="fas fa-sign-in-alt me-1"></i>تسجيل الدخول
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    padding: 2rem 0;
+}
+
+.auth-card {
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    padding: 2.5rem;
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+}
+
+.auth-header h2 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.form-group {
+    position: relative;
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+    padding: 12px 15px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 255, 0, 0.25);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.password-input-group {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    z-index: 10;
+}
+
+.password-toggle:hover {
+    color: var(--text-primary);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #00cc00 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 255, 0, 0.3);
+    background: linear-gradient(135deg, #00cc00 0%, var(--primary-color) 100%);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+}
+
+.social-register .btn {
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.social-register .btn:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.auth-footer a:hover {
+    text-decoration: underline !important;
+    color: var(--primary-color) !important;
+}
+
+.password-strength .progress-bar {
+    transition: all 0.3s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .auth-card {
+        margin: 1rem;
+        padding: 2rem;
+    }
+    
+    .auth-container {
+        padding: 1rem 0;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePassword(fieldId, iconId) {
+    const passwordField = document.getElementById(fieldId);
+    const toggleIcon = document.getElementById(iconId);
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordField.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+}
+
+function checkPasswordStrength(password) {
+    let strength = 0;
+    let strengthText = '';
+    let strengthColor = '';
+    
+    if (password.length >= 8) strength += 20;
+    if (password.match(/[a-z]/)) strength += 20;
+    if (password.match(/[A-Z]/)) strength += 20;
+    if (password.match(/[0-9]/)) strength += 20;
+    if (password.match(/[^a-zA-Z0-9]/)) strength += 20;
+    
+    if (strength < 40) {
+        strengthText = 'ضعيف';
+        strengthColor = '#dc3545';
+    } else if (strength < 80) {
+        strengthText = 'متوسط';
+        strengthColor = '#ffc107';
+    } else {
+        strengthText = 'قوي';
+        strengthColor = '#28a745';
+    }
+    
+    document.getElementById('passwordStrength').style.width = strength + '%';
+    document.getElementById('passwordStrength').style.backgroundColor = strengthColor;
+    document.getElementById('passwordStrengthText').textContent = strengthText;
+    document.getElementById('passwordStrengthText').style.color = strengthColor;
+}
+
+function checkPasswordMatch() {
+    const password1 = document.getElementById('{{ form.password1.id_for_label }}').value;
+    const password2 = document.getElementById('{{ form.password2.id_for_label }}').value;
+    const matchText = document.getElementById('passwordMatchText');
+    
+    if (password2.length === 0) {
+        matchText.textContent = '';
+        return;
+    }
+    
+    if (password1 === password2) {
+        matchText.textContent = 'كلمتا المرور متطابقتان';
+        matchText.style.color = '#28a745';
+    } else {
+        matchText.textContent = 'كلمتا المرور غير متطابقتان';
+        matchText.style.color = '#dc3545';
+    }
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const password1Field = document.getElementById('{{ form.password1.id_for_label }}');
+    const password2Field = document.getElementById('{{ form.password2.id_for_label }}');
+    
+    password1Field.addEventListener('input', function() {
+        checkPasswordStrength(this.value);
+        checkPasswordMatch();
+    });
+    
+    password2Field.addEventListener('input', checkPasswordMatch);
+    
+    // Form validation
+    const form = document.getElementById('registerForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    form.addEventListener('submit', function(e) {
+        const password1 = password1Field.value;
+        const password2 = password2Field.value;
+        const termsCheck = document.getElementById('termsCheck').checked;
+        
+        if (password1 !== password2) {
+            e.preventDefault();
+            alert('كلمتا المرور غير متطابقتان');
+            return;
+        }
+        
+        if (!termsCheck) {
+            e.preventDefault();
+            alert('يجب الموافقة على شروط الخدمة وسياسة الخصوصية');
+            return;
+        }
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>جاري الانضمام للفريق...';
+    });
+    
+    // Auto-hide messages after 5 seconds
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        setTimeout(() => {
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.hide();
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

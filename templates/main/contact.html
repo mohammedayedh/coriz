@@ -1,0 +1,465 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}تواصل معنا - كوريزا OSINT{% endblock %}
+
+{% block meta_description %}تواصل مع فريق كوريزا OSINT للحصول على الدعم الفني أو الاستفسارات حول الأمن السيبراني{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="py-5 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="display-4 fw-bold cyber-text typewriter">
+                    <i class="fas fa-envelope me-3"></i>تواصل معنا
+                </h1>
+                <p class="lead text-secondary mt-3">
+                    نحن هنا لمساعدتك في جميع استفساراتك حول الأمن السيبراني وأدوات OSINT
+                </p>
+                <div class="matrix-text mt-3">
+                    <small>CONTACT INITIALIZED</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Contact Form -->
+            <div class="col-lg-8">
+                <div class="contact-form-card cyber-border">
+                    <div class="card-header">
+                        <h3 class="cyber-text mb-0">
+                            <i class="fas fa-paper-plane me-2"></i>أرسل رسالة
+                        </h3>
+                        <p class="text-secondary mb-0">سنرد عليك في أقرب وقت ممكن</p>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" id="contactForm">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="name" class="form-label">
+                                            <i class="fas fa-user me-2"></i>الاسم الكامل
+                                        </label>
+                                        <input type="text" class="form-control" id="name" name="name" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="email" class="form-label">
+                                            <i class="fas fa-envelope me-2"></i>البريد الإلكتروني
+                                        </label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="phone" class="form-label">
+                                            <i class="fas fa-phone me-2"></i>رقم الهاتف (اختياري)
+                                        </label>
+                                        <input type="tel" class="form-control" id="phone" name="phone">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="subject" class="form-label">
+                                            <i class="fas fa-tag me-2"></i>الموضوع
+                                        </label>
+                                        <select class="form-control" id="subject" name="subject" required>
+                                            <option value="">اختر الموضوع</option>
+                                            <option value="support">الدعم الفني</option>
+                                            <option value="osint">أدوات OSINT</option>
+                                            <option value="security">الأمن السيبراني</option>
+                                            <option value="partnership">الشراكة</option>
+                                            <option value="other">أخرى</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="message" class="form-label">
+                                            <i class="fas fa-comment me-2"></i>الرسالة
+                                        </label>
+                                        <textarea class="form-control" id="message" name="message" rows="6" 
+                                                  placeholder="اكتب رسالتك هنا..." required></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="privacy" required>
+                                            <label class="form-check-label" for="privacy">
+                                                <i class="fas fa-shield-alt me-1"></i>
+                                                أوافق على <a href="{% url 'main:privacy_policy' %}" target="_blank" class="text-primary">سياسة الخصوصية</a>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-paper-plane me-2"></i>إرسال الرسالة
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Info -->
+            <div class="col-lg-4">
+                <div class="contact-info">
+                    <!-- Contact Methods -->
+                    <div class="contact-method-card cyber-border mb-4">
+                        <div class="card-header">
+                            <h5 class="cyber-text mb-0">
+                                <i class="fas fa-phone me-2"></i>طرق التواصل
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="contact-method">
+                                <div class="method-icon">
+                                    <i class="fas fa-envelope fa-2x text-primary"></i>
+                                </div>
+                                <div class="method-content">
+                                    <h6 class="cyber-text">البريد الإلكتروني</h6>
+                                    <p class="text-secondary small">info@coriza-osint.com</p>
+                                </div>
+                            </div>
+                            <hr class="my-3">
+                            <div class="contact-method">
+                                <div class="method-icon">
+                                    <i class="fas fa-phone fa-2x text-primary"></i>
+                                </div>
+                                <div class="method-content">
+                                    <h6 class="cyber-text">الهاتف</h6>
+                                    <p class="text-secondary small">+966 50 123 4567</p>
+                                </div>
+                            </div>
+                            <hr class="my-3">
+                            <div class="contact-method">
+                                <div class="method-icon">
+                                    <i class="fab fa-telegram fa-2x text-primary"></i>
+                                </div>
+                                <div class="method-content">
+                                    <h6 class="cyber-text">تيليجرام</h6>
+                                    <p class="text-secondary small">@coriza_osint</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Office Hours -->
+                    <div class="office-hours-card cyber-border mb-4">
+                        <div class="card-header">
+                            <h5 class="cyber-text mb-0">
+                                <i class="fas fa-clock me-2"></i>ساعات العمل
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="office-hour">
+                                <span class="day">الأحد - الخميس</span>
+                                <span class="time">9:00 ص - 6:00 م</span>
+                            </div>
+                            <div class="office-hour">
+                                <span class="day">الجمعة</span>
+                                <span class="time">2:00 م - 6:00 م</span>
+                            </div>
+                            <div class="office-hour">
+                                <span class="day">السبت</span>
+                                <span class="time">مغلق</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Social Media -->
+                    <div class="social-media-card cyber-border">
+                        <div class="card-header">
+                            <h5 class="cyber-text mb-0">
+                                <i class="fas fa-share-alt me-2"></i>تابعنا
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="social-links">
+                                <a href="#" class="social-link github">
+                                    <i class="fab fa-github"></i>
+                                    <span>GitHub</span>
+                                </a>
+                                <a href="#" class="social-link twitter">
+                                    <i class="fab fa-twitter"></i>
+                                    <span>Twitter</span>
+                                </a>
+                                <a href="#" class="social-link linkedin">
+                                    <i class="fab fa-linkedin-in"></i>
+                                    <span>LinkedIn</span>
+                                </a>
+                                <a href="#" class="social-link discord">
+                                    <i class="fab fa-discord"></i>
+                                    <span>Discord</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-5 bg-dark">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold cyber-text">
+                    <i class="fas fa-question-circle me-2"></i>الأسئلة الشائعة
+                </h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item cyber-border">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                <i class="fas fa-shield-alt me-2"></i>ما هي أدوات OSINT؟
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                أدوات OSINT (Open Source Intelligence) هي أدوات لجمع المعلومات من المصادر المفتوحة 
+                                والمتاحة للجمهور لتحليل التهديدات الأمنية وإجراء البحوث الأمنية.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item cyber-border">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                <i class="fas fa-user-secret me-2"></i>من يمكنه استخدام المنصة؟
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                المنصة مخصصة للمختصين في الأمن السيبراني، محللي الأمان، الباحثين الأمنيين، 
+                                ومختصي جمع المعلومات المفتوحة.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item cyber-border">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                <i class="fas fa-lock me-2"></i>هل المنصة آمنة؟
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                نعم، نستخدم أحدث تقنيات الأمان لحماية بيانات المستخدمين ومعلوماتهم، 
+                                مع التزام صارم بمعايير الأمان السيبراني.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item cyber-border">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                <i class="fas fa-graduation-cap me-2"></i>هل تقدمون تدريباً؟
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                نعم، نقدم دورات تدريبية متخصصة في الأمن السيبراني وأدوات OSINT 
+                                للمبتدئين والمتقدمين على حد سواء.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.contact-form-card {
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.contact-form-card .card-header {
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+.contact-form-card .card-body {
+    padding: 2rem;
+}
+
+.contact-method-card, .office-hours-card, .social-media-card {
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.contact-method-card .card-header, .office-hours-card .card-header, .social-media-card .card-header {
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.5rem;
+}
+
+.contact-method-card .card-body, .office-hours-card .card-body, .social-media-card .card-body {
+    padding: 1.5rem;
+}
+
+.contact-method {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.method-icon {
+    flex-shrink: 0;
+}
+
+.method-content h6 {
+    margin-bottom: 0.25rem;
+}
+
+.office-hour {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.office-hour .day {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.office-hour .time {
+    color: var(--text-secondary);
+}
+
+.social-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: var(--transition);
+    border: 1px solid var(--border-color);
+}
+
+.social-link:hover {
+    background: var(--primary-color);
+    color: var(--text-primary);
+    transform: translateX(5px);
+}
+
+.social-link.github:hover { background: #333; }
+.social-link.twitter:hover { background: #1da1f2; }
+.social-link.linkedin:hover { background: #0077b5; }
+.social-link.discord:hover { background: #7289da; }
+
+.accordion-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.accordion-button {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: none;
+    font-weight: 600;
+}
+
+.accordion-button:not(.collapsed) {
+    background: var(--primary-color);
+    color: var(--text-primary);
+}
+
+.accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(0, 139, 139, 0.25);
+}
+
+.accordion-body {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .contact-form-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .contact-method {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .office-hour {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.25rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Get form data
+    const formData = new FormData(this);
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>جاري الإرسال...';
+    submitBtn.disabled = true;
+    
+    // Simulate form submission (replace with actual AJAX call)
+    setTimeout(() => {
+        // Show success message
+        alert('تم إرسال رسالتك بنجاح! سنرد عليك في أقرب وقت ممكن.');
+        
+        // Reset form
+        this.reset();
+        
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }, 2000);
+});
+</script>
+{% endblock %}
+

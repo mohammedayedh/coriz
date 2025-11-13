@@ -1,0 +1,450 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}الملف الشخصي - كوريزا OSINT{% endblock %}
+
+{% block meta_description %}إدارة الملف الشخصي في كوريزا OSINT - تحديث المعلومات الشخصية والإعدادات{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" alt="صورة المستخدم" class="avatar-img">
+                            {% else %}
+                                <div class="avatar-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="profile-info">
+                            <h2 class="profile-name">{{ user.get_full_name|default:user.username }}</h2>
+                            <p class="profile-email">{{ user.email }}</p>
+                            <div class="profile-status">
+                                {% if user.is_verified %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle me-1"></i>مُتحقق
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>غير مُتحقق
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-content">
+                        <form method="post" enctype="multipart/form-data" class="profile-form">
+                            {% csrf_token %}
+                            
+                            <div class="form-section">
+                                <h4 class="section-title">
+                                    <i class="fas fa-user me-2"></i>المعلومات الشخصية
+                                </h4>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                                {{ form.first_name.label }}
+                                            </label>
+                                            {{ form.first_name }}
+                                            {% if form.first_name.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {{ form.first_name.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                                {{ form.last_name.label }}
+                                            </label>
+                                            {{ form.last_name }}
+                                            {% if form.last_name.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {{ form.last_name.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.email.id_for_label }}" class="form-label">
+                                        {{ form.email.label }}
+                                    </label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ form.email.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                        {{ form.phone.label }}
+                                    </label>
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ form.phone.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.birth_date.id_for_label }}" class="form-label">
+                                        {{ form.birth_date.label }}
+                                    </label>
+                                    {{ form.birth_date }}
+                                    {% if form.birth_date.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ form.birth_date.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.address.id_for_label }}" class="form-label">
+                                        {{ form.address.label }}
+                                    </label>
+                                    {{ form.address }}
+                                    {% if form.address.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ form.address.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h4 class="section-title">
+                                    <i class="fas fa-image me-2"></i>الصورة الشخصية
+                                </h4>
+                                
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.avatar.id_for_label }}" class="form-label">
+                                        {{ form.avatar.label }}
+                                    </label>
+                                    {{ form.avatar }}
+                                    {% if form.avatar.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ form.avatar.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">يمكنك رفع صورة شخصية بحجم لا يتجاوز 5 ميجابايت</div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>حفظ التغييرات
+                                </button>
+                                <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-right me-2"></i>العودة للوحة التحكم
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.profile-container {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    padding: 2rem 0;
+}
+
+.profile-card {
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.profile-header {
+    background: linear-gradient(135deg, var(--primary-color), #00cc66);
+    padding: 2rem;
+    text-align: center;
+    color: white;
+}
+
+.profile-avatar {
+    margin-bottom: 1rem;
+}
+
+.avatar-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid rgba(255,255,255,0.3);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border: 4px solid rgba(255,255,255,0.3);
+    font-size: 3rem;
+}
+
+.profile-name {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.profile-email {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 1rem;
+}
+
+.profile-status .badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+.profile-content {
+    padding: 2rem;
+}
+
+.form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.section-title {
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.form-group {
+    position: relative;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-control {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background: var(--bg-primary);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 255, 0, 0.25);
+    color: var(--text-primary);
+}
+
+.form-control::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.form-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn {
+    padding: 0.75rem 2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: var(--bg-primary);
+}
+
+.btn-primary:hover {
+    background: #00cc66;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3);
+}
+
+.btn-outline-secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
+}
+
+.btn-outline-secondary:hover {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+    transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 1rem 0;
+    }
+    
+    .profile-header {
+        padding: 1.5rem;
+    }
+    
+    .profile-content {
+        padding: 1.5rem;
+    }
+    
+    .profile-name {
+        font-size: 1.5rem;
+    }
+    
+    .avatar-img,
+    .avatar-placeholder {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .avatar-placeholder {
+        font-size: 2.5rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .form-control {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+    }
+    
+    .form-control:focus {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Avatar preview
+    const avatarInput = document.querySelector('input[type="file"]');
+    const avatarImg = document.querySelector('.avatar-img');
+    const avatarPlaceholder = document.querySelector('.avatar-placeholder');
+    
+    if (avatarInput) {
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (avatarImg) {
+                        avatarImg.src = e.target.result;
+                    } else {
+                        // Create new img element if it doesn't exist
+                        const newImg = document.createElement('img');
+                        newImg.src = e.target.result;
+                        newImg.className = 'avatar-img';
+                        newImg.alt = 'صورة المستخدم';
+                        avatarPlaceholder.parentNode.replaceChild(newImg, avatarPlaceholder);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // Form validation
+    const form = document.querySelector('.profile-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const requiredFields = form.querySelectorAll('input[required], textarea[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('يرجى ملء جميع الحقول المطلوبة');
+            }
+        });
+    }
+    
+    // Auto-hide messages
+    const messages = document.querySelectorAll('.alert');
+    messages.forEach(message => {
+        setTimeout(() => {
+            message.style.opacity = '0';
+            setTimeout(() => {
+                message.remove();
+            }, 300);
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}
+
