@@ -23,7 +23,7 @@ def run_osint_tool(self, session_id):
     session.progress = 5
     session.current_step = 'جاري تهيئة الأداة...'
     session.started_at = session.started_at or timezone.now()
-    session.save(update_fields=['status', 'progress', 'current_step', 'started_at', 'updated_at'])
+    session.save(update_fields=['celery_task_id', 'status', 'progress', 'current_step', 'started_at', 'updated_at'])
 
     runner = OSINTToolRunner(session)
 
@@ -72,7 +72,7 @@ def generate_osint_report(self, report_id):
     report.celery_task_id = self.request.id
     report.status = 'running'
     report.error_message = ''
-    report.save(update_fields=['status', 'error_message', 'updated_at'])
+    report.save(update_fields=['status', 'error_message'])
 
     try:
         generator = ReportGenerator(report)
@@ -82,7 +82,7 @@ def generate_osint_report(self, report_id):
         report.refresh_from_db()
         report.status = 'failed'
         report.error_message = str(exc)
-        report.save(update_fields=['status', 'error_message', 'updated_at'])
+        report.save(update_fields=['status', 'error_message'])
 
         OSINTActivityLog.objects.create(
             user=report.user,
@@ -96,7 +96,7 @@ def generate_osint_report(self, report_id):
     report.refresh_from_db()
     report.status = 'completed'
     report.error_message = ''
-    report.save(update_fields=['status', 'error_message', 'updated_at'])
+    report.save(update_fields=['status', 'error_message'])
 
     OSINTActivityLog.objects.create(
         user=report.user,
