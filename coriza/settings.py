@@ -29,7 +29,10 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'insecure-development-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'true').lower() == 'true'
 
-ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', '').split(',') if h.strip()]
+_default_allowed_hosts = 'localhost,127.0.0.1,[::1],coriza.cloud'
+ALLOWED_HOSTS = [
+    host.strip() for host in os.getenv('ALLOWED_HOSTS', _default_allowed_hosts).split(',') if host.strip()
+]
 
 # Security behind proxy
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
