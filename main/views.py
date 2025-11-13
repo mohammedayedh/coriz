@@ -52,6 +52,14 @@ def home_view(request):
     return render(request, 'main/home.html', context)
 
 
+def custom_page_not_found(request, exception=None):
+    """عرض الصفحة المخصصة عند حدوث خطأ 404."""
+    context = {
+        'request_path': getattr(request, 'path', '/'),
+    }
+    return render(request, 'errors/404.html', context, status=404)
+
+
 def posts_list_view(request):
     """قائمة المنشورات"""
     posts = Post.objects.filter(status='published').order_by('-published_at')

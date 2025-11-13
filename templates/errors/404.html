@@ -1,0 +1,153 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}الصفحة غير موجودة - كوريزا OSINT{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-hero {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .error-hero::before,
+    .error-hero::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(circle at center, rgba(0, 255, 255, 0.18), transparent 60%);
+        width: 380px;
+        height: 380px;
+        filter: blur(6px);
+        opacity: 0.7;
+    }
+
+    .error-hero::before {
+        top: -120px;
+        right: 15%;
+    }
+
+    .error-hero::after {
+        bottom: -160px;
+        left: 18%;
+    }
+
+    .error-card {
+        position: relative;
+        z-index: 1;
+        padding: 3rem;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(10, 10, 10, 0.85), rgba(33, 33, 33, 0.92));
+        border: 1px solid rgba(0, 255, 255, 0.25);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+        max-width: 720px;
+        margin: 0 auto;
+    }
+
+    .error-code {
+        font-size: clamp(6rem, 10vw, 9rem);
+        font-weight: 800;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+        text-shadow: 0 0 25px rgba(0, 255, 255, 0.55);
+        letter-spacing: 0.12em;
+    }
+
+    .error-message {
+        font-size: 1.35rem;
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+    }
+
+    .error-actions .btn {
+        border-radius: 999px;
+        padding: 0.85rem 2.4rem;
+        font-weight: 600;
+    }
+
+    .error-actions .btn-outline-primary {
+        border-width: 2px;
+    }
+
+    .error-floating-icon {
+        font-size: 3.5rem;
+        color: var(--glow-cyan);
+        text-shadow: 0 0 22px rgba(0, 255, 255, 0.65);
+        margin-bottom: 1.5rem;
+    }
+
+    .error-context {
+        font-family: var(--font-mono);
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        background: rgba(0, 0, 0, 0.35);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 2.5rem;
+        border: 1px solid rgba(0, 255, 255, 0.15);
+    }
+
+    .error-context span {
+        color: var(--primary-color);
+    }
+
+    @media (max-width: 576px) {
+        .error-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .error-code {
+            font-size: 4.5rem;
+        }
+
+        .error-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="error-hero py-5">
+    <div class="container">
+        <div class="error-card">
+            <div class="error-floating-icon">
+                <i class="fas fa-radar"></i>
+            </div>
+            <h1 class="error-code">404</h1>
+            <div class="error-context">
+                <i class="fas fa-terminal"></i>
+                <span>Request path:</span>
+                <code>{{ request_path|default:request.path|default:'/' }}</code>
+            </div>
+            <p class="error-message">
+                لم نتمكن من تحديد الموقع الذي تبحث عنه ضمن شبكة كوريزا OSINT.
+                ربما تم نقل الصفحة أو أن الرابط غير صحيح. دعنا نساعدك في العودة إلى المسار الصحيح.
+            </p>
+            <div class="error-actions d-flex justify-content-center gap-3 flex-wrap">
+                <a href="{% url 'main:home' %}" class="btn btn-primary">
+                    <i class="fas fa-home me-2"></i>
+                    العودة للواجهة الرئيسية
+                </a>
+                <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-tools me-2"></i>
+                    استكشاف أدوات OSINT
+                </a>
+                <a href="{% url 'main:search' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-search me-2"></i>
+                    البحث في المنصة
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

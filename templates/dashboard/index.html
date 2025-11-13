@@ -43,22 +43,7 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'dashboard:notifications' %}">
-                                    <i class="fas fa-bug me-2"></i>تدفق الاستخبارات
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'dashboard:activity_log' %}">
-                                    <i class="fas fa-network-wired me-2"></i>خريطة العلاقات
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'dashboard:reports' %}">
-                                    <i class="fas fa-file-alt me-2"></i>ملفات استخباراتية
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'dashboard:notifications' %}">
-                                    <i class="fas fa-bell me-2"></i>إشعارات المراقبة
+                                    <i class="fas fa-bell me-2"></i>الإشعارات
                                     {% if unread_notifications %}
                                         <span class="badge bg-danger ms-2">{{ unread_notifications|length }}</span>
                                     {% endif %}
@@ -66,7 +51,12 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'dashboard:activity_log' %}">
-                                    <i class="fas fa-history me-2"></i>سجل المهام
+                                    <i class="fas fa-history me-2"></i>سجل الأنشطة
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'dashboard:reports' %}">
+                                    <i class="fas fa-file-alt me-2"></i>ملفات استخباراتية
                                 </a>
                             </li>
                             <li class="nav-item">
