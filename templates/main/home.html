@@ -19,39 +19,41 @@
             <div class="row gy-5 align-items-center">
                 <div class="col-xl-7 col-lg-6">
                     <div class="hero-intro">
-                        <div class="hero-label">CORIZA // OPEN SOURCE INTELLIGENCE HUB</div>
+                        <div class="hero-label">CORIZA // OSINT OPERATIONS PLATFORM</div>
                         <h1 class="hero-heading">
-                            اجمع ضوء المصادر المفتوحة<br>
-                            <span>وارسم خريطة للمشهد المعلوماتي الكامل</span>
+                            حوّل البيانات المفتوحة إلى قرارات سريعة
+                            <span>مع محرك كوريزا الذكي</span>
                         </h1>
                         <p class="hero-text">
-                            منصة كوريزا تُسخر شبكات OSINT، قواعد البيانات المفتوحة، وتدفق البيانات الاجتماعية في سير عمل موحد يتيح للمحللين اكتشاف العلاقات، تتبع الأفراد، وبناء ملفات استخباراتية دقيقة بدون الحاجة لمنصات SIEM تقليدية.
+                            يجمع كوريزا بين الرصد اللحظي، تحليل الشبكات، ولوحات الاستجابة في تجربة واحدة تساعد فرق التحقيق على الوصول إلى الرؤى الدقيقة بدون ضوضاء أو تكرار.
                         </p>
                         <div class="hero-actions">
                             <a class="btn btn-primary btn-lg" href="{% url 'osint_tools:dashboard' %}">
-                                <i class="fas fa-tools me-2"></i>أدوات OSINT المتقدمة
+                                <i class="fas fa-satellite-dish me-2"></i>تشغيل حزمة الأدوات
                             </a>
                             <a class="btn btn-outline-primary btn-lg" href="{% url 'dashboard:index' %}">
-                                <i class="fas fa-compass me-2"></i>مركز الاستخبارات
+                                <i class="fas fa-layer-group me-2"></i>استعرض لوحة التحكم
                             </a>
                             <a class="btn btn-outline-secondary btn-lg" href="{% url 'main:posts_list' %}">
-                                <i class="fas fa-database me-2"></i>أدوات جمع البيانات
+                                <i class="fas fa-newspaper me-2"></i>تصفح التحليلات المنشورة
                             </a>
                         </div>
+                        {% with featured_count=featured_posts|length latest_count=latest_posts|length category_count=categories|length %}
                         <div class="hero-counters">
                             <div class="counter">
-                                <span class="counter-value">{{ featured_posts|length|default:0 }}+</span>
-                                <span class="counter-caption">مصدر بيانات موثّق</span>
+                                <span class="counter-value">{{ featured_count|default:0 }}+</span>
+                                <span class="counter-caption">مصادر تم التحقق منها</span>
                             </div>
                             <div class="counter">
-                                <span class="counter-value">{{ latest_posts|length|default:0 }}</span>
-                                <span class="counter-caption">تحليل متداول يومياً</span>
+                                <span class="counter-value">{{ latest_count|default:0 }}</span>
+                                <span class="counter-caption">تقارير خلال آخر 48 ساعة</span>
                             </div>
                             <div class="counter">
-                                <span class="counter-value">{{ categories|length|default:0 }}</span>
-                                <span class="counter-caption">مجالات استخبارات متخصصة</span>
+                                <span class="counter-value">{{ category_count|default:0 }}</span>
+                                <span class="counter-caption">قطاعات استخبارات مدعومة</span>
                             </div>
                         </div>
+                        {% endwith %}
                     </div>
                 </div>
                 <div class="col-xl-5 col-lg-6">
@@ -63,19 +65,19 @@
                             <div class="orbit-ring ring-tertiary"></div>
                         </div>
                         <div class="orbit-card card-primary">
-                            <span class="card-title">DATA PIPELINE</span>
-                            <span class="card-value">{{ latest_posts|length|default:0 }} تدفقات</span>
-                            <span class="card-meta">مصادر عامة متزامنة</span>
+                            <span class="card-title">STREAM MONITOR</span>
+                            <span class="card-value">{{ latest_posts|length|default:0 }} تدفق نشط</span>
+                            <span class="card-meta">تحديثات زمن-حقيقي من مصادر مفتوحة</span>
                         </div>
                         <div class="orbit-card card-secondary">
-                            <span class="card-title">ALERT VECTOR</span>
-                            <span class="card-value">{% if featured_posts %}{{ featured_posts.0.title|truncatewords:4 }}{% else %}لا إشارات جديدة{% endif %}</span>
-                            <span class="card-meta">أبرز القصص المفتوحة</span>
+                            <span class="card-title">INSIGHT QUEUE</span>
+                            <span class="card-value">{% if featured_posts %}{{ featured_posts.0.title|truncatewords:4 }}{% else %}بانتظار الإشارة التالية{% endif %}</span>
+                            <span class="card-meta">ملخص القصص الأكثر تأثيراً</span>
                         </div>
                         <div class="orbit-card card-tertiary">
-                            <span class="card-title">PROFILE BUILDER</span>
+                            <span class="card-title">TEAM SYNC</span>
                             <span class="card-value">READY</span>
-                            <span class="card-meta">أدوات إثراء الهوية الرقمية</span>
+                            <span class="card-meta">تكامل مع تدفقات عمل الفريق</span>
                         </div>
                     </div>
                 </div>
@@ -87,51 +89,50 @@
     <section class="lanes py-5">
         <div class="container">
             <div class="section-head">
-                <h2 class="section-title">مسارات جمع المعلومات المفتوحة</h2>
-                <p class="section-lead">حدد المرحلة التي تحتاجها: التنقيب عن المصادر، تحليل العلاقات، أو بناء الملفات الاستخباراتية.</p>
+                <h2 class="section-title">مسارات العمل داخل كوريزا</h2>
+                <p class="section-lead">استكشف أبرز الفئات التي يعمل عليها فريقك وابدأ من المسار الأنسب لحاجتك الحالية.</p>
             </div>
+            {% if categories %}
             <div class="row g-4">
+                {% for category in categories|slice:":4" %}
                 <div class="col-xl-3 col-md-6">
                     <article class="lane-card">
-                        <div class="lane-icon"><i class="fas fa-tools"></i></div>
-                        <h5>أدوات OSINT المتقدمة</h5>
-                        <p>مجموعة شاملة من أدوات جمع المعلومات المفتوحة المتخصصة: GHunt، Sherlock، SpiderFoot، Maigret، Infoga، Harvester.</p>
-                        <a href="{% url 'osint_tools:dashboard' %}" class="lane-link">الوصول للأدوات</a>
+                        <div class="lane-icon"><i class="{{ category.icon|default:'fas fa-layer-group' }}"></i></div>
+                        <h5>{{ category.name }}</h5>
+                        <p>{{ category.description|default:"لم تُضف وصفًا بعد لهذه الفئة، لكن يمكنك استعراض محتواها مباشرة." }}</p>
+                        <a href="{% url 'main:posts_list' %}?category={{ category.slug }}" class="lane-link">استعراض المنشورات</a>
                     </article>
                 </div>
-                <div class="col-xl-3 col-md-6">
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="row g-4">
+                <div class="col-xl-4 col-md-6">
                     <article class="lane-card">
-                        <div class="lane-icon"><i class="fas fa-compass"></i></div>
-                        <h5>Pathfinder Recon</h5>
-                        <p>استكشاف المصادر المفتوحة، البحث المتقدم في البيانات العامة، والربط بين الحسابات الرقمية.</p>
-                        <a href="{% url 'main:posts_list' %}?category=recon" class="lane-link">تشغيل المسار</a>
+                        <div class="lane-icon"><i class="fas fa-search"></i></div>
+                        <h5>استكشاف المصادر المفتوحة</h5>
+                        <p>ابدأ بجمع البيانات الخام من الشبكات الاجتماعية ومحركات البحث المتخصصة.</p>
+                        <a href="{% url 'osint_tools:dashboard' %}" class="lane-link">تشغيل الحزمة</a>
                     </article>
                 </div>
-                <div class="col-xl-3 col-md-6">
+                <div class="col-xl-4 col-md-6">
                     <article class="lane-card">
                         <div class="lane-icon"><i class="fas fa-project-diagram"></i></div>
-                        <h5>Deep Mesh Monitor</h5>
-                        <p>تحليل العلاقات والرسوم البيانية، تحديد الشبكات المتصلة، وتتبع نقاط التأثير العامة.</p>
-                        <a href="{% url 'main:posts_list' %}?category=network" class="lane-link">تشغيل المسار</a>
+                        <h5>تحليل الشبكات</h5>
+                        <p>حوّل البيانات إلى خرائط علاقات واكتشف الروابط المؤثرة بين الكيانات.</p>
+                        <a href="{% url 'main:posts_list' %}" class="lane-link">استعراض التحليلات</a>
                     </article>
                 </div>
-                <div class="col-xl-3 col-md-6">
-                    <article class="lane-card">
-                        <div class="lane-icon"><i class="fas fa-user-secret"></i></div>
-                        <h5>Shadow Trace</h5>
-                        <p>جمع بيانات الهوية الرقمية، تحليل البصمات الاجتماعية، ورصد النشاط في الأوساط شبه المغلقة.</p>
-                        <a href="{% url 'main:posts_list' %}?category=darkweb" class="lane-link">تشغيل المسار</a>
-                    </article>
-                </div>
-                <div class="col-xl-3 col-md-6">
+                <div class="col-xl-4 col-md-6">
                     <article class="lane-card">
                         <div class="lane-icon"><i class="fas fa-flask"></i></div>
-                        <h5>Insight Lab Studio</h5>
-                        <p>إثراء البيانات، بناء ملفات استخبارات، وتوليد تقارير قابلة للمشاركة مع الفرق الميدانية.</p>
-                        <a href="{% url 'main:posts_list' %}?category=lab" class="lane-link">تشغيل المسار</a>
+                        <h5>إعداد الملفات الاستخباراتية</h5>
+                        <p>صمّم تقارير قابلة للمشاركة مع الفرق الميدانية وحدّثها باستمرار.</p>
+                        <a href="{% url 'dashboard:index' %}" class="lane-link">فتح لوحة التحكم</a>
                     </article>
                 </div>
             </div>
+            {% endif %}
         </div>
     </section>
 
@@ -141,8 +142,8 @@
         <div class="container">
             <header class="section-head d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
-                    <h2 class="section-title mb-1">سجل الإشارات اللحظية</h2>
-                    <p class="section-lead mb-0">التقاط فوري لآخر التحليلات والتقارير الواردة من فرق OSINT.</p>
+                    <h2 class="section-title mb-1">آخر ما نشره محللو كوريزا</h2>
+                    <p class="section-lead mb-0">تحديثات مركزة تبقيك على اطلاع بأبرز التحليلات والملخصات الموثوقة.</p>
                 </div>
                 <a class="btn btn-outline-primary" href="{% url 'main:posts_list' %}">
                     <i class="fas fa-stream me-2"></i>عرض النطاق الكامل
@@ -192,12 +193,12 @@
                 </div>
                 <div class="col-lg-6">
                     <div class="holo-copy">
-                        <h2 class="section-title">لوحة التحكم متعددة الأبعاد</h2>
-                        <p class="section-lead">يجمع محرك كوريزا بين خطوط البيانات، خرائط التهديدات، ولوحات الاستجابة معاً لتقديم رؤية شاملة تتحرك مع نبض الهجمات السيبرانية.</p>
+                        <h2 class="section-title">لوحة تحليلات مترابطة</h2>
+                        <p class="section-lead">تابع كل ما يحدث عبر لوحات مترابطة تربط بين البيانات الخام، المؤشرات، والاستجابة التشغيلية في مكان واحد.</p>
                         <ul class="holo-list">
-                            <li><i class="fas fa-check-circle"></i> تنبيهات تكيفية تعتمد على سياق الحدث.</li>
-                            <li><i class="fas fa-check-circle"></i> تكامل لحظي مع مصادر استخبارات محلية وعالمية.</li>
-                            <li><i class="fas fa-check-circle"></i> دعم كامل لإجراءات DFIR وتقارير الحوادث.</li>
+                            <li><i class="fas fa-check-circle"></i> تنبيهات سياقية تعتمد على أولويات فريقك.</li>
+                            <li><i class="fas fa-check-circle"></i> دمج مصادر مفتوحة ومحلية عبر واجهة واحدة.</li>
+                            <li><i class="fas fa-check-circle"></i> دعم مهام DFIR وإثراء التقارير فوراً.</li>
                         </ul>
                         <a href="{% url 'dashboard:index' %}" class="btn btn-primary">
                             <i class="fas fa-layer-group me-2"></i>فتح اللوحة التفاعلية
@@ -213,8 +214,8 @@
     <section class="lab py-5">
         <div class="container">
             <div class="section-head text-center">
-                <h2 class="section-title">مختبر الأدوات المختارة</h2>
-                <p class="section-lead">أدوات تمت مراجعتها من قبل خبراء المجتمع وجاهزة للدمج في عملياتك اليومية.</p>
+                <h2 class="section-title">أحدث الوحدات المميزة</h2>
+                <p class="section-lead">نماذج مختارة من المقالات والأدلة التي تضيف عمقاً عملياً لعمليات OSINT اليومية.</p>
             </div>
             <div class="row g-4">
                 {% for post in featured_posts|slice:":3" %}
@@ -270,7 +271,7 @@
                     <div class="control-panel">
                         <h3 class="cyber-text">مركز التحكم الميداني</h3>
                         <p class="text-secondary mb-4">
-                            قم بتهيئة مسارات الاستجابة، جدولة عمليات المسح، وتكامل تقارير الحوادث لحظياً مع فريقك.
+                            اعمل مع فريقك على تنفيذ مهام الرصد الآلي، متابعة التنبيهات، وجدولة التحليلات الدورية عبر لوحة واحدة.
                         </p>
                         <div class="d-grid gap-3">
                             <a href="{% url 'dashboard:index' %}" class="btn btn-primary">
@@ -292,9 +293,9 @@
             <div class="newsletter-box">
                 <div class="row align-items-center g-4">
                     <div class="col-lg-7">
-                        <h3 class="cyber-text mb-3">سجل في موجز الاستخبارات اللحظي</h3>
+                        <h3 class="cyber-text mb-3">احصل على تحديثات OSINT المركزة</h3>
                         <p class="text-secondary mb-0">
-                            اشترك لتصلك تحديثات يومية حول مؤشرات الاختراق، إسقاطات الثغرات، ونبض التهديدات السيبرانية العالمي.
+                            سنرسل لك أبرز المؤشرات العملية، تنبيهات الثغرات، والملخصات التي تحتاجها لاتخاذ القرار بسرعة.
                         </p>
                     </div>
                     <div class="col-lg-5">
