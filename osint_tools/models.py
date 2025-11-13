@@ -85,6 +85,7 @@ class OSINTSession(models.Model):
     # إعدادات الجلسة
     config = models.JSONField(default=dict, blank=True, verbose_name="الإعدادات")
     options = models.JSONField(default=dict, blank=True, verbose_name="الخيارات")
+    celery_task_id = models.CharField(max_length=100, blank=True, null=True, verbose_name="معرف مهمة Celery")
     
     # معلومات التقدم
     progress = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)], verbose_name="التقدم")
@@ -214,6 +215,21 @@ class OSINTReport(models.Model):
     include_metadata = models.BooleanField(default=True, verbose_name="تضمين البيانات الوصفية")
     include_charts = models.BooleanField(default=True, verbose_name="تضمين الرسوم البيانية")
     
+    # حالة إنشاء التقرير
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'قيد الانتظار'),
+            ('running', 'قيد الإنشاء'),
+            ('completed', 'مكتمل'),
+            ('failed', 'فشل')
+        ],
+        default='pending',
+        verbose_name="الحالة"
+    )
+    error_message = models.TextField(blank=True, verbose_name="رسالة الخطأ")
+    celery_task_id = models.CharField(max_length=100, blank=True, null=True, verbose_name="معرف مهمة Celery")
+
     # التواريخ
     generated_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
     downloaded_count = models.PositiveIntegerField(default=0, verbose_name="عدد التحميلات")

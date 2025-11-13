@@ -27,6 +27,7 @@ from .serializers import (
     OSINTReportSerializer, OSINTConfigurationSerializer
 )
 from .utils import OSINTToolRunner, ReportGenerator
+from .tasks import run_osint_tool, generate_osint_report
 
 logger = logging.getLogger(__name__)
 
@@ -481,25 +482,21 @@ def run_tool(request, tool_slug):
             user=request.user,
             session=session,
             action='tool_run',
-            description=f'تم تشغيل أداة {tool.name} للهدف: {target}',
+            description=f'تم جدولة تشغيل أداة {tool.name} للهدف: {target}',
             ip_address=request.META.get('REMOTE_ADDR'),
             user_agent=request.META.get('HTTP_USER_AGENT', '')
         )
         
-        # تشغيل الأداة مباشرة (بدون threading)
-        try:
-            runner = OSINTToolRunner(session)
-            runner.run()
-        except Exception as e:
-            logger.error(f"خطأ في تشغيل الأداة: {e}")
-            session.status = 'failed'
-            session.error_message = str(e)
-            session.save()
-        
+        # جدولة المهمة عبر Celery
+        task = run_osint_tool.delay(session.id)
+        session.celery_task_id = task.id
+        session.save(update_fields=['celery_task_id', 'updated_at'])
+
         return JsonResponse({
             'success': True,
-            'message': 'تم بدء تشغيل الأداة بنجاح',
-            'session_id': session.id
+            'message': 'تم جدولة تشغيل الأداة بنجاح',
+            'session_id': session.id,
+            'task_id': task.id
         })
         
     except json.JSONDecodeError:
@@ -537,30 +534,20 @@ def generate_report(request, session_id):
             format=format_type,
             include_raw_data=include_raw_data,
             include_metadata=include_metadata,
-            include_charts=include_charts
+            include_charts=include_charts,
+            status='pending'
         )
         
-        # إنشاء محتوى التقرير
-        generator = ReportGenerator(report)
-        generator.generate()
-        
-        # تسجيل النشاط
-        OSINTActivityLog.objects.create(
-            user=request.user,
-            session=session,
-            action='report_generated',
-            description=f'تم إنشاء تقرير {report_type} بصيغة {format_type}',
-            details={
-                'report_id': report.id,
-                'report_type': report_type,
-                'format': format_type
-            }
-        )
-        
+        # جدولة إنشاء التقرير عبر Celery
+        task = generate_osint_report.delay(report.id)
+        report.celery_task_id = task.id
+        report.save(update_fields=['celery_task_id', 'updated_at'])
+
         return JsonResponse({
             'success': True,
-            'message': 'تم إنشاء التقرير بنجاح',
-            'report_id': report.id
+            'message': 'تم جدولة إنشاء التقرير بنجاح',
+            'report_id': report.id,
+            'task_id': task.id
         })
         
     except json.JSONDecodeError:

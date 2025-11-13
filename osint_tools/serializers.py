@@ -28,13 +28,13 @@ class OSINTSessionSerializer(serializers.ModelSerializer):
         model = OSINTSession
         fields = [
             'id', 'tool', 'tool_name', 'tool_icon', 'tool_color',
-            'target', 'status', 'config', 'options', 'progress',
+            'target', 'status', 'config', 'options', 'celery_task_id', 'progress',
             'current_step', 'results_count', 'results_summary',
             'started_at', 'completed_at', 'duration', 'error_message',
             'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'id', 'tool_name', 'tool_icon', 'tool_color', 'progress',
+            'id', 'tool_name', 'tool_icon', 'tool_color', 'celery_task_id', 'progress',
             'current_step', 'results_count', 'results_summary',
             'started_at', 'completed_at', 'duration', 'error_message',
             'created_at', 'updated_at'
@@ -70,11 +70,13 @@ class OSINTReportSerializer(serializers.ModelSerializer):
             'title', 'report_type', 'format', 'content', 'summary',
             'recommendations', 'file', 'file_url', 'file_size',
             'include_raw_data', 'include_metadata', 'include_charts',
+            'status', 'error_message', 'celery_task_id',
             'generated_at', 'downloaded_count'
         ]
         read_only_fields = [
             'id', 'session_tool', 'session_target', 'file_url',
-            'file_size', 'generated_at', 'downloaded_count'
+            'file_size', 'status', 'error_message', 'celery_task_id',
+            'generated_at', 'downloaded_count'
         ]
     
     def get_file_url(self, obj):
