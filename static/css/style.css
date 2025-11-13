@@ -48,6 +48,17 @@
     --glow-effect: 0 0 20px var(--glow-primary);
 }
 
+.stat-card .stat-icon i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: none;
+}
+
 /* إعادة تعيين عام */
 * {
     margin: 0;
@@ -504,12 +515,10 @@ footer::before {
 
 @keyframes hackerGlow {
     0% { 
-        text-shadow: 0 0 5px var(--glow-primary);
-        box-shadow: 0 0 10px var(--glow-primary);
+        text-shadow: 0 0 8px var(--glow-primary);
     }
     100% { 
-        text-shadow: 0 0 20px var(--glow-primary), 0 0 30px var(--glow-cyan);
-        box-shadow: 0 0 20px var(--glow-primary), 0 0 30px var(--glow-cyan);
+        text-shadow: 0 0 22px var(--glow-primary), 0 0 30px var(--glow-cyan);
     }
 }
 
