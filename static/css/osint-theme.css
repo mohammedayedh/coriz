@@ -1,0 +1,650 @@
+/* إخفاء مؤشرات التحميل الافتراضية فقط */
+body.loading {
+    overflow: hidden;
+}
+
+.loading-indicator,
+.loading-overlay,
+.spinner-border,
+[class*="loading"],
+[class*="spinner"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* تحسين التباين والألوان لواجهات OSINT */
+/* ملف CSS مشترك لجميع صفحات أدوات OSINT */
+
+/* تحسين الخلفية العامة */
+body {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
+    color: #ffffff !important;
+}
+
+/* تحسين ألوان النصوص الرئيسية */
+.content-header h1 {
+    color: #00ff00 !important;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    font-weight: bold;
+}
+
+.content-header p {
+    color: #e0e0e0 !important;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.matrix-text small {
+    color: #00ff00 !important;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* تحسين بطاقات الإحصائيات */
+.stat-card {
+    background: linear-gradient(145deg, #1a1a1a, #2a2a2a) !important;
+    border: 2px solid #00ff00 !important;
+    box-shadow: 0 8px 32px rgba(0, 255, 0, 0.2) !important;
+    transition: all 0.3s ease;
+    border-radius: 15px;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 255, 0, 0.4) !important;
+    border-color: #00ff00 !important;
+}
+
+.stat-number {
+    color: #00ff00 !important;
+    font-weight: bold;
+    text-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+    font-size: 2.5rem;
+}
+
+.stat-label {
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* تحسين بطاقات المحتوى */
+.content-card {
+    background: linear-gradient(145deg, #1a1a1a, #2a2a2a) !important;
+    border: 1px solid #333333 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 15px;
+}
+
+.content-card .card-header {
+    background: linear-gradient(90deg, #2a2a2a, #1a1a1a) !important;
+    border-bottom: 2px solid #00ff00 !important;
+    border-radius: 15px 15px 0 0 !important;
+}
+
+.content-card .card-header h5 {
+    color: #00ff00 !important;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+}
+
+/* تحسين الأزرار */
+.btn-outline-primary {
+    color: #00ff00 !important;
+    border-color: #00ff00 !important;
+    background: transparent !important;
+    font-weight: 600;
+    border-width: 2px;
+}
+
+.btn-outline-primary:hover {
+    background: #00ff00 !important;
+    color: #000000 !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #00ff00, #00cc00) !important;
+    border-color: #00ff00 !important;
+    color: #000000 !important;
+    font-weight: bold;
+    border-width: 2px;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #00cc00, #00ff00) !important;
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.6);
+    transform: translateY(-2px);
+}
+
+/* تحسين النماذج */
+.form-control {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid #444444 !important;
+    color: #ffffff !important;
+    border-radius: 8px;
+}
+
+.form-control:focus {
+    background: rgba(0, 0, 0, 0.7) !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    color: #ffffff !important;
+}
+
+.form-select {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid #444444 !important;
+    color: #ffffff !important;
+    border-radius: 8px;
+}
+
+.form-select:focus {
+    background: rgba(0, 0, 0, 0.7) !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    color: #ffffff !important;
+}
+
+.form-label {
+    color: #ffffff !important;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* تحسين الشارات */
+.badge.bg-success {
+    background: linear-gradient(45deg, #00ff00, #00cc00) !important;
+    color: #000000 !important;
+    font-weight: bold;
+    padding: 0.5rem 0.8rem;
+}
+
+.badge.bg-info {
+    background: linear-gradient(45deg, #00bfff, #0080ff) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+    padding: 0.5rem 0.8rem;
+}
+
+.badge.bg-warning {
+    background: linear-gradient(45deg, #ffaa00, #ff8800) !important;
+    color: #000000 !important;
+    font-weight: bold;
+    padding: 0.5rem 0.8rem;
+}
+
+.badge.bg-danger {
+    background: linear-gradient(45deg, #ff4444, #cc0000) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+    padding: 0.5rem 0.8rem;
+}
+
+.badge.bg-secondary {
+    background: linear-gradient(45deg, #666666, #444444) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+    padding: 0.5rem 0.8rem;
+}
+
+.badge.bg-primary {
+    background: linear-gradient(45deg, #00ff00, #00cc00) !important;
+    color: #000000 !important;
+    font-weight: bold;
+    padding: 0.5rem 0.8rem;
+}
+
+/* تحسين الجداول */
+.table-dark {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table-dark th {
+    background: linear-gradient(90deg, #2a2a2a, #1a1a1a) !important;
+    color: #00ff00 !important;
+    font-weight: bold;
+    border-color: #444444 !important;
+    padding: 1rem;
+}
+
+.table-dark td {
+    color: #ffffff !important;
+    border-color: #333333 !important;
+    padding: 0.8rem 1rem;
+}
+
+.table-dark tbody tr:hover {
+    background: rgba(0, 255, 0, 0.1) !important;
+}
+
+/* تحسين الترقيم */
+.pagination .page-item .page-link {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    border-color: #444444 !important;
+    color: #ffffff !important;
+    border-radius: 8px;
+    margin: 0 2px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #00ff00 !important;
+    border-color: #00ff00 !important;
+    color: #000000 !important;
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: rgba(0, 255, 0, 0.2) !important;
+    color: #00ff00 !important;
+    border-color: #00ff00 !important;
+}
+
+/* تحسين الحالة الفارغة */
+.empty-state {
+    background: rgba(0, 255, 0, 0.05);
+    border: 2px dashed rgba(0, 255, 0, 0.3);
+    border-radius: 15px;
+    padding: 3rem;
+    text-align: center;
+}
+
+.empty-state i {
+    color: #666666 !important;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: #cccccc !important;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state .btn {
+    margin-top: 1rem;
+}
+
+/* تحسين الروابط */
+a {
+    color: #00ff00 !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    color: #ffffff !important;
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+}
+
+/* تحسين التمرير */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #00ff00;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #00cc00;
+}
+
+/* تحسين الرسوم المتحركة */
+@keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(0, 255, 0, 0.8); }
+    100% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
+}
+
+.hacker-glow {
+    animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse-animation {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* تحسين الاستجابة */
+@media (max-width: 768px) {
+    .content-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .stat-card {
+        margin-bottom: 1rem;
+    }
+    
+    .content-card {
+        margin-bottom: 1rem;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+    }
+    
+    .btn {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .content-header h1 {
+        font-size: 1.2rem;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+    }
+    
+    .content-header p {
+        font-size: 1rem;
+    }
+}
+
+/* تحسينات إضافية للتباين */
+.text-white {
+    color: #ffffff !important;
+}
+
+.text-muted {
+    color: #cccccc !important;
+}
+
+.text-secondary {
+    color: #999999 !important;
+}
+
+.text-primary {
+    color: #00ff00 !important;
+}
+
+.text-success {
+    color: #00ff00 !important;
+}
+
+.text-info {
+    color: #00bfff !important;
+}
+
+.text-warning {
+    color: #ffaa00 !important;
+}
+
+.text-danger {
+    color: #ff4444 !important;
+}
+
+/* تحسين الخلفيات */
+.bg-dark {
+    background-color: #1a1a1a !important;
+}
+
+.bg-secondary {
+    background-color: #2a2a2a !important;
+}
+
+/* تحسين الحدود */
+.border-primary {
+    border-color: #00ff00 !important;
+}
+
+.border-secondary {
+    border-color: #444444 !important;
+}
+
+/* تحسين الظلال */
+.shadow {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+.shadow-lg {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7) !important;
+}
+
+.shadow-primary {
+    box-shadow: 0 4px 20px rgba(0, 255, 0, 0.3) !important;
+}
+
+/* تحسينات إضافية للتباين */
+h1, h2, h3, h4, h5, h6 {
+    color: #00ff00 !important;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    font-weight: bold;
+}
+
+.display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
+    color: #00ff00 !important;
+    text-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+    font-weight: bold;
+}
+
+p, span, div, label {
+    color: #ffffff !important;
+}
+
+.lead {
+    color: #e0e0e0 !important;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+/* تحسين جميع العناصر النصية */
+.card-text {
+    color: #cccccc !important;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.list-group-item {
+    background: rgba(0, 255, 0, 0.05) !important;
+    border: 1px solid rgba(0, 255, 0, 0.2) !important;
+    color: #ffffff !important;
+}
+
+.list-group-item:hover {
+    background: rgba(0, 255, 0, 0.1) !important;
+    border-color: #00ff00 !important;
+}
+
+/* تحسين الأيقونات */
+.fas, .far, .fab {
+    color: #00ff00 !important;
+}
+
+.text-primary .fas, .text-primary .far, .text-primary .fab {
+    color: #00ff00 !important;
+}
+
+.text-success .fas, .text-success .far, .text-success .fab {
+    color: #00ff00 !important;
+}
+
+.text-info .fas, .text-info .far, .text-info .fab {
+    color: #00bfff !important;
+}
+
+.text-warning .fas, .text-warning .far, .text-warning .fab {
+    color: #ffaa00 !important;
+}
+
+.text-danger .fas, .text-danger .far, .text-danger .fab {
+    color: #ff4444 !important;
+}
+
+/* تحسين التنبيهات */
+.alert {
+    border: 2px solid;
+    font-weight: 600;
+}
+
+.alert-success {
+    background: rgba(0, 255, 0, 0.1) !important;
+    border-color: #00ff00 !important;
+    color: #00ff00 !important;
+}
+
+.alert-info {
+    background: rgba(0, 191, 255, 0.1) !important;
+    border-color: #00bfff !important;
+    color: #00bfff !important;
+}
+
+.alert-warning {
+    background: rgba(255, 170, 0, 0.1) !important;
+    border-color: #ffaa00 !important;
+    color: #ffaa00 !important;
+}
+
+.alert-danger {
+    background: rgba(255, 68, 68, 0.1) !important;
+    border-color: #ff4444 !important;
+    color: #ff4444 !important;
+}
+
+/* تحسين التقدم */
+.progress {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid #444444 !important;
+}
+
+.progress-bar {
+    background: linear-gradient(45deg, #00ff00, #00cc00) !important;
+    color: #000000 !important;
+    font-weight: bold;
+}
+
+/* تحسين الكود */
+code {
+    background: rgba(0, 0, 0, 0.8) !important;
+    color: #00ff00 !important;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    border: 1px solid #444444;
+}
+
+pre {
+    background: rgba(0, 0, 0, 0.8) !important;
+    color: #ffffff !important;
+    border: 1px solid #444444;
+    border-radius: 8px;
+}
+
+/* تحسين العناصر المخصصة */
+.fw-bold {
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+.fw-normal {
+    color: #cccccc !important;
+}
+
+.fw-light {
+    color: #999999 !important;
+}
+
+/* تحسين العناصر التفاعلية */
+.btn-outline-secondary {
+    color: #cccccc !important;
+    border-color: #666666 !important;
+    background: transparent !important;
+}
+
+.btn-outline-secondary:hover {
+    background: #666666 !important;
+    color: #ffffff !important;
+    border-color: #666666 !important;
+}
+
+/* تحسين العناصر الخاصة */
+.matrix-text small {
+    color: #00ff00 !important;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.cyber-text {
+    color: #00ff00 !important;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.typewriter {
+    color: #00ff00 !important;
+    text-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+}
+
+.hacker-glow {
+    color: #00ff00 !important;
+    text-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+}
+
+/* معالجة مشاكل التحميل */
+body.loading {
+    overflow: hidden;
+}
+
+.loading-indicator, .loading-overlay, .spinner-border {
+    display: none !important;
+}
+
+/* إخفاء مؤشرات التحميل الافتراضية */
+[class*="loading"], [class*="spinner"] {
+    display: none !important;
+}
+
+/* تحسين أداء التحميل */
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* تحسين التحميل السريع */
+img {
+    max-width: 100%;
+    height: auto;
+    loading: lazy;
+}
+
+/* إخفاء العناصر المعلقة */
+.hidden, .d-none {
+    display: none !important;
+}
+
+/* تحسين الاستجابة السريعة */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
