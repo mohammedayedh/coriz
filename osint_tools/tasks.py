@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from celery import shared_task
 from django.utils import timezone
@@ -18,7 +19,8 @@ def run_osint_tool(self, session_id):
         logger.error("لم يتم العثور على جلسة OSINT بالمعرف %s", session_id)
         return {'status': 'missing', 'session_id': session_id}
 
-    session.celery_task_id = self.request.id
+    request_id = getattr(self.request, 'id', None) or f'local-session-{session_id}-{uuid.uuid4()}'
+    session.celery_task_id = request_id
     session.status = 'running'
     session.progress = 5
     session.current_step = 'جاري تهيئة الأداة...'
@@ -69,7 +71,8 @@ def generate_osint_report(self, report_id):
         logger.error("لم يتم العثور على تقرير OSINT بالمعرف %s", report_id)
         return {'status': 'missing', 'report_id': report_id}
 
-    report.celery_task_id = self.request.id
+    request_id = getattr(self.request, 'id', None) or f'local-report-{report_id}-{uuid.uuid4()}'
+    report.celery_task_id = request_id
     report.status = 'running'
     report.error_message = ''
     report.save(update_fields=['status', 'error_message'])
