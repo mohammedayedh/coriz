@@ -30,6 +30,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'insecure-development-key')
 DEBUG = os.getenv('DEBUG', 'true').lower() == 'true'
 
 _default_allowed_hosts = 'localhost,127.0.0.1,[::1],coriza.cloud'
+_default_csrf_trusted_origins = 'https://coriza.cloud,https://www.coriza.cloud'
+
 ALLOWED_HOSTS = [
     host.strip() for host in os.getenv('ALLOWED_HOSTS', _default_allowed_hosts).split(',') if host.strip()
 ]
@@ -37,7 +39,10 @@ ALLOWED_HOSTS = [
 # Security behind proxy
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in os.getenv('CSRF_TRUSTED_ORIGINS', _default_csrf_trusted_origins).split(',')
+    if origin.strip()
+]
 
 
 # Application definition

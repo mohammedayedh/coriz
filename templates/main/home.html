@@ -371,9 +371,9 @@
     margin-bottom: 1.5rem;
 }
 .hero .hero-heading {
-    font-size: clamp(2.5rem, 4vw, 3.8rem);
-    line-height: 1.25;
-    margin-bottom: 1.5rem;
+    font-size: clamp(2.2rem, 3.6vw, 3.4rem);
+    line-height: 1.2;
+    margin-bottom: 1.25rem;
     font-family: var(--font-display);
     text-shadow: 0 0 25px rgba(0,0,0,0.35);
 }
@@ -382,27 +382,27 @@
     display: inline-block;
 }
 .hero .hero-text {
-    font-size: 1.05rem;
+    font-size: 1rem;
     color: var(--text-secondary);
-    max-width: 540px;
-    margin-bottom: 2rem;
+    max-width: 520px;
+    margin-bottom: 1.75rem;
 }
 .hero .hero-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 2.5rem;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
 }
-.hero .hero-actions .btn { min-width: 220px; }
+.hero .hero-actions .btn { min-width: 180px; }
 .hero .hero-counters {
     display: flex;
     flex-wrap: wrap;
     gap: 1.5rem;
 }
 .hero .counter {
-    min-width: 150px;
-    padding: 1rem 1.25rem;
-    border-radius: 18px;
+    min-width: 140px;
+    padding: 0.85rem 1.1rem;
+    border-radius: 16px;
     background: rgba(5,12,26,0.75);
     border: 1px solid rgba(0,139,139,0.25);
     backdrop-filter: blur(10px);
@@ -410,7 +410,7 @@
 }
 .hero .counter-value {
     display: block;
-    font-size: 1.9rem;
+    font-size: 1.6rem;
     color: var(--primary-color);
     font-family: var(--font-display);
 }
@@ -481,25 +481,25 @@
 /* Shared sections */
 .section-head {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
 }
 .section-title {
     font-family: var(--font-display);
-    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-size: clamp(1.6rem, 2.7vw, 2.2rem);
     color: var(--text-light);
     margin-bottom: 0.75rem;
 }
 .section-lead {
     color: var(--text-secondary);
-    max-width: 640px;
+    max-width: 600px;
     margin-inline: auto;
 }
 .lanes { background: rgba(11,12,16,0.4); }
 .lane-card {
     background: rgba(22,33,62,0.6);
     border: 1px solid rgba(0,139,139,0.4);
-    border-radius: 20px;
-    padding: 2rem 1.5rem;
+    border-radius: 18px;
+    padding: 1.75rem 1.5rem;
     height: 100%;
     text-align: center;
     position: relative;
@@ -507,7 +507,7 @@
     backdrop-filter: blur(8px);
 }
 .lane-icon {
-    font-size: 2.5rem;
+    font-size: 2.1rem;
     color: var(--primary-color);
     margin-bottom: 1.25rem;
 }
@@ -524,7 +524,7 @@
     background: rgba(11,12,16,0.8);
     border: 1px solid rgba(0,139,139,0.35);
     border-radius: 16px;
-    padding: 1.75rem;
+    padding: 1.5rem;
     height: 100%;
     overflow: hidden;
 }
@@ -555,8 +555,8 @@
     color: var(--text-secondary);
 }
 .ticker-title {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.15rem;
+    margin-bottom: 0.45rem;
 }
 .ticker-title a {
     color: var(--text-light);
@@ -567,12 +567,12 @@
     text-decoration: underline;
 }
 .ticker-body {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     color: var(--text-secondary);
-    line-height: 1.6;
-    height: 4.8em; /* Show 3 lines of text */
+    line-height: 1.55;
+    height: 4.5em; /* Show ~3 lines */
     overflow: hidden;
-    margin-bottom: 1rem;
+    margin-bottom: 0.9rem;
 }
 .ticker-meta {
     display: flex;
@@ -583,12 +583,12 @@
 .holo-grid { background: rgba(11,12,16,0.6); }
 .holo-diagram {
     position: relative;
-    background: radial-gradient(circle at center, rgba(0,139,139,0.25), rgba(11,12,16,0.9));
-    border-radius: 24px;
-    padding: 3rem;
+    background: radial-gradient(circle at center, rgba(0,139,139,0.22), rgba(11,12,16,0.9));
+    border-radius: 22px;
+    padding: 2.5rem;
     border: 1px solid rgba(0,139,139,0.3);
     overflow: hidden;
-    min-height: 280px;
+    min-height: 260px;
 }
 .holo-core {
     position: absolute;
@@ -602,8 +602,8 @@
 }
 .holo-node {
     position: absolute;
-    width: 90px;
-    height: 90px;
+    width: 82px;
+    height: 82px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -611,7 +611,7 @@
     background: rgba(11,12,16,0.85);
     border: 1px solid rgba(0,139,139,0.5);
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     letter-spacing: 1px;
 }
 .holo-node.node-one { top: 22%; left: 18%; }
@@ -625,7 +625,7 @@
     stroke-width: 1.5;
 }
 .holo-copy {
-    padding-left: 3rem;
+    padding-left: 2.25rem;
     border-left: 1px solid rgba(0,139,139,0.2);
 }
 .holo-list {
@@ -636,6 +636,7 @@
 .holo-list li {
     display: flex;
     align-items: center;
+    gap: 0.65rem;
     margin-bottom: 0.75rem;
     color: var(--text-secondary);
     font-size: 0.9rem;
@@ -646,10 +647,10 @@
 }
 .lab { background: rgba(15,52,96,0.3); }
 .lab-card {
-    background: rgba(11,12,16,0.85);
-    border: 1px solid rgba(0,139,139,0.3);
-    border-radius: 18px;
-    padding: 2rem;
+    background: rgba(11,12,16,0.82);
+    border: 1px solid rgba(0,139,139,0.25);
+    border-radius: 16px;
+    padding: 1.75rem 1.6rem;
     height: 100%;
     position: relative;
 }
@@ -682,13 +683,13 @@
     font-size: 0.8rem;
 }
 .lab-title {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.18rem;
+    margin-bottom: 0.65rem;
 }
 .lab-desc {
     font-size: 0.9rem;
     color: var(--text-secondary);
-    line-height: 1.6;
+    margin-bottom: 1.1rem;
     height: 3.6em; /* Show 2 lines of text */
     overflow: hidden;
     margin-bottom: 1rem;
@@ -732,26 +733,26 @@
 }
 .console-highlight { color: #39ff14; }
 .control-panel {
-    padding-left: 3rem;
-    border-left: 1px solid rgba(0,139,139,0.2);
+    padding-left: 2.4rem;
+    border-left: 1px solid rgba(0,139,139,0.18);
 }
 .intel-newsletter { background: rgba(15,52,96,0.25); }
 .newsletter-box {
-    background: rgba(11,12,16,0.85);
-    border: 1px solid rgba(0,139,139,0.35);
-    border-radius: 24px;
-    padding: 2.5rem;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    background: rgba(11,12,16,0.82);
+    border: 1px solid rgba(0,139,139,0.28);
+    border-radius: 18px;
+    padding: 2rem;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.32);
 }
 .newsletter-form .form-control {
-    border-radius: 999px 0 0 999px;
-    padding: 0.85rem 1.5rem;
-    border: 1px solid rgba(0,139,139,0.5);
-    background: rgba(11,12,16,0.9);
+    border-radius: 14px 0 0 14px;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid rgba(0,139,139,0.38);
+    background: rgba(11,12,16,0.88);
 }
 .newsletter-form .btn {
-    border-radius: 0 999px 999px 0;
-    padding: 0.85rem 1.5rem;
+    border-radius: 0 14px 14px 0;
+    padding: 0.75rem 1rem;
 }
 
 @keyframes heroPulse {
