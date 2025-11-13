@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 from dotenv import load_dotenv
 import logging
 
@@ -259,6 +260,17 @@ CELERY_TASK_ROUTES = {
     'osint_tools.tasks.run_osint_tool': {'queue': 'osint_tools'},
     'osint_tools.tasks.generate_osint_report': {'queue': 'osint_reports'},
 }
+
+TESTING = 'test' in sys.argv
+if TESTING:
+    CACHES['default'] = {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'coriza-test-cache'
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
 
 # Logging configuration
 LOG_LEVEL = os.getenv('DJANGO_LOG_LEVEL', 'INFO')
