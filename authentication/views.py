@@ -28,7 +28,7 @@ RATE_LIMITS = {
     'login': {'limit': 5, 'window': 15 * 60},
     'password_reset': {'limit': 5, 'window': 15 * 60},
     'resend_verification': {'limit': 5, 'window': 15 * 60},
-    'availability': {'limit': 30, 'window': 5 * 60},
+    'availability': {'limit': 10, 'window': 120},
 }
 
 
@@ -57,6 +57,26 @@ def incr_rate(kind: str, ident: str):
 
 def reset_rate(kind: str, ident: str):
     cache.delete(_rl_key(kind, ident))
+
+
+def log_availability_rate_limit(kind: str, identifier: str, request):
+    """Log throttled availability attempts using LoginAttempt."""
+    normalized = (identifier or '').strip()
+    if kind == 'username':
+        slug = ''.join(ch for ch in normalized if ch.isalnum()) or 'unknown'
+        email_value = f"{slug}@availability.local"
+    else:
+        email_value = normalized
+
+    try:
+        LoginAttempt.objects.create(
+            email=email_value,
+            ip_address=get_client_ip(request),
+            user_agent=request.META.get('HTTP_USER_AGENT', ''),
+            success=False
+        )
+    except Exception:  # pragma: no cover - defensive logging
+        logger.exception("فشل تسجيل محاولة التحقق المتكررة لنوع %s", kind)
 
 
 def get_client_ip(request):
@@ -157,7 +177,7 @@ def login_view(request):
     return render(request, 'authentication/login.html', {'form': form})
 
 
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
 def logout_view(request):
     """تسجيل الخروج"""
     logout(request)
@@ -365,6 +385,7 @@ def check_email_availability(request):
         # Throttle availability checks
         rl_ident = f"{get_client_ip(request)}:email_avail"
         if is_rate_limited('availability', rl_ident):
+            log_availability_rate_limit('email', email, request)
             return JsonResponse({'available': False, 'message': 'محاولات متكررة، حاول لاحقاً.'}, status=429)
         incr_rate('availability', rl_ident)
 
@@ -393,6 +414,7 @@ def check_username_availability(request):
         # Throttle availability checks
         rl_ident = f"{get_client_ip(request)}:username_avail"
         if is_rate_limited('availability', rl_ident):
+            log_availability_rate_limit('username', username, request)
             return JsonResponse({'available': False, 'message': 'محاولات متكررة، حاول لاحقاً.'}, status=429)
         incr_rate('availability', rl_ident)
 

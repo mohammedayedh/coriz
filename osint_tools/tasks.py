@@ -20,12 +20,7 @@ def run_osint_tool(self, session_id):
         return {'status': 'missing', 'session_id': session_id}
 
     request_id = getattr(self.request, 'id', None) or f'local-session-{session_id}-{uuid.uuid4()}'
-    session.celery_task_id = request_id
-    session.status = 'running'
-    session.progress = 5
-    session.current_step = 'Initializing tool...'
-    session.started_at = session.started_at or timezone.now()
-    session.save(update_fields=['celery_task_id', 'status', 'progress', 'current_step', 'started_at', 'updated_at'])
+    session.mark_running(request_id)
 
     runner = OSINTToolRunner(session)
 
@@ -33,11 +28,7 @@ def run_osint_tool(self, session_id):
         runner.run()
     except Exception as exc:  # pragma: no cover
         logger.exception("Failed to run OSINT tool for session %s", session_id)
-        session.refresh_from_db()
-        session.status = 'failed'
-        session.error_message = str(exc)
-        session.current_step = f'Execution failed: {exc}'
-        session.save(update_fields=['status', 'error_message', 'current_step', 'updated_at'])
+        session.mark_failed(str(exc))
 
         OSINTActivityLog.objects.create(
             user=session.user,
@@ -51,13 +42,7 @@ def run_osint_tool(self, session_id):
     session.refresh_from_db()
 
     if session.status != 'completed':
-        session.status = 'completed'
-        session.progress = 100
-        session.current_step = 'Completed successfully!'
-        session.completed_at = session.completed_at or timezone.now()
-        if session.started_at and session.completed_at:
-            session.duration = session.completed_at - session.started_at
-        session.save(update_fields=['status', 'progress', 'current_step', 'completed_at', 'duration', 'updated_at'])
+        session.mark_completed()
 
     return {'status': session.status, 'session_id': session.id}
 
@@ -72,10 +57,7 @@ def generate_osint_report(self, report_id):
         return {'status': 'missing', 'report_id': report_id}
 
     request_id = getattr(self.request, 'id', None) or f'local-report-{report_id}-{uuid.uuid4()}'
-    report.celery_task_id = request_id
-    report.status = 'running'
-    report.error_message = ''
-    report.save(update_fields=['status', 'error_message'])
+    report.mark_running(request_id)
 
     try:
         generator = ReportGenerator(report)
@@ -83,9 +65,7 @@ def generate_osint_report(self, report_id):
     except Exception as exc:  # pragma: no cover
         logger.exception("Failed to generate OSINT report %s", report_id)
         report.refresh_from_db()
-        report.status = 'failed'
-        report.error_message = str(exc)
-        report.save(update_fields=['status', 'error_message'])
+        report.mark_failed(str(exc))
 
         OSINTActivityLog.objects.create(
             user=report.user,
@@ -97,9 +77,7 @@ def generate_osint_report(self, report_id):
         raise
 
     report.refresh_from_db()
-    report.status = 'completed'
-    report.error_message = ''
-    report.save(update_fields=['status', 'error_message'])
+    report.mark_completed()
 
     OSINTActivityLog.objects.create(
         user=report.user,

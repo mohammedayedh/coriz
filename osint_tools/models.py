@@ -2,12 +2,36 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
-import json
+from django.core.exceptions import ValidationError
 
 User = get_user_model()
 
 
-class OSINTTool(models.Model):
+class JSONValidationMixin:
+    """Mixin لتدقيق الحقول من نوع JSONField للتأكد من نوع البيانات."""
+
+    json_fields = {}
+
+    def clean(self):
+        super().clean()
+        errors = {}
+        for field_name, allowed_types in self.json_fields.items():
+            value = getattr(self, field_name, None)
+            if value in (None, ''):
+                continue
+
+            if not isinstance(value, allowed_types):
+                errors[field_name] = ValidationError("قيمة JSON غير صالحة.")
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+
+class OSINTTool(JSONValidationMixin, models.Model):
     """نموذج أدوات OSINT"""
     TOOL_TYPES = [
         ('email', 'البريد الإلكتروني'),
@@ -58,6 +82,11 @@ class OSINTTool(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="تاريخ التحديث")
     
+    json_fields = {
+        'config_schema': (dict,),
+        'supported_formats': (list,),
+    }
+
     class Meta:
         verbose_name = "أداة OSINT"
         verbose_name_plural = "أدوات OSINT"
@@ -67,7 +96,7 @@ class OSINTTool(models.Model):
         return self.name
 
 
-class OSINTSession(models.Model):
+class OSINTSession(JSONValidationMixin, models.Model):
     """نموذج جلسات OSINT"""
     STATUS_CHOICES = [
         ('pending', 'في الانتظار'),
@@ -107,6 +136,12 @@ class OSINTSession(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="تاريخ التحديث")
     
+    json_fields = {
+        'config': (dict,),
+        'options': (dict,),
+        'results_summary': (dict,),
+    }
+    
     class Meta:
         verbose_name = "جلسة OSINT"
         verbose_name_plural = "جلسات OSINT"
@@ -118,13 +153,51 @@ class OSINTSession(models.Model):
     def save(self, *args, **kwargs):
         if self.status == 'running' and not self.started_at:
             self.started_at = timezone.now()
-        elif self.status in ['completed', 'failed', 'cancelled'] and self.started_at and not self.completed_at:
-            self.completed_at = timezone.now()
-            self.duration = self.completed_at - self.started_at
+        elif self.status in ['completed', 'failed', 'cancelled']:
+            if self.started_at and not self.completed_at:
+                self.completed_at = timezone.now()
+            if self.started_at and self.completed_at:
+                self.duration = self.completed_at - self.started_at
+
+        self.full_clean()
         super().save(*args, **kwargs)
 
+    def mark_running(self, task_id, initial_progress=5, step_label='Initializing tool...'):
+        self.celery_task_id = task_id
+        self.status = 'running'
+        self.progress = max(self.progress, initial_progress)
+        self.current_step = step_label
+        if not self.started_at:
+            self.started_at = timezone.now()
+        self.save(update_fields=[
+            'celery_task_id', 'status', 'progress', 'current_step', 'started_at', 'updated_at'
+        ])
 
-class OSINTResult(models.Model):
+    def mark_failed(self, message):
+        self.status = 'failed'
+        self.error_message = message
+        self.current_step = f'Execution failed: {message}'
+        if self.started_at and not self.completed_at:
+            self.completed_at = timezone.now()
+            self.duration = self.completed_at - self.started_at
+        self.save(update_fields=[
+            'status', 'error_message', 'current_step', 'completed_at', 'duration', 'updated_at'
+        ])
+
+    def mark_completed(self, step_label='Completed successfully!'):
+        self.status = 'completed'
+        self.progress = 100
+        self.current_step = step_label
+        if self.started_at and not self.completed_at:
+            self.completed_at = timezone.now()
+        if self.started_at and self.completed_at:
+            self.duration = self.completed_at - self.started_at
+        self.save(update_fields=[
+            'status', 'progress', 'current_step', 'completed_at', 'duration', 'updated_at'
+        ])
+
+
+class OSINTResult(JSONValidationMixin, models.Model):
     """نموذج نتائج OSINT"""
     RESULT_TYPES = [
         ('email', 'بريد إلكتروني'),
@@ -168,6 +241,12 @@ class OSINTResult(models.Model):
     # التواريخ
     discovered_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الاكتشاف")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="تاريخ التحديث")
+    
+    json_fields = {
+        'raw_data': (dict,),
+        'tags': (list,),
+        'metadata': (dict,),
+    }
     
     class Meta:
         verbose_name = "نتيجة OSINT"
@@ -242,8 +321,24 @@ class OSINTReport(models.Model):
     def __str__(self):
         return f"{self.title} - {self.session.tool.name}"
 
+    def mark_running(self, task_id):
+        self.celery_task_id = task_id
+        self.status = 'running'
+        self.error_message = ''
+        self.save(update_fields=['celery_task_id', 'status', 'error_message', 'updated_at'])
 
-class OSINTConfiguration(models.Model):
+    def mark_failed(self, message):
+        self.status = 'failed'
+        self.error_message = message
+        self.save(update_fields=['status', 'error_message', 'updated_at'])
+
+    def mark_completed(self):
+        self.status = 'completed'
+        self.error_message = ''
+        self.save(update_fields=['status', 'error_message', 'updated_at'])
+
+
+class OSINTConfiguration(JSONValidationMixin, models.Model):
     """نموذج إعدادات OSINT"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='osint_configs', verbose_name="المستخدم")
     tool = models.ForeignKey(OSINTTool, on_delete=models.CASCADE, related_name='configurations', verbose_name="الأداة")
@@ -269,6 +364,12 @@ class OSINTConfiguration(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="تاريخ التحديث")
     is_active = models.BooleanField(default=True, verbose_name="نشط")
+
+    json_fields = {
+        'config_data': (dict,),
+        'api_keys': (dict,),
+        'proxy_settings': (dict,),
+    }
     
     class Meta:
         verbose_name = "إعداد OSINT"
@@ -280,7 +381,7 @@ class OSINTConfiguration(models.Model):
         return f"{self.user.username} - {self.tool.name} - {self.config_name}"
 
 
-class OSINTActivityLog(models.Model):
+class OSINTActivityLog(JSONValidationMixin, models.Model):
     """نموذج سجل أنشطة OSINT"""
     ACTION_TYPES = [
         ('tool_run', 'تشغيل أداة'),
@@ -303,6 +404,10 @@ class OSINTActivityLog(models.Model):
     user_agent = models.TextField(blank=True, verbose_name="متصفح المستخدم")
     
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
+    
+    json_fields = {
+        'details': (dict,),
+    }
     
     class Meta:
         verbose_name = "سجل نشاط OSINT"

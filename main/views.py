@@ -185,7 +185,7 @@ def add_comment_view(request, post_id):
         return JsonResponse({'success': False, 'message': 'حدث خطأ أثناء إضافة التعليق'})
 
 
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
 def contact_view(request):
     """صفحة التواصل"""
     if request.method == 'POST':

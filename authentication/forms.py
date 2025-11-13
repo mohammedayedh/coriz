@@ -73,10 +73,13 @@ class CustomUserCreationForm(UserCreationForm):
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        # لا نكشف عن وجود البريد لتجنب enumeration
-        return email
-        if User.objects.filter(email=email).exists():
-            raise ValidationError(_("هذا البريد الإلكتروني مستخدم بالفعل."))
+        # لا نكشف عن وجود البريد لتجنب enumeration لكن نمنع التكرار فعلياً
+        if not email:
+            return email
+
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError(_("لا يمكن استخدام هذا البريد الإلكتروني."))
+
         return email
     
     def clean_phone(self):
