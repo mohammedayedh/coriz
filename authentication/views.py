@@ -144,21 +144,33 @@ def login_view(request):
     if request.method == 'POST':
         form = CustomAuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            email = form.cleaned_data.get('username')
+            username_or_email = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             remember_me = form.cleaned_data.get('remember_me', False)
 
-            rl_ident = f"{get_client_ip(request)}:{email}"
+            rl_ident = f"{get_client_ip(request)}:{username_or_email}"
             if is_rate_limited('login', rl_ident):
                 messages.error(request, 'محاولات تسجيل الدخول تجاوزت الحد مؤقتاً. حاول لاحقاً.')
                 return render(request, 'authentication/login.html', {'form': form})
 
-            user = authenticate(request, username=email, password=password)
+            # محاولة تسجيل الدخول بالبريد الإلكتروني أو اسم المستخدم
+            user = None
+            if '@' in username_or_email:
+                # محاولة تسجيل الدخول بالبريد الإلكتروني
+                try:
+                    user_obj = User.objects.get(email=username_or_email)
+                    user = authenticate(request, username=user_obj.username, password=password)
+                except User.DoesNotExist:
+                    pass
+            else:
+                # محاولة تسجيل الدخول باسم المستخدم
+                user = authenticate(request, username=username_or_email, password=password)
+            
             if user is not None:
-                if user.is_active and getattr(user, 'is_verified', False):
+                if user.is_active:
                     LoginAttempt.objects.create(
                         user=user,
-                        email=email,
+                        email=user.email,
                         ip_address=get_client_ip(request),
                         user_agent=request.META.get('HTTP_USER_AGENT', ''),
                         success=True
@@ -178,7 +190,7 @@ def login_view(request):
                     messages.error(request, 'حسابك غير مفعل. يرجى التحقق من بريدك الإلكتروني.')
             else:
                 LoginAttempt.objects.create(
-                    email=email,
+                    email=username_or_email,
                     ip_address=get_client_ip(request),
                     user_agent=request.META.get('HTTP_USER_AGENT', ''),
                     success=False

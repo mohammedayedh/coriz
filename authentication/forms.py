@@ -94,11 +94,11 @@ class CustomUserCreationForm(UserCreationForm):
 
 class CustomAuthenticationForm(AuthenticationForm):
     """نموذج تسجيل الدخول المخصص"""
-    username = forms.EmailField(
-        label=_("البريد الإلكتروني"),
-        widget=forms.EmailInput(attrs={
+    username = forms.CharField(
+        label=_("اسم المستخدم أو البريد الإلكتروني"),
+        widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'أدخل بريدك الإلكتروني',
+            'placeholder': 'أدخل اسم المستخدم أو البريد الإلكتروني',
             'dir': 'ltr',
             'autofocus': True
         })
