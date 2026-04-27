@@ -151,20 +151,8 @@ def login_view(request):
                 messages.error(request, 'محاولات تسجيل الدخول تجاوزت الحد مؤقتاً. حاول لاحقاً.')
                 return render(request, 'authentication/login.html', {'form': form})
 
-            # محاولة تسجيل الدخول بالبريد الإلكتروني أو اسم المستخدم
-            user = None
-            username_to_auth = username_or_email
-            
-            # إذا كان الإدخال يحتوي على @، نفترض أنه بريد إلكتروني
-            if '@' in username_or_email:
-                try:
-                    user_obj = User.objects.get(email=username_or_email)
-                    username_to_auth = user_obj.username
-                except User.DoesNotExist:
-                    pass
-            
-            # محاولة المصادقة
-            user = authenticate(request, username=username_to_auth, password=password)
+            # المصادقة باستخدام Custom Backend (يدعم email أو username)
+            user = authenticate(request, username=username_or_email, password=password)
             
             if user is not None:
                 # تسجيل محاولة ناجحة
@@ -190,6 +178,7 @@ def login_view(request):
                 next_url = request.GET.get('next', 'dashboard:index')
                 return redirect(next_url)
             else:
+                # تسجيل محاولة فاشلة
                 LoginAttempt.objects.create(
                     email=username_or_email,
                     ip_address=get_client_ip(request),
