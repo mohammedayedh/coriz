@@ -98,36 +98,34 @@ def register_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             try:
-                # إصلاح: استخدام transaction.atomic لضمان تناسق البيانات
+                # إنشاء المستخدم بحالة نشطة مباشرة
                 with transaction.atomic():
                     user = form.save(commit=False)
-                    user.is_active = False
+                    user.is_active = True  # تفعيل الحساب مباشرة
                     user.save()
 
                     # إنشاء profile للمستخدم
                     UserProfile.objects.create(user=user)
                 
-                # إرسال البريد خارج transaction (عملية خارجية)
+                # إرسال بريد التحقق (اختياري - لا يمنع تسجيل الدخول)
                 try:
                     send_verification_email(user, request)
-                except Exception as email_error:
-                    # فشل إرسال البريد لا يجب أن يمنع إنشاء الحساب
-                    logger.error(f"فشل إرسال بريد التحقق للمستخدم {user.email}: {email_error}")
-                    messages.warning(
+                    messages.success(
                         request,
-                        'تم إنشاء حسابك بنجاح! لكن حدث خطأ في إرسال بريد التحقق. '
-                        'يمكنك طلب إعادة الإرسال لاحقاً.'
+                        'تم إنشاء حسابك بنجاح! يمكنك تسجيل الدخول الآن. '
+                        'تم إرسال رابط تفعيل البريد الإلكتروني لمزيد من الأمان.'
                     )
-                    return redirect('authentication:login')
-
-                messages.success(
-                    request,
-                    'تم إنشاء حسابك بنجاح! يمكنك تسجيل الدخول الآن، وتم إرسال بريد للتحقق من بريدك الإلكتروني.'
-                )
+                except Exception as email_error:
+                    # فشل إرسال البريد لا يمنع تسجيل الدخول
+                    logger.error(f"فشل إرسال بريد التحقق للمستخدم {user.email}: {email_error}")
+                    messages.success(
+                        request,
+                        'تم إنشاء حسابك بنجاح! يمكنك تسجيل الدخول الآن.'
+                    )
+                
                 return redirect('authentication:login')
                 
             except Exception as e:
-                # إصلاح: معالجة استثناءات محددة
                 logger.exception(f"خطأ غير متوقع في إنشاء المستخدم: {e}")
                 messages.error(request, 'حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.')
     else:
@@ -155,39 +153,42 @@ def login_view(request):
 
             # محاولة تسجيل الدخول بالبريد الإلكتروني أو اسم المستخدم
             user = None
+            username_to_auth = username_or_email
+            
+            # إذا كان الإدخال يحتوي على @، نفترض أنه بريد إلكتروني
             if '@' in username_or_email:
-                # محاولة تسجيل الدخول بالبريد الإلكتروني
                 try:
                     user_obj = User.objects.get(email=username_or_email)
-                    user = authenticate(request, username=user_obj.username, password=password)
+                    username_to_auth = user_obj.username
                 except User.DoesNotExist:
                     pass
-            else:
-                # محاولة تسجيل الدخول باسم المستخدم
-                user = authenticate(request, username=username_or_email, password=password)
+            
+            # محاولة المصادقة
+            user = authenticate(request, username=username_to_auth, password=password)
             
             if user is not None:
-                if user.is_active:
-                    LoginAttempt.objects.create(
-                        user=user,
-                        email=user.email,
-                        ip_address=get_client_ip(request),
-                        user_agent=request.META.get('HTTP_USER_AGENT', ''),
-                        success=True
-                    )
-                    
-                    login(request, user)
-                    reset_rate('login', rl_ident)
-                    
-                    if not remember_me:
-                        request.session.set_expiry(0)
-                    else:
-                        request.session.set_expiry(1209600)
-                    
-                    next_url = request.GET.get('next', 'dashboard:index')
-                    return redirect(next_url)
+                # تسجيل محاولة ناجحة
+                LoginAttempt.objects.create(
+                    user=user,
+                    email=user.email,
+                    ip_address=get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                    success=True
+                )
+                
+                # تسجيل الدخول
+                login(request, user)
+                reset_rate('login', rl_ident)
+                
+                # إعداد الجلسة
+                if not remember_me:
+                    request.session.set_expiry(0)
                 else:
-                    messages.error(request, 'حسابك غير مفعل. يرجى التحقق من بريدك الإلكتروني.')
+                    request.session.set_expiry(1209600)
+                
+                # التوجيه للصفحة المطلوبة
+                next_url = request.GET.get('next', 'dashboard:index')
+                return redirect(next_url)
             else:
                 LoginAttempt.objects.create(
                     email=username_or_email,
