@@ -1,0 +1,122 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}Subdomain Enumerator - استخراج النطاقات الفرعية{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center mb-2">
+        <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-outline-secondary me-3"><i class="fas fa-arrow-right"></i></a>
+        <div>
+            <h1 class="fw-bold mb-0 cyber-text"><i class="fas fa-sitemap me-2"></i>Subdomain Enumerator</h1>
+            <p class="text-secondary mb-0 small">البحث واستخراج النطاقات الفرعية العميقة لأي موقع عبر شهادات الأمان crt.sh</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <!-- Search Box -->
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-body p-4">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text" style="background:rgba(0,0,0,0.4); border-color:#444;"><i class="fas fa-globe text-primary"></i></span>
+                    <input type="text" id="domainInput" class="form-control text-white font-monospace"
+                           style="background:rgba(0,0,0,0.4); border-color:#444;"
+                           placeholder="أدخل اسم النطاق (مثال: google.com)..."
+                           onkeydown="if(event.key==='Enter') runEnum()">
+                    <button class="btn btn-primary px-5" id="enumBtn" onclick="runEnum()">
+                        <i class="fas fa-spider me-2"></i>استخراج
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="col-12" id="resultArea" style="display:none;">
+        <div class="content-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-primary"><i class="fas fa-list me-2"></i>النطاقات المكتشفة</h5>
+                <span class="badge bg-info text-dark" id="subDomainCount"></span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">النطاق الفرعي</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subDomainList">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer border-top border-secondary text-secondary small">
+                يتم عرض بحد أقصى 500 نطاق تم استخراجها من سجلات Certificate Transparency
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="col-12 text-center py-5" id="loadingArea" style="display:none;">
+        <div class="spinner-border text-primary mb-3" style="width:3rem;height:3rem;"></div>
+        <p class="text-secondary">جارٍ البحث في قواعد بيانات شهادات الأمان... (قد يستغرق دقائق)</p>
+        <div class="matrix-text"><small id="loadingText">ENUMERATING SUBDOMAINS...</small></div>
+    </div>
+
+    <!-- Error -->
+    <div class="col-12" id="errorArea" style="display:none;">
+        <div class="alert alert-danger cyber-border"><i class="fas fa-exclamation-triangle me-2"></i><span id="errorMsg"></span></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function runEnum() {
+    const target = document.getElementById('domainInput').value.trim();
+    if (!target) return;
+
+    showLoading(true);
+    document.getElementById('resultArea').style.display = 'none';
+    document.getElementById('errorArea').style.display = 'none';
+
+    fetch('{% url "osint_tools:api_subdomain_enum" %}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
+        body: JSON.stringify({target})
+    })
+    .then(r => r.json())
+    .then(res => {
+        showLoading(false);
+        if (!res.success) { showError(res.error); return; }
+        renderResults(res.data);
+    })
+    .catch(() => { showLoading(false); showError('فشل الاتصال بالخادم. المصدر قد يكون بطيئاً جداً أو محظوراً.'); });
+}
+
+function renderResults(d) {
+    document.getElementById('subDomainCount').textContent = d.subdomains.length + ' نطاق فرعي';
+    let tbody = document.getElementById('subDomainList');
+    tbody.innerHTML = '';
+    
+    if (d.subdomains.length === 0) {
+        tbody.innerHTML = '<tr><td class="text-center text-secondary py-4">لم يتم العثور على أي نطاقات فرعية</td></tr>';
+    } else {
+        d.subdomains.sort().forEach(sub => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td class="ps-4 font-monospace"><a href="http://${sub}" target="_blank" class="text-decoration-none text-info">${sub}</a></td>`;
+            tbody.appendChild(tr);
+        });
+    }
+    
+    document.getElementById('resultArea').style.display = 'block';
+}
+
+function showLoading(v) { document.getElementById('loadingArea').style.display = v ? 'block' : 'none'; }
+function showError(msg) { document.getElementById('errorMsg').textContent = msg; document.getElementById('errorArea').style.display = 'block'; }
+function getCsrf() { return document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''; }
+</script>
+{% endblock %}

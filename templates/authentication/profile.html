@@ -6,153 +6,141 @@
 {% block meta_description %}إدارة الملف الشخصي في كوريزا OSINT - تحديث المعلومات الشخصية والإعدادات{% endblock %}
 
 {% block content %}
-<div class="profile-container">
+<div class="profile-container profile-variant-{{ user.profile.clearance_level|lower }}">
+    <!-- Dynamic Background Decor -->
+    <div class="profile-bg-decor"></div>
+    
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="profile-card">
+            <div class="col-lg-10">
+                <div class="profile-card cyber-border">
+                    <!-- Top Ribbon / Stamp for L3/L4 -->
+                    {% if user.profile.clearance_level == 'L3' or user.profile.clearance_level == 'L4' %}
+                    <div class="clearance-stamp">
+                        {% if user.profile.clearance_level == 'L3' %}CLASSIFIED{% else %}SOVEREIGN{% endif %}
+                    </div>
+                    {% endif %}
+
                     <div class="profile-header">
-                        <div class="profile-avatar">
-                            {% if user.avatar %}
-                                <img src="{{ user.avatar.url }}" alt="صورة المستخدم" class="avatar-img">
-                            {% else %}
-                                <div class="avatar-placeholder">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="profile-info">
-                            <h2 class="profile-name">{{ user.get_full_name|default:user.username }}</h2>
-                            <p class="profile-email">{{ user.email }}</p>
-                            <div class="profile-status">
-                                {% if user.is_verified %}
-                                    <span class="badge bg-success">
-                                        <i class="fas fa-check-circle me-1"></i>مُتحقق
-                                    </span>
+                        <div class="profile-avatar-wrapper">
+                            <div class="profile-avatar">
+                                {% if user.avatar %}
+                                    <img src="{{ user.avatar.url }}" alt="صورة المستخدم" class="avatar-img">
                                 {% else %}
-                                    <span class="badge bg-warning">
-                                        <i class="fas fa-exclamation-triangle me-1"></i>غير مُتحقق
-                                    </span>
+                                    <div class="avatar-placeholder">
+                                        <i class="fas fa-user-secret"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <!-- Circular Gauge for high levels -->
+                            <div class="avatar-gauge"></div>
+                        </div>
+                        
+                        <div class="profile-info text-start">
+                            <div class="id-tag">AGENT ID: #{{ user.id|stringformat:"05d" }}</div>
+                            <h2 class="profile-name">{{ user.get_full_name|default:user.username }}</h2>
+                            <p class="profile-email text-muted">{{ user.email }}</p>
+                            
+                            <div class="clearance-indicator mt-3">
+                                <span class="badge clr-badge-{{ user.profile.clearance_level|lower }}">
+                                    SECURITY CLEARANCE: {{ user.profile.clearance_level }}
+                                </span>
+                                {% if user.is_verified %}
+                                    <span class="ms-2 text-success small"><i class="fas fa-check-double me-1"></i>VERIFIED OPERATIVE</span>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
 
                     <div class="profile-content">
-                        <form method="post" enctype="multipart/form-data" class="profile-form">
-                            {% csrf_token %}
+                        <div class="row">
+                            <!-- Left Sidebar for Stats/Meta (L2+) -->
+                            {% if user.profile.clearance_level != 'L1' %}
+                            <div class="col-md-4 border-end border-secondary border-opacity-25">
+                                <div class="side-intel-section mb-4">
+                                    <h6 class="text-uppercase small text-muted ls-2 mb-3">Service Statistics</h6>
+                                    <div class="intel-stat-item mb-2">
+                                        <span class="small">Operational Status</span>
+                                        <span class="float-end text-success">ACTIVE</span>
+                                    </div>
+                                    <div class="intel-stat-item mb-2">
+                                        <span class="small">Tools Authored</span>
+                                        <span class="float-end text-primary">14</span>
+                                    </div>
+                                    <div class="intel-stat-item mb-2">
+                                        <span class="small">Data Access</span>
+                                        <span class="float-end text-warning">RESTRICTED</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="side-intel-section">
+                                    <h6 class="text-uppercase small text-muted ls-2 mb-3">Security Protocol</h6>
+                                    <div class="p-2 cyber-glass-border small text-secondary mb-2" style="font-size: 0.65rem;">
+                                        > MAPPING NEURAL NETWORK...<br>
+                                        > ENCRYPTING LOCAL CACHE...<br>
+                                        > PROTOCOL: GHOST-MODE
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                             
-                            <div class="form-section">
-                                <h4 class="section-title">
-                                    <i class="fas fa-user me-2"></i>المعلومات الشخصية
-                                </h4>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label for="{{ form.first_name.id_for_label }}" class="form-label">
-                                                {{ form.first_name.label }}
-                                            </label>
-                                            {{ form.first_name }}
-                                            {% if form.first_name.errors %}
-                                                <div class="text-danger small mt-1">
-                                                    {{ form.first_name.errors.0 }}
+                            <!-- Form Area -->
+                            <div class="{% if user.profile.clearance_level != 'L1' %}col-md-8{% else %}col-12{% endif %}">
+                                <form method="post" enctype="multipart/form-data" class="profile-form ps-md-4">
+                                    {% csrf_token %}
+                                    
+                                    <div class="form-section">
+                                        <h4 class="section-title">
+                                            <i class="fas fa-id-card me-2"></i>تعديل السجل التعريفي
+                                        </h4>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label class="form-label small text-muted text-uppercase">First Name</label>
+                                                    {{ form.first_name }}
                                                 </div>
-                                            {% endif %}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label class="form-label small text-muted text-uppercase">Last Name</label>
+                                                    {{ form.last_name }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label class="form-label small text-muted text-uppercase">Email Address</label>
+                                            {{ form.email }}
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label class="form-label small text-muted text-uppercase">Operational Phone</label>
+                                            {{ form.phone }}
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label for="{{ form.last_name.id_for_label }}" class="form-label">
-                                                {{ form.last_name.label }}
-                                            </label>
-                                            {{ form.last_name }}
-                                            {% if form.last_name.errors %}
-                                                <div class="text-danger small mt-1">
-                                                    {{ form.last_name.errors.0 }}
-                                                </div>
-                                            {% endif %}
+
+                                    <div class="form-section">
+                                        <h4 class="section-title">
+                                            <i class="fas fa-camera me-2"></i>تحديث الهوية البصرية
+                                        </h4>
+                                        <div class="form-group">
+                                            {{ form.avatar }}
+                                            <div class="form-text small mt-2">قم برفع صورة تعبيرية لبروفايلك الأمني.</div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="form-group mb-3">
-                                    <label for="{{ form.email.id_for_label }}" class="form-label">
-                                        {{ form.email.label }}
-                                    </label>
-                                    {{ form.email }}
-                                    {% if form.email.errors %}
-                                        <div class="text-danger small mt-1">
-                                            {{ form.email.errors.0 }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="form-group mb-3">
-                                    <label for="{{ form.phone.id_for_label }}" class="form-label">
-                                        {{ form.phone.label }}
-                                    </label>
-                                    {{ form.phone }}
-                                    {% if form.phone.errors %}
-                                        <div class="text-danger small mt-1">
-                                            {{ form.phone.errors.0 }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="form-group mb-3">
-                                    <label for="{{ form.birth_date.id_for_label }}" class="form-label">
-                                        {{ form.birth_date.label }}
-                                    </label>
-                                    {{ form.birth_date }}
-                                    {% if form.birth_date.errors %}
-                                        <div class="text-danger small mt-1">
-                                            {{ form.birth_date.errors.0 }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="form-group mb-3">
-                                    <label for="{{ form.address.id_for_label }}" class="form-label">
-                                        {{ form.address.label }}
-                                    </label>
-                                    {{ form.address }}
-                                    {% if form.address.errors %}
-                                        <div class="text-danger small mt-1">
-                                            {{ form.address.errors.0 }}
-                                        </div>
-                                    {% endif %}
-                                </div>
+                                    <div class="form-actions justify-content-start">
+                                        <button type="submit" class="btn btn-primary px-5">
+                                            <i class="fas fa-shield-alt me-2"></i>حفظ التعديلات
+                                        </button>
+                                        <a href="{% url 'osint_tools:dashboard' %}" class="btn btn-outline-secondary">
+                                            إلغاء
+                                        </a>
+                                    </div>
+                                </form>
                             </div>
-
-                            <div class="form-section">
-                                <h4 class="section-title">
-                                    <i class="fas fa-image me-2"></i>الصورة الشخصية
-                                </h4>
-                                
-                                <div class="form-group mb-3">
-                                    <label for="{{ form.avatar.id_for_label }}" class="form-label">
-                                        {{ form.avatar.label }}
-                                    </label>
-                                    {{ form.avatar }}
-                                    {% if form.avatar.errors %}
-                                        <div class="text-danger small mt-1">
-                                            {{ form.avatar.errors.0 }}
-                                        </div>
-                                    {% endif %}
-                                    <div class="form-text">يمكنك رفع صورة شخصية بحجم لا يتجاوز 5 ميجابايت</div>
-                                </div>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-2"></i>حفظ التغييرات
-                                </button>
-                                <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-arrow-right me-2"></i>العودة للوحة التحكم
-                                </a>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>

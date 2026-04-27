@@ -1,143 +1,229 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{% block meta_description %}كوريزا OSINT - منصة الأمن السيبراني وجمع المعلومات المفتوحة للمختصين في الأمن السيبراني{% endblock %}">
-    <meta name="keywords" content="{% block meta_keywords %}OSINT، الأمن السيبراني، جمع المعلومات، أمن المعلومات، كوريزا، cybersecurity{% endblock %}">
+    <meta name="description"
+        content="{% block meta_description %}كوريزا OSINT - منصة الأمن السيبراني وجمع المعلومات المفتوحة للمختصين في الأمن السيبراني{% endblock %}">
+    <meta name="keywords"
+        content="{% block meta_keywords %}OSINT، الأمن السيبراني، جمع المعلومات، أمن المعلومات، كوريزا، cybersecurity{% endblock %}">
     <meta name="author" content="كوريزا">
-    
+
     <title>{% block title %}كوريزا OSINT - منصة الأمن السيبراني{% endblock %}</title>
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    
+    <link rel="stylesheet" href="{% static 'css/osint-dark-theme.css' %}">
+
     {% block extra_css %}{% endblock %}
 </head>
-    <body>
-        <!-- Matrix Background Effect -->
-        <div class="matrix-bg"></div>
-        
-        <!-- Navigation -->
+
+<body class="{% if user.is_authenticated %}clr-level-{{ user.profile.clearance_level|lower }}{% endif %}">
+    <!-- Matrix Background Effect -->
+    <div class="matrix-bg"></div>
+
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
             <a class="navbar-brand fw-bold cyber-text hacker-glow" href="{% url 'main:home' %}">
                 <img src="{% static 'images/logo.png' %}" alt="كوريزا OSINT" class="logo-img me-2">
                 كوريزا OSINT
             </a>
-            
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link interactive-element" href="{% url 'main:home' %}">
-                                <i class="fas fa-home me-1"></i>الرئيسية
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle interactive-element" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-tools me-1"></i>أدوات OSINT
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:dashboard' %}">
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'main:home' %}">
+                            <i class="fas fa-home me-1"></i>الرئيسية
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="osintToolsDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-tools me-1"></i>أدوات OSINT
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="osintToolsDropdown">
+                            <li><a class="dropdown-item interactive-element"
+                                    href="{% url 'osint_tools:simple_search' %}">
+                                    <i class="fas fa-search me-2"></i>بحث مبسط (جديد!)
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:dashboard' %}">
                                     <i class="fas fa-tachometer-alt me-2"></i>لوحة التحكم
                                 </a></li>
-                                <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:tools_list' %}">
-                                    <i class="fas fa-tools me-2"></i>جميع الأدوات
+                            <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:cases_list' %}">
+                                    <i class="fas fa-folder-open me-2"></i>القضايا (Cases)
                                 </a></li>
-                                <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:sessions_list' %}">
+                            <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:tools_list' %}">
+                                    <i class="fas fa-tools me-2"></i>جميع المصادر والأدوات
+                                </a></li>
+                            <li><a class="dropdown-item interactive-element"
+                                    href="{% url 'osint_tools:sessions_list' %}">
                                     <i class="fas fa-history me-2"></i>الجلسات السابقة
                                 </a></li>
-                                <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:results_list' %}">
+                            <li><a class="dropdown-item interactive-element"
+                                    href="{% url 'osint_tools:results_list' %}">
                                     <i class="fas fa-search me-2"></i>النتائج المكتشفة
                                 </a></li>
-                                <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:reports_list' %}">
+                            <li><a class="dropdown-item interactive-element"
+                                    href="{% url 'osint_tools:reports_list' %}">
                                     <i class="fas fa-file-alt me-2"></i>التقارير
                                 </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:analytics' %}">
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:analytics' %}">
                                     <i class="fas fa-chart-line me-2"></i>التحليلات
                                 </a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link interactive-element" href="{% url 'main:about' %}">
-                                <i class="fas fa-shield-alt me-1"></i>الأمن السيبراني
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link interactive-element" href="{% url 'main:contact' %}">
-                                <i class="fas fa-bug me-1"></i>التواصل
-                            </a>
-                        </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item interactive-element"
+                                    href="{% url 'osint_tools:cybersecurity_resources' %}">
+                                    <i class="fas fa-newspaper me-2"></i>مصادر الأمن السيبراني
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <h6 class="dropdown-header text-primary"><i class="fas fa-crosshairs me-1"></i> أدوات
+                                    الاستخبارات</h6>
+                            </li>
+                            <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:ip_lookup' %}">
+                                    <i class="fas fa-map-marker-alt me-2"></i>IP Lookup
+                                </a></li>
+                            <li><a class="dropdown-item interactive-element"
+                                    href="{% url 'osint_tools:domain_recon' %}">
+                                    <i class="fas fa-globe me-2"></i>Domain Recon
+                                </a></li>
+                            <li><a class="dropdown-item interactive-element"
+                                    href="{% url 'osint_tools:email_scanner' %}">
+                                    <i class="fas fa-envelope-open-text me-2"></i>Email Scanner
+                                </a></li>
+                            <li><a class="dropdown-item interactive-element"
+                                    href="{% url 'osint_tools:virustotal_scan' %}">
+                                    <i class="fas fa-shield-virus me-2"></i>VirusTotal Scan
+                                </a></li>
+                            <li><a class="dropdown-item interactive-element"
+                                    href="{% url 'osint_tools:threat_intel' %}">
+                                    <i class="fas fa-satellite me-2"></i>Threat Intelligence
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <h6 class="dropdown-header text-warning"><i class="fas fa-toolbox me-1"></i> أدوات
+                                    التشفير</h6>
+                            </li>
+                            <li><a class="dropdown-item interactive-element"
+                                    href="{% url 'osint_tools:utilities_dashboard' %}">
+                                    <i class="fas fa-toolbox me-2"></i>مركز الأدوات
+                                </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'main:about' %}">
+                            <i class="fas fa-shield-alt me-1"></i>الأمن السيبراني
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'main:contact' %}">
+                            <i class="fas fa-bug me-1"></i>التواصل
+                        </a>
+                    </li>
                 </ul>
-                
+
                 <!-- Search Form -->
                 <form class="d-flex me-3" method="GET" action="{% url 'main:search' %}">
-                    <input class="form-control me-2" type="search" name="q" placeholder="البحث في OSINT..." value="{{ request.GET.q }}">
+                    <input class="form-control me-2" type="search" name="q" placeholder="البحث في OSINT..."
+                        value="{{ request.GET.q }}">
                     <button class="btn btn-outline-primary neon-pulse" type="submit">
                         <i class="fas fa-search"></i>
                     </button>
                 </form>
-                
+
                 <!-- User Menu -->
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user me-1"></i>{{ user.first_name|default:user.username }}
-                            </a>
-                            <ul class="dropdown-menu">
-                        <li><a class="dropdown-item interactive-element" href="{% url 'dashboard:index' %}">
-                            <i class="fas fa-terminal me-2"></i>لوحة التحكم
-                        </a></li>
-                        <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:dashboard' %}">
-                            <i class="fas fa-tools me-2"></i>أدوات OSINT
-                        </a></li>
-                        <li><a class="dropdown-item interactive-element" href="{% url 'authentication:profile' %}">
-                            <i class="fas fa-user-secret me-2"></i>الملف الشخصي
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item interactive-element" href="{% url 'authentication:logout' %}">
-                            <i class="fas fa-power-off me-2"></i>تسجيل الخروج
-                        </a></li>
-                            </ul>
-                        </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
+                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar-container me-2">
+                                <i class="fas fa-user-secret"></i>
+                            </div>
+                            <span class="user-nav-name me-1">{{ user.first_name|default:user.username }}</span>
+                            {% if user.profile.clearance_level %}
+                            <span class="badge clr-badge-{{ user.profile.clearance_level|lower }} ms-1"
+                                style="font-size:0.55rem; padding: 2px 5px;">{{ user.profile.clearance_level }}</span>
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark border-0 shadow-lg clean-dropdown" aria-labelledby="userDropdown">
+                            <!-- Clean ID Header -->
+                            <div class="clean-id-header">
+                                <div class="id-label-minimal">AUTHORIZED PERSONNEL</div>
+                                <div class="id-name-minimal">{{ user.first_name|default:user.username }}</div>
+                                <div class="d-flex align-items-center gap-2 mt-2">
+                                    <span class="badge clr-badge-{{ user.profile.clearance_level|lower }} badge-minimal">LEVEL {{ user.profile.clearance_level }}</span>
+                                    <span class="id-status-minimal"><i class="fas fa-check-circle me-1"></i>VERIFIED</span>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider-minimal"></div>
+                            <li><a class="dropdown-item clean-item" href="{% url 'dashboard:index' %}">
+                                    <i class="fas fa-terminal me-2"></i>لوحة التحكم
+                                </a></li>
+                            <li><a class="dropdown-item clean-item" href="{% url 'osint_tools:dashboard' %}">
+                                    <i class="fas fa-tools me-2"></i>أدوات OSINT
+                                </a></li>
+                            <li><a class="dropdown-item clean-item" href="{% url 'authentication:profile' %}">
+                                    <i class="fas fa-user-secret me-2"></i>الملف الشخصي
+                                </a></li>
+                            <li>
+                                <div class="dropdown-divider-minimal my-1"></div>
+                            </li>
+                            <li><a class="dropdown-item clean-item text-danger" href="{% url 'authentication:logout' %}">
+                                    <i class="fas fa-power-off me-2"></i>تسجيل الخروج
+                                </a></li>
+                        </ul>
+                    </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link interactive-element" href="{% url 'authentication:login' %}">
-                                <i class="fas fa-key me-1"></i>تسجيل الدخول
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link interactive-element" href="{% url 'authentication:register' %}">
-                                <i class="fas fa-user-plus me-1"></i>انضمام للفريق
-                            </a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'authentication:login' %}">
+                            <i class="fas fa-key me-1"></i>تسجيل الدخول
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'authentication:register' %}">
+                            <i class="fas fa-user-plus me-1"></i>انضمام للفريق
+                        </a>
+                    </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
-    
+
     <!-- Main Content -->
     <main class="main-content">
         {% block content %}{% endblock %}
     </main>
-    
+
     <!-- Footer -->
     <footer class="py-5 mt-5">
         <div class="container">
@@ -148,7 +234,8 @@
                         <h5 class="fw-bold cyber-text d-inline">كوريزا OSINT</h5>
                     </div>
                     <p class="text-secondary">
-                        منصة الأمن السيبراني المتخصصة في جمع المعلومات المفتوحة (OSINT) للمختصين في أمن المعلومات والأمن السيبراني.
+                        منصة الأمن السيبراني المتخصصة في جمع المعلومات المفتوحة (OSINT) للمختصين في أمن المعلومات والأمن
+                        السيبراني.
                     </p>
                     <div class="social-links">
                         <a href="#" class="text-secondary me-3"><i class="fab fa-github"></i></a>
@@ -157,44 +244,52 @@
                         <a href="#" class="text-secondary me-3"><i class="fab fa-discord"></i></a>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h6 class="fw-bold mb-3 cyber-text">أدوات OSINT</h6>
                     <ul class="list-unstyled">
-                        <li><a href="{% url 'osint_tools:dashboard' %}" class="text-secondary text-decoration-none">لوحة التحكم</a></li>
-                        <li><a href="{% url 'osint_tools:tools_list' %}" class="text-secondary text-decoration-none">جميع الأدوات</a></li>
-                        <li><a href="{% url 'osint_tools:sessions_list' %}" class="text-secondary text-decoration-none">الجلسات</a></li>
-                        <li><a href="{% url 'osint_tools:results_list' %}" class="text-secondary text-decoration-none">النتائج</a></li>
-                        <li><a href="{% url 'osint_tools:reports_list' %}" class="text-secondary text-decoration-none">التقارير</a></li>
+                        <li><a href="{% url 'osint_tools:dashboard' %}" class="text-secondary text-decoration-none">لوحة
+                                التحكم</a></li>
+                        <li><a href="{% url 'osint_tools:tools_list' %}"
+                                class="text-secondary text-decoration-none">جميع الأدوات</a></li>
+                        <li><a href="{% url 'osint_tools:sessions_list' %}"
+                                class="text-secondary text-decoration-none">الجلسات</a></li>
+                        <li><a href="{% url 'osint_tools:results_list' %}"
+                                class="text-secondary text-decoration-none">النتائج</a></li>
+                        <li><a href="{% url 'osint_tools:reports_list' %}"
+                                class="text-secondary text-decoration-none">التقارير</a></li>
                     </ul>
                 </div>
-                
+
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h6 class="fw-bold mb-3 cyber-text">الموارد</h6>
                     <ul class="list-unstyled">
-                        <li><a href="{% url 'main:privacy_policy' %}" class="text-secondary text-decoration-none">سياسة الخصوصية</a></li>
-                        <li><a href="{% url 'main:terms_of_service' %}" class="text-secondary text-decoration-none">شروط الخدمة</a></li>
+                        <li><a href="{% url 'main:privacy_policy' %}" class="text-secondary text-decoration-none">سياسة
+                                الخصوصية</a></li>
+                        <li><a href="{% url 'main:terms_of_service' %}" class="text-secondary text-decoration-none">شروط
+                                الخدمة</a></li>
                         <li><a href="#" class="text-secondary text-decoration-none">التوثيق</a></li>
                         <li><a href="#" class="text-secondary text-decoration-none">الدعم الفني</a></li>
                     </ul>
                 </div>
-                
+
                 <div class="col-lg-4 mb-4">
-                    <h6 class="fw-bold mb-3 cyber-text">النشرة الأمنية</h6>
-                    <p class="text-secondary mb-3">اشترك في نشرتنا الأمنية للحصول على آخر التهديدات والأدوات الأمنية.</p>
+                    <h6 class="fw-bold mb-3 cyber-text">خلاصة التهديدات (Threat Feeds)</h6>
+                    <p class="text-secondary mb-3">اشترك في خدمة الإنذار المبكر للحصول على آخر مؤشرات التسريبات والأدوات
+                        الاستخباراتية الجديدة.</p>
                     <form class="newsletter-form" id="newsletterForm">
                         <div class="input-group">
-                            <input type="email" class="form-control" placeholder="بريدك الإلكتروني" required>
+                            <input type="email" class="form-control" placeholder="بريد العمل الرسمي" required>
                             <button class="btn btn-primary" type="submit">
-                                <i class="fas fa-shield-alt"></i>
+                                <i class="fas fa-satellite-dish"></i>
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
-            
+
             <hr class="my-4">
-            
+
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <p class="text-secondary mb-0">
@@ -209,56 +304,83 @@
             </div>
         </div>
     </footer>
-    
+
     <!-- Messages -->
     {% if messages %}
-        <div class="toast-container position-fixed bottom-0 end-0 p-3">
-            {% for message in messages %}
-                <div class="toast show" role="alert">
-                    <div class="toast-header">
-                        {% if message.tags == 'error' %}
-                            <i class="fas fa-exclamation-circle text-danger me-2"></i>
-                        {% elif message.tags == 'warning' %}
-                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
-                        {% elif message.tags == 'success' %}
-                            <i class="fas fa-check-circle text-success me-2"></i>
-                        {% else %}
-                            <i class="fas fa-info-circle text-info me-2"></i>
-                        {% endif %}
-                        <strong class="me-auto">تنبيه أمني</strong>
-                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-                    </div>
-                    <div class="toast-body">
-                        {{ message }}
-                    </div>
-                </div>
-            {% endfor %}
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        {% for message in messages %}
+        <div class="toast show" role="alert">
+            <div class="toast-header">
+                {% if message.tags == 'error' %}
+                <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                {% elif message.tags == 'warning' %}
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                {% elif message.tags == 'success' %}
+                <i class="fas fa-check-circle text-success me-2"></i>
+                {% else %}
+                <i class="fas fa-info-circle text-info me-2"></i>
+                {% endif %}
+                <strong class="me-auto">تنبيه أمني</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                {{ message }}
+            </div>
         </div>
+        {% endfor %}
+    </div>
     {% endif %}
-    
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
+    <!-- تفعيل القوائم المنسدلة -->
+    <script>
+        // تفعيل القوائم المنسدلة فور تحميل الصفحة
+        (function () {
+            'use strict';
+
+            // الانتظار حتى يتم تحميل Bootstrap بالكامل
+            if (typeof bootstrap !== 'undefined') {
+                // تفعيل جميع القوائم المنسدلة
+                var dropdownTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
+                dropdownTriggerList.forEach(function (dropdownTriggerEl) {
+                    new bootstrap.Dropdown(dropdownTriggerEl, {
+                        autoClose: true,
+                        boundary: 'viewport'
+                    });
+                });
+
+                console.log('✓ تم تفعيل', dropdownTriggerList.length, 'قائمة منسدلة');
+            } else {
+                console.error('✗ Bootstrap غير محمل');
+            }
+        })();
+    </script>
+
+    <!-- CSRF Helper - يجب تحميله قبل أي سكريبت آخر -->
+    <script src="{% static 'js/csrf-helper.js' %}"></script>
+
     <!-- Custom JS -->
     <script src="{% static 'js/main.js' %}"></script>
-    
+
     <!-- معالجة مشاكل التحميل (مبسطة) -->
     <script>
         // إخفاء مؤشرات التحميل فوراً
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // إخفاء جميع مؤشرات التحميل
             const loadingElements = document.querySelectorAll('.loading, .spinner, .loading-indicator, .loading-overlay');
             loadingElements.forEach(el => {
                 el.style.display = 'none';
                 el.remove();
             });
-            
+
             // إزالة فئة التحميل من body
             document.body.classList.remove('loading');
         });
-        
+
         // إخفاء مؤشرات التحميل عند اكتمال تحميل الصفحة
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             const loadingElements = document.querySelectorAll('.loading, .spinner, .loading-indicator, .loading-overlay');
             loadingElements.forEach(el => {
                 el.style.display = 'none';
@@ -267,7 +389,8 @@
             document.body.classList.remove('loading');
         });
     </script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>

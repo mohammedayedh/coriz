@@ -1,0 +1,168 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+{% block title %}Email Scanner - فحص البريد الإلكتروني{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center mb-2">
+        <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-outline-secondary me-3"><i class="fas fa-arrow-right"></i></a>
+        <div>
+            <h1 class="fw-bold mb-0 cyber-text"><i class="fas fa-envelope-open-text me-2"></i>Email Intelligence Scanner</h1>
+            <p class="text-secondary mb-0 small">فحص صحة البريد الإلكتروني وسمعة النطاق وسجلات MX</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <!-- Search -->
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-body p-4">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text" style="background:rgba(0,0,0,0.4);border-color:#444;"><i class="fas fa-at text-primary"></i></span>
+                    <input type="email" id="emailInput" class="form-control text-white font-monospace"
+                           style="background:rgba(0,0,0,0.4);border-color:#444;"
+                           placeholder="أدخل البريد الإلكتروني... مثال: target@domain.com"
+                           onkeydown="if(event.key==='Enter') runScan()">
+                    <button class="btn btn-primary px-5" onclick="runScan()">
+                        <i class="fas fa-search me-2"></i>فحص
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="col-12 text-center py-5" id="loadingArea" style="display:none;">
+        <div class="spinner-border text-primary mb-3" style="width:3rem;height:3rem;"></div>
+        <p class="text-secondary">جارٍ فحص البريد الإلكتروني...</p>
+    </div>
+
+    <!-- Error -->
+    <div class="col-12" id="errorArea" style="display:none;">
+        <div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i><span id="errorMsg"></span></div>
+    </div>
+
+    <!-- Results -->
+    <div class="col-12" id="resultArea" style="display:none;">
+        <div class="row g-4">
+            <!-- Overall Status -->
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center gap-4">
+                            <div id="overallIcon" style="font-size:4rem;"></div>
+                            <div>
+                                <h3 id="overallTitle" class="fw-bold mb-1"></h3>
+                                <p id="overallDesc" class="text-secondary mb-0"></p>
+                                <div class="mt-2">
+                                    <span class="badge bg-secondary me-1" id="emailBadge"></span>
+                                    <span class="badge bg-secondary me-1" id="domainBadge"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Check Cards -->
+            <div class="col-md-4">
+                <div class="content-card h-100">
+                    <div class="card-header"><h6 class="mb-0"><i class="fas fa-code me-2 text-primary"></i>فحص الصياغة</h6></div>
+                    <div class="card-body" id="syntaxCard"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="content-card h-100">
+                    <div class="card-header"><h6 class="mb-0"><i class="fas fa-mail-bulk me-2 text-warning"></i>سجلات MX</h6></div>
+                    <div class="card-body" id="mxCard"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="content-card h-100">
+                    <div class="card-header"><h6 class="mb-0"><i class="fas fa-server me-2 text-success"></i>حل النطاق</h6></div>
+                    <div class="card-body" id="domainCard"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function runScan() {
+    const email = document.getElementById('emailInput').value.trim();
+    if (!email) return;
+
+    document.getElementById('loadingArea').style.display = 'block';
+    document.getElementById('resultArea').style.display = 'none';
+    document.getElementById('errorArea').style.display = 'none';
+
+    fetch('{% url "osint_tools:api_email_scanner" %}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
+        body: JSON.stringify({email})
+    })
+    .then(r => r.json())
+    .then(res => {
+        document.getElementById('loadingArea').style.display = 'none';
+        if (!res.success) { showError(res.error); return; }
+        renderResults(res.data);
+    })
+    .catch(() => { document.getElementById('loadingArea').style.display = 'none'; showError('فشل الاتصال بالخادم'); });
+}
+
+function renderResults(d) {
+    const checks = d.checks || {};
+    const allValid = Object.values(checks).every(c => c.status === 'valid');
+    const anyInvalid = Object.values(checks).some(c => c.status === 'invalid');
+
+    // Overall
+    if (allValid) {
+        document.getElementById('overallIcon').innerHTML = '<i class="fas fa-check-circle text-success"></i>';
+        document.getElementById('overallTitle').innerHTML = '<span class="text-success">بريد صالح وموثوق</span>';
+        document.getElementById('overallDesc').textContent = 'اجتاز البريد الإلكتروني جميع فحوصات الصحة والسمعة.';
+    } else if (anyInvalid) {
+        document.getElementById('overallIcon').innerHTML = '<i class="fas fa-times-circle text-danger"></i>';
+        document.getElementById('overallTitle').innerHTML = '<span class="text-danger">بريد مشكوك فيه</span>';
+        document.getElementById('overallDesc').textContent = 'فشل البريد في أحد فحوصات الصحة. قد يكون وهمياً أو غير قابل للتسليم.';
+    } else {
+        document.getElementById('overallIcon').innerHTML = '<i class="fas fa-exclamation-triangle text-warning"></i>';
+        document.getElementById('overallTitle').innerHTML = '<span class="text-warning">نتائج غير محددة</span>';
+        document.getElementById('overallDesc').textContent = 'لم يمكن التحقق من بعض المعطيات بشكل كامل.';
+    }
+
+    document.getElementById('emailBadge').textContent = d.email;
+    document.getElementById('domainBadge').textContent = '@' + d.domain;
+    document.getElementById('emailBadge').className = 'badge bg-primary me-1';
+    document.getElementById('domainBadge').className = 'badge bg-secondary me-1';
+
+    // Individual checks
+    renderCheck('syntaxCard', checks.syntax);
+    renderCheck('mxCard', checks.mx_records);
+    renderCheck('domainCard', checks.domain_resolution);
+
+    document.getElementById('resultArea').style.display = 'block';
+}
+
+function renderCheck(targetId, check) {
+    if (!check) { document.getElementById(targetId).innerHTML = '<p class="text-secondary">لا توجد بيانات</p>'; return; }
+    const colorMap = {valid: 'success', invalid: 'danger', error: 'warning'};
+    const iconMap = {valid: 'check-circle', invalid: 'times-circle', error: 'exclamation-circle'};
+    const color = colorMap[check.status] || 'secondary';
+    document.getElementById(targetId).innerHTML = `
+        <div class="text-center mb-3">
+            <i class="fas fa-${iconMap[check.status] || 'question'} fa-3x text-${color}"></i>
+        </div>
+        <p class="text-white text-center fw-bold mb-2">${check.status === 'valid' ? 'صالح' : check.status === 'invalid' ? 'غير صالح' : 'خطأ'}</p>
+        <p class="text-secondary small mb-0">${check.details || ''}</p>`;
+}
+
+function showError(msg) {
+    document.getElementById('errorMsg').textContent = msg;
+    document.getElementById('errorArea').style.display = 'block';
+}
+function getCsrf() { return document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''; }
+</script>
+{% endblock %}

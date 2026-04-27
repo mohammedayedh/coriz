@@ -9,7 +9,7 @@ import json
 import logging
 
 from .models import DashboardWidget, UserDashboard, ActivityLog, Notification, UserSession, SystemMetrics
-from main.models import Post, Category, Comment, ContactMessage, Newsletter
+from osint_tools.models import InvestigationCase, OSINTSession, OSINTResult, OSINTReport
 from authentication.models import User, LoginAttempt
 
 logger = logging.getLogger(__name__)
@@ -17,29 +17,26 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def dashboard_index(request):
-    """لوحة التحكم الرئيسية"""
-    # الحصول على أو إنشاء لوحة تحكم المستخدم
+    """لوحة التحكم الرئيسية (مركز الاستخبارات)"""
     user_dashboard, created = UserDashboard.objects.get_or_create(user=request.user)
     
-    # إحصائيات عامة
+    # إحصائيات استخباراتية
     stats = {
-        'total_posts': Post.objects.filter(author=request.user).count(),
-        'published_posts': Post.objects.filter(author=request.user, status='published').count(),
-        'draft_posts': Post.objects.filter(author=request.user, status='draft').count(),
-        'total_comments': Comment.objects.filter(post__author=request.user).count(),
-        'total_views': Post.objects.filter(author=request.user).aggregate(
-            total_views=Count('views_count')
-        )['total_views'] or 0,
-        'reports_generated': ActivityLog.objects.filter(user=request.user, action='download').count(),
+        'total_cases': InvestigationCase.objects.filter(user=request.user).count(),
+        'open_cases': InvestigationCase.objects.filter(user=request.user, status__in=['open', 'in_progress']).count(),
+        'total_sessions': OSINTSession.objects.filter(user=request.user).count(),
+        'total_results': OSINTResult.objects.filter(session__user=request.user).count(),
+        'total_reports': OSINTReport.objects.filter(user=request.user).count(),
     }
     
-    # أحدث المنشورات
-    recent_posts = Post.objects.filter(author=request.user).order_by('-created_at')[:5]
+    # الجلسات الحديثة
+    recent_sessions = OSINTSession.objects.filter(user=request.user).select_related('tool', 'investigation_case').order_by('-created_at')[:5]
     
-    # أحدث التعليقات
-    recent_comments = Comment.objects.filter(
-        post__author=request.user
-    ).order_by('-created_at')[:5]
+    # القضايا النشطة
+    recent_cases = InvestigationCase.objects.filter(
+        user=request.user, 
+        status__in=['open', 'in_progress']
+    ).order_by('-updated_at')[:5]
     
     # الإشعارات غير المقروءة
     unread_notifications = Notification.objects.filter(
@@ -47,130 +44,18 @@ def dashboard_index(request):
         is_read=False
     ).order_by('-created_at')[:5]
     
-    # الأنشطة الأخيرة
-    recent_activities = ActivityLog.objects.filter(
-        user=request.user
-    ).order_by('-created_at')[:10]
-    
     context = {
         'stats': stats,
-        'recent_posts': recent_posts,
-        'recent_comments': recent_comments,
+        'recent_sessions': recent_sessions,
+        'recent_cases': recent_cases,
         'unread_notifications': unread_notifications,
-        'recent_activities': recent_activities,
         'user_dashboard': user_dashboard,
     }
     
     return render(request, 'dashboard/index.html', context)
 
 
-@login_required
-def posts_management(request):
-    """إدارة المنشورات"""
-    posts = Post.objects.filter(author=request.user).order_by('-created_at')
-    
-    # البحث والفلترة
-    search_query = request.GET.get('search')
-    if search_query:
-        posts = posts.filter(
-            Q(title__icontains=search_query) |
-            Q(content__icontains=search_query)
-        )
-    
-    status_filter = request.GET.get('status')
-    if status_filter:
-        posts = posts.filter(status=status_filter)
-    
-    category_filter = request.GET.get('category')
-    if category_filter:
-        posts = posts.filter(category_id=category_filter)
-    
-    # الحصول على الفئات للفلترة
-    categories = Category.objects.filter(is_active=True).order_by('name')
-    
-    context = {
-        'posts': posts,
-        'categories': categories,
-        'search_query': search_query,
-        'status_filter': status_filter,
-        'category_filter': category_filter,
-    }
-    
-    return render(request, 'dashboard/posts_management.html', context)
 
-
-@login_required
-def reports_view(request):
-    """صفحة إنشاء التقارير"""
-    generated_reports = ActivityLog.objects.filter(
-        user=request.user,
-        action='download',
-        object_type='report'
-    ).order_by('-created_at')[:20]
-    
-    context = {
-        'generated_reports': generated_reports,
-    }
-    
-    return render(request, 'dashboard/reports.html', context)
-
-
-@login_required
-def analytics_view(request):
-    """صفحة التحليلات"""
-    # إحصائيات المنشورات
-    posts_stats = {
-        'total': Post.objects.filter(author=request.user).count(),
-        'published': Post.objects.filter(author=request.user, status='published').count(),
-        'draft': Post.objects.filter(author=request.user, status='draft').count(),
-        'archived': Post.objects.filter(author=request.user, status='archived').count(),
-    }
-    
-    # إحصائيات المشاهدات
-    views_stats = Post.objects.filter(author=request.user).aggregate(
-        total_views=Count('views_count'),
-        avg_views=Count('views_count')
-    )
-    
-    # المنشورات الأكثر مشاهدة
-    popular_posts = Post.objects.filter(
-        author=request.user,
-        status='published'
-    ).order_by('-views_count')[:10]
-    
-    # إحصائيات التعليقات
-    comments_stats = Comment.objects.filter(
-        post__author=request.user
-    ).aggregate(
-        total_comments=Count('id'),
-        approved_comments=Count('id', filter=Q(is_approved=True))
-    )
-    
-    # المنشورات الأكثر تعليقاً
-    most_commented_posts = Post.objects.filter(
-        author=request.user,
-        status='published'
-    ).annotate(
-        comments_count=Count('comments', filter=Q(comments__is_approved=True))
-    ).order_by('-comments_count')[:10]
-    
-    # إحصائيات حسب الشهر
-    current_month = timezone.now().replace(day=1)
-    monthly_stats = Post.objects.filter(
-        author=request.user,
-        created_at__gte=current_month
-    ).count()
-    
-    context = {
-        'posts_stats': posts_stats,
-        'views_stats': views_stats,
-        'popular_posts': popular_posts,
-        'comments_stats': comments_stats,
-        'most_commented_posts': most_commented_posts,
-        'monthly_stats': monthly_stats,
-    }
-    
-    return render(request, 'dashboard/analytics.html', context)
 
 
 @login_required

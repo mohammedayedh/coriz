@@ -7,15 +7,7 @@ urlpatterns = [
     # Dashboard main
     path('', views.dashboard_index, name='index'),
     
-    # Posts management
-    path('posts/', views.posts_management, name='posts_management'),
-    
-    # Analytics
-    path('analytics/', views.analytics_view, name='analytics'),
-    
-    # Reports
-    path('reports/', views.reports_view, name='reports'),
-    
+
     # OSINT Tools
     path('osint/', include('osint_tools.urls')),
     

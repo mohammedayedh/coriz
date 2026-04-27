@@ -19,7 +19,7 @@ import os
 import time
 
 from .models import (
-    OSINTTool, OSINTSession, OSINTResult, OSINTReport, 
+    InvestigationCase, OSINTTool, OSINTSession, OSINTResult, OSINTReport, 
     OSINTConfiguration, OSINTActivityLog
 )
 from .serializers import (
@@ -77,31 +77,107 @@ def osint_dashboard(request):
 
 
 @login_required
+def cases_list(request):
+    """قائمة القضايا"""
+    cases = InvestigationCase.objects.filter(user=request.user).order_by('-created_at')
+    
+    # التعامل مع طلب إنشاء قضية جديدة (مبسط)
+    if request.method == 'POST' and 'title' in request.POST:
+        title = request.POST.get('title')
+        description = request.POST.get('description', '')
+        if title:
+            InvestigationCase.objects.create(
+                user=request.user,
+                title=title,
+                description=description
+            )
+            return redirect('osint_tools:cases_list')
+            
+    paginator = Paginator(cases, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'osint_tools/cases_list.html', {'page_obj': page_obj})
+
+
+@login_required
+def case_detail(request, case_id):
+    """تفاصيل القضية المتقدمة"""
+    from .models import OSINTResult
+    from django.db.models import Count, Q
+    
+    case = get_object_or_404(InvestigationCase, id=case_id, user=request.user)
+    sessions = case.sessions.all().order_by('-created_at')
+    
+    # حساب الإحصائيات للقضية
+    stats = OSINTResult.objects.filter(session__investigation_case=case).aggregate(
+        total_results=Count('id'),
+        high_confidence=Count('id', filter=Q(confidence='high')),
+        sources_count=Count('source', distinct=True)
+    )
+    
+    # جلب آخر النتائج المكتشفة في هذه القضية
+    recent_results = OSINTResult.objects.filter(session__investigation_case=case).order_by('-discovered_at')[:10]
+    
+    context = {
+        'case': case, 
+        'sessions': sessions,
+        'stats': stats,
+        'recent_results': recent_results
+    }
+    
+    return render(request, 'osint_tools/case_detail.html', context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def update_case_notes(request, case_id):
+    """تحديث ملاحظات القضية عبر AJAX"""
+    case = get_object_or_404(InvestigationCase, id=case_id, user=request.user)
+    try:
+        data = json.loads(request.body)
+        case.notes = data.get('notes', '')
+        case.save()
+        return JsonResponse({'success': True, 'message': 'تم حفظ الملاحظات بنجاح'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+
+@login_required
 def tools_list(request):
     """قائمة أدوات OSINT"""
-    tools = OSINTTool.objects.filter(status='active').order_by('name')
+    try:
+        user_clearance = request.user.profile.clearance_level
+    except Exception:
+        user_clearance = 'L1'
+        
+    # فلترة الأدوات حسب مستوى تصريح المستخدم
+    tools = OSINTTool.objects.filter(
+        status='active',
+        required_clearance__lte=user_clearance
+    ).order_by('name')
     
     # فلترة حسب النوع
-    tool_type = request.GET.get('type')
+    tool_type = request.GET.get('type', '')
     if tool_type:
         tools = tools.filter(tool_type=tool_type)
     
     # البحث
-    search_query = request.GET.get('search')
+    search_query = request.GET.get('search', '')
     if search_query:
         tools = tools.filter(
             Q(name__icontains=search_query) |
             Q(description__icontains=search_query)
         )
     
-    paginator = Paginator(tools, 12)
+    paginator = Paginator(tools, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
     context = {
         'page_obj': page_obj,
-        'tool_type': tool_type,
-        'search_query': search_query,
+        'tool_type': tool_type if tool_type else None,
+        'search_query': search_query if search_query else None,
         'tool_types': OSINTTool.TOOL_TYPES,
     }
     
@@ -137,11 +213,18 @@ def tool_detail(request, tool_slug):
         is_active=True
     )
     
+    # القضايا المفتوحة للمستخدم
+    user_cases = InvestigationCase.objects.filter(
+        user=request.user,
+        status__in=['open', 'in_progress']
+    ).order_by('-created_at')
+    
     context = {
         'tool': tool,
         'user_sessions': user_sessions,
         'user_stats': user_stats,
         'user_configs': user_configs,
+        'user_cases': user_cases,
     }
     
     return render(request, 'osint_tools/tool_detail.html', context)
@@ -355,10 +438,15 @@ def export_results(request, session_id):
 
 
 # API Endpoints
-@csrf_exempt
 @require_http_methods(["GET"])
 def api_stats(request):
-    """إحصائيات API"""
+    """
+    إحصائيات API
+    
+    إصلاح المشكلة الحرجة #4: إزالة csrf_exempt غير الضروري
+    هذا endpoint هو GET فقط ولا يحتاج csrf_exempt أصلاً
+    GET requests لا تحتاج CSRF protection
+    """
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'غير مصرح'}, status=401)
     
@@ -396,42 +484,7 @@ def api_stats(request):
     return JsonResponse(stats)
 
 
-@login_required
-def test_tool(request, tool_slug):
-    """اختبار أداة OSINT"""
-    tool = get_object_or_404(OSINTTool, slug=tool_slug, status='active')
-    
-    try:
-        # إنشاء جلسة مؤقتة للاختبار
-        session = OSINTSession.objects.create(
-            user=request.user,
-            tool=tool,
-            target='test@example.com',  # هدف اختبار
-            config={},
-            options={},
-            status='testing'
-        )
-        
-        # اختبار الأداة
-        runner = OSINTToolRunner(session)
-        test_result = runner.test()
-        
-        # حذف الجلسة المؤقتة
-        session.delete()
-        
-        return JsonResponse({
-            'success': test_result['success'],
-            'message': test_result['message'],
-            'error': test_result['error']
-        })
-        
-    except Exception as e:
-        logger.error(f"خطأ في اختبار الأداة: {e}")
-        return JsonResponse({
-            'success': False,
-            'message': 'حدث خطأ في اختبار الأداة',
-            'error': str(e)
-        })
+# ─── test_tool: تعريف واحد موحّد ──────────────────────────────────────────────
 
 
 @login_required
@@ -443,6 +496,7 @@ def run_tool(request, tool_slug):
         data = json.loads(request.body)
         target = data.get('target', '').strip()
         config_id = data.get('config_id')
+        case_id = data.get('case_id')
         options = data.get('options', {})
         
         if not target:
@@ -450,6 +504,25 @@ def run_tool(request, tool_slug):
                 'success': False, 
                 'message': 'الهدف مطلوب'
             })
+        
+        # التحقق من وجود جلسة نشطة لنفس الأداة والهدف
+        active_session = OSINTSession.objects.filter(
+            user=request.user,
+            tool=tool,
+            target=target,
+            status__in=['pending', 'running']
+        ).first()
+        
+        if active_session:
+            return JsonResponse({
+                'success': False,
+                'message': f'يوجد جلسة نشطة بالفعل لهذا الهدف (جلسة #{active_session.id}). يرجى الانتظار حتى تكتمل أو إلغاؤها.',
+                'session_id': active_session.id
+            })
+            
+        case = None
+        if case_id:
+            case = InvestigationCase.objects.filter(id=case_id, user=request.user).first()
         
         # الحصول على الإعدادات
         config = None
@@ -472,6 +545,7 @@ def run_tool(request, tool_slug):
             user=request.user,
             tool=tool,
             target=target,
+            investigation_case=case,
             config=config.config_data if config else {},
             options=options,
             status='pending'
@@ -564,6 +638,13 @@ def generate_report(request, session_id):
 
 
 @login_required
+@require_http_methods(["POST"])
+def generate_session_report(request, session_id):
+    """إنشاء تقرير للجلسة من صفحة النتائج"""
+    return generate_report(request, session_id)
+
+
+@login_required
 def session_results(request, session_id):
     """نتائج جلسة OSINT"""
     session = get_object_or_404(OSINTSession, id=session_id, user=request.user)
@@ -593,6 +674,35 @@ def session_results(request, session_id):
     }
     
     return render(request, 'osint_tools/session_results.html', context)
+
+
+@login_required
+def generate_case_report(request, case_id):
+    """توليد تقرير استخباراتي شامل للقضية"""
+    case = get_object_or_404(InvestigationCase, id=case_id, user=request.user)
+    sessions = case.sessions.all().prefetch_related('results')
+    
+    # حساب الإحصائيات
+    total_results = 0
+    high_confidence = 0
+    all_results = []
+    
+    for session in sessions:
+        res_list = session.results.all()
+        total_results += res_list.count()
+        high_confidence += res_list.filter(confidence='high').count()
+        all_results.extend(res_list)
+
+    context = {
+        'case': case,
+        'sessions': sessions,
+        'total_results': total_results,
+        'high_confidence': high_confidence,
+        'all_results': all_results[:100], # الحد من النتائج للتقرير
+        'generated_at': timezone.now()
+    }
+    
+    return render(request, 'osint_tools/case_report_template.html', context)
 
 
 @login_required
@@ -740,10 +850,13 @@ def configuration_detail(request, config_id):
 
 @login_required
 def osint_analytics(request):
-    """صفحة التحليلات"""
+    """صفحة التحليلات المتقدمة"""
     user = request.user
+    from django.db.models import Count, Q, Avg
+    from django.db.models.functions import TruncMonth, TruncDate
+    from datetime import timedelta
     
-    # إحصائيات الجلسات
+    # 1. إحصائيات الجلسات العامة
     sessions_stats = OSINTSession.objects.filter(user=user).aggregate(
         total=Count('id'),
         completed=Count('id', filter=Q(status='completed')),
@@ -751,76 +864,694 @@ def osint_analytics(request):
         running=Count('id', filter=Q(status='running'))
     )
     
-    # إحصائيات النتائج
+    # 2. إحصائيات النتائج والجودة
     results_stats = OSINTResult.objects.filter(session__user=user).aggregate(
         total=Count('id'),
         high_confidence=Count('id', filter=Q(confidence='high')),
         medium_confidence=Count('id', filter=Q(confidence='medium')),
-        low_confidence=Count('id', filter=Q(confidence='low'))
+        low_confidence=Count('id', filter=Q(confidence='low')),
+        avg_confidence=Avg('confidence_score')
     )
     
-    # إحصائيات الأدوات
-    tools_stats = OSINTTool.objects.annotate(
-        user_usage_count=Count('sessions', filter=Q(sessions__user=user))
-    ).filter(user_usage_count__gt=0).order_by('-user_usage_count')[:10]
-    
-    # إحصائيات شهرية
-    from datetime import datetime, timedelta
-    last_month = timezone.now() - timedelta(days=30)
-    monthly_stats = OSINTSession.objects.filter(
-        user=user,
-        created_at__gte=last_month
-    ).extra(select={'month': "strftime('%%Y-%%m', created_at)"}).values('month').annotate(
+    # 3. توزيع أنواع الأدوات (Tool Type Distribution)
+    type_distribution = OSINTSession.objects.filter(user=user).values('tool__tool_type').annotate(
         count=Count('id')
-    ).order_by('month')
+    ).order_by('-count')
     
+    # 4. أداء الأدوات (Tool Performance)
+    tools_performance_raw = OSINTTool.objects.filter(sessions__user=user).annotate(
+        total_runs=Count('sessions', filter=Q(sessions__user=user)),
+        success_runs=Count('sessions', filter=Q(sessions__user=user, sessions__status='completed')),
+        found_results=Count('sessions__results', filter=Q(sessions__user=user))
+    ).order_by('-total_runs')[:10]
+    
+    tools_performance = []
+    for tool in tools_performance_raw:
+        success_rate = (tool.success_runs / tool.total_runs * 100) if tool.total_runs > 0 else 0
+        tools_performance.append({
+            'name': tool.name,
+            'total_runs': tool.total_runs,
+            'success_runs': tool.success_runs,
+            'found_results': tool.found_results,
+            'success_rate': round(success_rate, 1)
+        })
+    
+    # 5. النشاط اليومي لآخر 14 يوم
+    two_weeks_ago = timezone.now() - timedelta(days=14)
+    daily_activity = OSINTSession.objects.filter(
+        user=user,
+        created_at__gte=two_weeks_ago
+    ).annotate(
+        date=TruncDate('created_at')
+    ).values('date').annotate(
+        count=Count('id')
+    ).order_by('date')
+    
+    # 6. توزيع النتائج حسب النوع (Result Type Distribution)
+    results_by_type = OSINTResult.objects.filter(session__user=user).values('result_type').annotate(
+        count=Count('id')
+    ).order_by('-count')
+
+    # 7. متوسط النتائج لكل جلسة
+    avg_results = 0
+    if sessions_stats['total'] > 0:
+        avg_results = results_stats['total'] / sessions_stats['total']
+        
+    # 8. أفضل المصادر (Top Sources)
+    top_sources = OSINTResult.objects.filter(session__user=user).values('source').annotate(
+        count=Count('id')
+    ).order_by('-count')[:5]
+
     context = {
         'sessions_stats': sessions_stats,
         'results_stats': results_stats,
-        'tools_stats': tools_stats,
-        'monthly_stats': monthly_stats,
+        'type_distribution': type_distribution,
+        'tools_performance': tools_performance,
+        'daily_activity': daily_activity,
+        'results_by_type': results_by_type,
+        'avg_results_per_session': round(avg_results, 1),
+        'top_sources': top_sources,
     }
     
     return render(request, 'osint_tools/analytics.html', context)
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
+@login_required
+@require_http_methods(["GET", "POST"])
 def test_tool(request, tool_slug):
-    """اختبار أداة OSINT"""
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'غير مصرح'}, status=401)
-    
+    """
+    اختبار أداة OSINT للتحقق من وجودها وقابليتها للتشغيل.
+    GET  → يُعيد معلومات الأداة
+    POST → يُشغّل اختبارًا فعليًا
+    """
     tool = get_object_or_404(OSINTTool, slug=tool_slug, status='active')
-    
+
+    if request.method == 'GET':
+        return JsonResponse({
+            'success': True,
+            'tool': tool.name,
+            'tool_type': tool.tool_type,
+            'status': tool.status,
+        })
+
+    # ── POST: اختبار فعلي ──────────────────────────────────────────────────────
     try:
-        data = json.loads(request.body)
-        test_target = data.get('target', 'test@example.com')
-        
-        # إنشاء جلسة اختبار
+        data = json.loads(request.body) if request.body else {}
+        test_target = data.get('target', 'test@example.com').strip() or 'test@example.com'
+
+        # إنشاء جلسة مؤقتة للاختبار (لا تُربط بقضية)
         session = OSINTSession.objects.create(
             user=request.user,
             tool=tool,
             target=test_target,
-            status='running'
+            config={},
+            options={},
         )
-        
-        # تشغيل اختبار سريع
+
         runner = OSINTToolRunner(session)
         test_result = runner.test()
-        
-        session.status = 'completed' if test_result['success'] else 'failed'
-        session.error_message = test_result.get('error', '')
-        session.save()
-        
+
+        # تحديث حالة الجلسة باستخدام الدوال الرسمية
+        if test_result['success']:
+            session.mark_completed(step_label='Tool test passed')
+        else:
+            session.mark_failed(test_result.get('error') or 'Tool test failed')
+
         return JsonResponse({
             'success': test_result['success'],
             'message': test_result.get('message', 'تم الاختبار'),
-            'session_id': session.id
+            'error': test_result.get('error'),
+            'session_id': session.id,
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'بيانات JSON غير صحيحة'}, status=400)
+    except Exception as e:
+        logger.error('خطأ في اختبار الأداة %s: %s', tool_slug, e)
+        return JsonResponse({'success': False, 'error': 'حدث خطأ في الخادم'}, status=500)
+
+
+# ---------------------------------------------------------
+# Utilities Views (Client-Side OSINT Utilities)
+# ---------------------------------------------------------
+
+@login_required
+def utilities_dashboard(request):
+    """لوحة الأدوات المساعدة"""
+    return render(request, 'osint_tools/utilities/dashboard.html')
+
+@login_required
+def hash_generator(request):
+    """مُولّد الهاش المتقدم"""
+    return render(request, 'osint_tools/utilities/hash_generator.html')
+
+@login_required
+def coder_decoder(request):
+    """تشفير وفك تشفير البيانات"""
+    return render(request, 'osint_tools/utilities/coder_decoder.html')
+
+@login_required
+def timestamp_converter(request):
+    """محول الطوابع الزمنية"""
+    return render(request, 'osint_tools/utilities/timestamp_converter.html')
+
+@login_required
+def json_formatter(request):
+    """منسق ومدقق JSON"""
+    return render(request, 'osint_tools/utilities/json_formatter.html')
+
+@login_required
+def text_diff(request):
+    """مقارن النصوص"""
+    return render(request, 'osint_tools/utilities/text_diff.html')
+
+@login_required
+def cybersecurity_resources(request):
+    """مصادر الأمن السيبراني"""
+    return render(request, 'osint_tools/cybersecurity_resources.html')
+
+@login_required
+def simple_search_interface(request):
+    """واجهة البحث المبسطة الموحدة"""
+    # إحصائيات حقيقية من قاعدة البيانات
+    total_tools = OSINTTool.objects.filter(status='active').count()
+    
+    # حساب عدد المصادر الفعلية (الأدوات التي تعمل بدون API)
+    web_sources = OSINTTool.objects.filter(
+        status='active',
+        source_type='open',
+        api_key_required=False
+    ).count()
+    
+    # إجمالي الجلسات للمستخدم
+    total_searches = OSINTSession.objects.filter(user=request.user).count()
+    
+    # إحصائيات إضافية
+    completed_searches = OSINTSession.objects.filter(
+        user=request.user,
+        status='completed'
+    ).count()
+    
+    total_results = OSINTResult.objects.filter(
+        session__user=request.user
+    ).count()
+    
+    context = {
+        'total_tools': total_tools,
+        'total_sources': web_sources if web_sources > 0 else total_tools,
+        'total_searches': total_searches,
+        'completed_searches': completed_searches,
+        'total_results': total_results,
+    }
+    
+    return render(request, 'osint_tools/simple_search_interface.html', context)
+
+
+@login_required
+def ajax_session_results(request, session_id):
+    """الحصول على نتائج الجلسة عبر AJAX"""
+    session = get_object_or_404(OSINTSession, id=session_id, user=request.user)
+    results = OSINTResult.objects.filter(session=session).order_by('-discovered_at')
+    
+    results_data = [
+        {
+            'id': result.id,
+            'title': result.title,
+            'description': result.description,
+            'url': result.url,
+            'result_type': result.get_result_type_display(),
+            'confidence': result.get_confidence_display(),
+            'source': result.source,
+            'discovered_at': result.discovered_at.isoformat(),
+        }
+        for result in results
+    ]
+    
+    return JsonResponse({
+        'success': True,
+        'results': results_data,
+        'count': len(results_data)
+    })
+
+
+@login_required
+def password_generator(request):
+    """مُولّد كلمات المرور الآمنة"""
+    return render(request, 'osint_tools/utilities/password_generator.html')
+
+@login_required
+def jwt_inspector(request):
+    """مُفتش توكن المصادقة JWT"""
+    return render(request, 'osint_tools/utilities/jwt_inspector.html')
+
+
+# ---------------------------------------------------------
+# Server-Side OSINT Intelligence Tool Views
+# ---------------------------------------------------------
+import urllib.request
+import urllib.parse
+import socket
+import ssl
+import re
+
+def _fetch_json(url, timeout=10, headers=None):
+    """Helper: fetch and parse JSON from a URL"""
+    req = urllib.request.Request(url)
+    req.add_header('User-Agent', 'Coriza-OSINT/1.0')
+    if headers:
+        for k, v in headers.items():
+            req.add_header(k, v)
+    ctx = ssl.create_default_context()
+    with urllib.request.urlopen(req, context=ctx, timeout=timeout) as resp:
+        return json.loads(resp.read().decode())
+
+
+@login_required
+def ip_lookup(request):
+    """صفحة أداة IP Lookup"""
+    return render(request, 'osint_tools/intel/ip_lookup.html')
+
+
+@login_required
+def domain_recon(request):
+    """صفحة أداة Domain Recon"""
+    return render(request, 'osint_tools/intel/domain_recon.html')
+
+
+@login_required
+def email_scanner(request):
+    """صفحة أداة Email Scanner"""
+    return render(request, 'osint_tools/intel/email_scanner.html')
+
+
+@login_required
+def virustotal_scan(request):
+    """صفحة أداة VirusTotal Scan"""
+    return render(request, 'osint_tools/intel/virustotal_scan.html')
+
+
+@login_required
+def threat_intel(request):
+    """صفحة استخبارات التهديدات"""
+    return render(request, 'osint_tools/intel/threat_intel.html')
+
+
+@login_required
+def phone_analyzer(request):
+    """صفحة محلل أرقام الهواتف"""
+    return render(request, 'osint_tools/intel/phone_analyzer.html')
+
+
+@login_required
+def subdomain_enum(request):
+    """صفحة استخراج النطاقات الفرعية"""
+    return render(request, 'osint_tools/intel/subdomain_enum.html')
+
+
+# --- JSON API Endpoints (called by frontend JS) ---
+
+@login_required
+@require_http_methods(["POST"])
+def api_ip_lookup(request):
+    """استعلام معلومات عنوان IP"""
+    try:
+        data = json.loads(request.body)
+        ip_address = data.get('ip', '').strip()
+        if not ip_address:
+            return JsonResponse({'success': False, 'error': 'يرجى إدخال عنوان IP'}, status=400)
+
+        # Validate basic IP / hostname format
+        if not re.match(r'^[a-zA-Z0-9.:\-_]+$', ip_address):
+            return JsonResponse({'success': False, 'error': 'عنوان IP غير صالح'}, status=400)
+
+        result = _fetch_json(f'http://ip-api.com/json/{urllib.parse.quote(ip_address)}?fields=66846719')
+
+        if result.get('status') == 'fail':
+            return JsonResponse({'success': False, 'error': result.get('message', 'فشل الاستعلام')})
+
+        return JsonResponse({'success': True, 'data': result})
+
+    except Exception as e:
+        logger.error(f'IP Lookup error: {e}')
+        return JsonResponse({'success': False, 'error': 'فشل الاتصال بخدمة الاستعلام. تحقق من الاتصال.'}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def api_domain_recon(request):
+    """استطلاع معلومات النطاق (Domain Recon)"""
+    try:
+        data = json.loads(request.body)
+        domain = data.get('domain', '').strip().lower()
+        if not domain:
+            return JsonResponse({'success': False, 'error': 'يرجى إدخال اسم نطاق'}, status=400)
+
+        # Remove protocol if present
+        domain = re.sub(r'^https?://', '', domain).split('/')[0]
+
+        if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9\-\.]{1,253}[a-zA-Z0-9]$', domain):
+            return JsonResponse({'success': False, 'error': 'اسم النطاق غير صالح'}, status=400)
+
+        results = {'domain': domain}
+
+        # --- WHOIS via hackertarget (free, no key required) ---
+        try:
+            whois_raw = urllib.request.urlopen(
+                f'https://api.hackertarget.com/whois/?q={urllib.parse.quote(domain)}',
+                timeout=12
+            ).read().decode('utf-8', errors='replace')
+            results['whois'] = whois_raw[:3000]  # limit size
+        except Exception:
+            results['whois'] = 'تعذّر جلب بيانات WHOIS'
+
+        # --- DNS Records via hackertarget ---
+        dns_types = {'A': 'dnslookup', 'MX': 'mxlookup'}
+        results['dns'] = {}
+        for record_type, endpoint in dns_types.items():
+            try:
+                dns_raw = urllib.request.urlopen(
+                    f'https://api.hackertarget.com/{endpoint}/?q={urllib.parse.quote(domain)}',
+                    timeout=10
+                ).read().decode('utf-8', errors='replace')
+                results['dns'][record_type] = dns_raw[:2000]
+            except Exception:
+                results['dns'][record_type] = 'تعذّر الاستعلام'
+
+        # --- IP resolution ---
+        try:
+            resolved_ip = socket.gethostbyname(domain)
+            results['resolved_ip'] = resolved_ip
+        except Exception:
+            results['resolved_ip'] = 'تعذّر الحل'
+
+        return JsonResponse({'success': True, 'data': results})
+
+    except Exception as e:
+        logger.error(f'Domain Recon error: {e}')
+        return JsonResponse({'success': False, 'error': 'حدث خطأ في الاستطلاع'}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def api_email_scanner(request):
+    """فحص صحة وسمعة عنوان البريد الإلكتروني"""
+    try:
+        data = json.loads(request.body)
+        email = data.get('email', '').strip().lower()
+
+        if not email or not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email):
+            return JsonResponse({'success': False, 'error': 'بريد إلكتروني غير صالح'}, status=400)
+
+        domain = email.split('@')[1]
+        results = {'email': email, 'domain': domain, 'checks': {}}
+
+        # Check MX records (domain validity)
+        try:
+            mx_raw = urllib.request.urlopen(
+                f'https://api.hackertarget.com/mxlookup/?q={urllib.parse.quote(domain)}',
+                timeout=10
+            ).read().decode('utf-8', errors='replace')
+            has_mx = 'error' not in mx_raw.lower() and len(mx_raw.strip()) > 0
+            results['checks']['mx_records'] = {
+                'status': 'valid' if has_mx else 'invalid',
+                'details': mx_raw[:500] if has_mx else 'لا توجد سجلات MX - البريد غير قابل للتسليم'
+            }
+        except Exception:
+            results['checks']['mx_records'] = {'status': 'error', 'details': 'فشل الفحص'}
+
+        # Validate email syntax more thoroughly
+        syntax_valid = bool(re.match(
+            r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$', email
+        ))
+        results['checks']['syntax'] = {
+            'status': 'valid' if syntax_valid else 'invalid',
+            'details': 'الصياغة صحيحة' if syntax_valid else 'صياغة البريد غير صحيحة'
+        }
+
+        # Domain reputation via IP resolution
+        try:
+            ip = socket.gethostbyname(domain)
+            results['checks']['domain_resolution'] = {
+                'status': 'valid',
+                'details': f'النطاق يُحل إلى IP: {ip}'
+            }
+        except Exception:
+            results['checks']['domain_resolution'] = {
+                'status': 'invalid',
+                'details': 'لا يمكن حل النطاق - قد يكون البريد وهمياً'
+            }
+
+        return JsonResponse({'success': True, 'data': results})
+
+    except Exception as e:
+        logger.error(f'Email Scanner error: {e}')
+        return JsonResponse({'success': False, 'error': 'حدث خطأ في الفحص'}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def api_virustotal_scan(request):
+    """فحص الروابط والملفات عبر VirusTotal"""
+    try:
+        from django.conf import settings
+        vt_api_key = getattr(settings, 'VIRUSTOTAL_API_KEY', '')
+
+        data = json.loads(request.body)
+        target = data.get('target', '').strip()
+        scan_type = data.get('scan_type', 'url')  # url or hash
+
+        if not target:
+            return JsonResponse({'success': False, 'error': 'يرجى إدخال هدف الفحص'}, status=400)
+
+        if not vt_api_key:
+            # Return a demo/simulation result when no API key is configured
+            return JsonResponse({
+                'success': True,
+                'demo': True,
+                'message': 'نمط العرض التوضيحي - أضف VIRUSTOTAL_API_KEY في الإعدادات للحصول على نتائج حقيقية',
+                'data': {
+                    'target': target,
+                    'scan_type': scan_type,
+                    'stats': {'malicious': 0, 'suspicious': 2, 'undetected': 68, 'harmless': 5, 'total': 75},
+                    'threat_names': [],
+                    'permalink': f'https://www.virustotal.com/gui/{scan_type}/{target}',
+                }
+            })
+
+        # Real VirusTotal API call
+        if scan_type == 'url':
+            endpoint = 'https://www.virustotal.com/api/v3/urls'
+            post_data = urllib.parse.urlencode({'url': target}).encode()
+            req = urllib.request.Request(endpoint, data=post_data, method='POST')
+        else:
+            # hash lookup
+            endpoint = f'https://www.virustotal.com/api/v3/files/{urllib.parse.quote(target)}'
+            req = urllib.request.Request(endpoint, method='GET')
+
+        req.add_header('x-apikey', vt_api_key)
+        req.add_header('User-Agent', 'Coriza-OSINT/1.0')
+
+        ctx = ssl.create_default_context()
+        with urllib.request.urlopen(req, context=ctx, timeout=20) as resp:
+            vt_data = json.loads(resp.read().decode())
+
+        # Parse VT response
+        attributes = vt_data.get('data', {}).get('attributes', {})
+        last_stats = attributes.get('last_analysis_stats', {})
+        results_map = attributes.get('last_analysis_results', {})
+
+        malicious_engines = [
+            {'engine': k, 'result': v.get('result'), 'category': v.get('category')}
+            for k, v in results_map.items()
+            if v.get('category') in ('malicious', 'suspicious')
+        ]
+
+        return JsonResponse({
+            'success': True,
+            'demo': False,
+            'data': {
+                'target': target,
+                'scan_type': scan_type,
+                'stats': last_stats,
+                'threat_names': list(set(v.get('result') for v in results_map.values() if v.get('result'))),
+                'malicious_engines': malicious_engines[:20],
+                'permalink': attributes.get('url', f'https://www.virustotal.com')
+            }
+        })
+
+    except Exception as e:
+        logger.error(f'VirusTotal error: {e}')
+        return JsonResponse({'success': False, 'error': 'فشل الاتصال بـ VirusTotal'}, status=500)
+
+
+@login_required
+@require_http_methods(["GET"])
+def api_threat_feed(request):
+    """جلب تغذية استخبارات التهديدات (Threat Intelligence Feed)"""
+    try:
+        # AlienVault OTX free pulses - no key needed for public feed
+        feed_url = 'https://otx.alienvault.com/api/v1/pulses/subscribed?modified_since=2024-01-01&limit=20'
+        otx_key = getattr(__import__('django.conf', fromlist=['settings']).settings, 'OTX_API_KEY', '')
+
+        if not otx_key:
+            # Return simulated threat intel data
+            simulated = [
+                {'name': 'APT28 - Fancy Bear Campaign', 'description': 'نشاط مجموعة APT28 الروسية المرتبطة بهجمات التصيد الاحتيالي', 'tlp': 'WHITE', 'severity': 'high', 'tags': ['APT28', 'phishing', 'russia'], 'created': '2026-04-10'},
+                {'name': 'Log4Shell Exploitation Wave', 'description': 'استغلال ثغرة Log4Shell في بيئات Java المشغلة على الإنترنت', 'tlp': 'GREEN', 'severity': 'critical', 'tags': ['log4j', 'RCE', 'java'], 'created': '2026-04-09'},
+                {'name': 'Ransomware - LockBit 3.0 IOCs', 'description': 'مؤشرات الاختراق الخاصة بمجموعة LockBit 3.0 الفدية', 'tlp': 'WHITE', 'severity': 'critical', 'tags': ['ransomware', 'lockbit', 'IOC'], 'created': '2026-04-08'},
+                {'name': 'Credential Stuffing via Leaked Databases', 'description': 'هجمات حشو بيانات الاعتماد باستخدام قواعد بيانات مسربة', 'tlp': 'GREEN', 'severity': 'medium', 'tags': ['credential-stuffing', 'breach'], 'created': '2026-04-07'},
+                {'name': 'Malicious npm Package Supply Chain', 'description': 'اكتشاف حزمة npm خبيثة تستهدف سلسلة torii المعروفة', 'tlp': 'WHITE', 'severity': 'high', 'tags': ['supply-chain', 'npm', 'malware'], 'created': '2026-04-06'},
+            ]
+            return JsonResponse({'success': True, 'demo': True, 'data': simulated})
+
+        req = urllib.request.Request(feed_url)
+        req.add_header('X-OTX-API-KEY', otx_key)
+        req.add_header('User-Agent', 'Coriza-OSINT/1.0')
+        ctx = ssl.create_default_context()
+        with urllib.request.urlopen(req, context=ctx, timeout=15) as resp:
+            feed_data = json.loads(resp.read().decode())
+
+        pulses = [
+            {
+                'name': p.get('name'),
+                'description': p.get('description', '')[:200],
+                'tlp': p.get('tlp', 'WHITE'),
+                'severity': 'high' if p.get('adversary') else 'medium',
+                'tags': p.get('tags', [])[:5],
+                'created': p.get('created', '')[:10],
+            }
+            for p in feed_data.get('results', [])[:20]
+        ]
+
+        return JsonResponse({'success': True, 'demo': False, 'data': pulses})
+
+    except Exception as e:
+        logger.error(f'Threat Feed error: {e}')
+        return JsonResponse({'success': False, 'error': 'فشل جلب بيانات تغذية التهديدات'}, status=500)
+
+
+import phonenumbers
+from phonenumbers import geocoder, carrier, timezone as ph_timezone
+
+@login_required
+@require_http_methods(["POST"])
+def api_phone_analyzer(request):
+    """تحليل رقم الهاتف"""
+    try:
+        data = json.loads(request.body)
+        phone = data.get('target', '').strip()
+        if not phone:
+            return JsonResponse({'success': False, 'error': 'يرجى إدخال رقم هاتف'}, status=400)
+            
+        if not phone.startswith('+'):
+            phone = '+' + phone
+            
+        parsed_number = phonenumbers.parse(phone, None)
+        
+        if not phonenumbers.is_valid_number(parsed_number):
+            return JsonResponse({'success': False, 'error': 'رقم غير صالح للتنسيق الدولي'})
+
+        country = geocoder.description_for_number(parsed_number, "ar") or geocoder.description_for_number(parsed_number, "en")
+        carrier_name = carrier.name_for_number(parsed_number, "ar") or carrier.name_for_number(parsed_number, "en")
+        time_zones = ph_timezone.time_zones_for_number(parsed_number)
+
+        results = {
+            'target': phone,
+            'is_valid': True,
+            'country': country or 'غير معروف',
+            'carrier': carrier_name or 'غير معروف',
+            'timezones': list(time_zones),
+            'formatted': phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
+        }
+        
+        return JsonResponse({'success': True, 'demo': False, 'data': results})
+        
+    except phonenumbers.phonenumberutil.NumberParseException:
+         return JsonResponse({'success': False, 'error': 'الرقم يبدو غير صالح للتحليل'})
+    except Exception as e:
+        logger.error(f'Phone Analyzer error: {e}')
+        return JsonResponse({'success': False, 'error': 'فشل تحليل الهاتف'}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def api_subdomain_enum(request):
+    """استخراج النطاقات الفرعية عبر crt.sh"""
+    try:
+        data = json.loads(request.body)
+        domain = data.get('target', '').strip().lower()
+        if not domain:
+            return JsonResponse({'success': False, 'error': 'يرجى إدخال اسم نطاق'}, status=400)
+
+        domain = re.sub(r'^https?://', '', domain).split('/')[0]
+
+        if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9\-\.]{1,253}[a-zA-Z0-9]$', domain):
+             return JsonResponse({'success': False, 'error': 'اسم النطاق غير صالح'})
+             
+        results = {'domain': domain, 'subdomains': []}
+        
+        try:
+            req = urllib.request.Request(f'https://crt.sh/?q=%.{urllib.parse.quote(domain)}&output=json')
+            req.add_header('User-Agent', 'Coriza-OSINT/1.0')
+            ctx = ssl.create_default_context()
+            with urllib.request.urlopen(req, context=ctx, timeout=25) as resp:
+                crt_data = json.loads(resp.read().decode())
+                
+            seen = set()
+            for entry in crt_data:
+                name = entry.get('name_value', '').lower()
+                if '*' not in name and name.endswith(domain):
+                    for sub in name.split('\\n'):
+                        if sub not in seen:
+                            seen.add(sub)
+                            
+            results['subdomains'] = list(seen)[:500]
+            
+        except Exception as e:
+            logger.error(f'crt.sh error: {e}')
+            return JsonResponse({'success': False, 'error': 'فشل جلب النطاقات من المصدر.'}, status=500)
+
+        return JsonResponse({'success': True, 'demo': False, 'data': results})
+
+    except Exception as e:
+        logger.error(f'Subdomain Enum error: {e}')
+        return JsonResponse({'success': False, 'error': 'حدث خطأ في عملية البحث'}, status=500)
+
+
+
+@login_required
+@require_http_methods(["GET"])
+def ajax_completed_sessions(request):
+    """الحصول على قائمة الجلسات المكتملة للمستخدم (لإنشاء التقارير)"""
+    try:
+        # جلب الجلسات المكتملة فقط
+        sessions = OSINTSession.objects.filter(
+            user=request.user,
+            status='completed'
+        ).select_related('tool').order_by('-completed_at')[:50]
+        
+        sessions_data = [
+            {
+                'id': session.id,
+                'tool_name': session.tool.name,
+                'target': session.target,
+                'results_count': session.results_count,
+                'completed_at': session.completed_at.isoformat() if session.completed_at else None,
+                'created_at': session.created_at.isoformat(),
+            }
+            for session in sessions
+        ]
+        
+        return JsonResponse({
+            'success': True,
+            'sessions': sessions_data,
+            'count': len(sessions_data)
         })
         
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'بيانات غير صحيحة'}, status=400)
     except Exception as e:
-        logger.error(f"خطأ في اختبار الأداة: {e}")
-        return JsonResponse({'error': 'حدث خطأ في الخادم'}, status=500)
+        logger.error(f'Error fetching completed sessions: {e}')
+        return JsonResponse({
+            'success': False,
+            'error': 'حدث خطأ في جلب الجلسات',
+            'sessions': []
+        }, status=500)

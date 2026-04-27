@@ -1,0 +1,141 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}IP Lookup - تتبع العناوين{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center mb-2">
+        <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-outline-secondary me-3"><i class="fas fa-arrow-right"></i></a>
+        <div>
+            <h1 class="fw-bold mb-0 cyber-text"><i class="fas fa-map-marker-alt me-2"></i>IP Lookup &amp; Geolocation</h1>
+            <p class="text-secondary mb-0 small">تتبع عناوين IP جغرافياً ومعرفة مزود الخدمة والشبكة</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <!-- Search Box -->
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-body p-4">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text" style="background:rgba(0,0,0,0.4); border-color:#444;"><i class="fas fa-search text-primary"></i></span>
+                    <input type="text" id="ipInput" class="form-control text-white font-monospace"
+                           style="background:rgba(0,0,0,0.4); border-color:#444;"
+                           placeholder="أدخل عنوان IP أو اسم نطاق... مثال: 8.8.8.8 أو google.com"
+                           onkeydown="if(event.key==='Enter') runLookup()">
+                    <button class="btn btn-primary px-5" id="lookupBtn" onclick="runLookup()">
+                        <i class="fas fa-satellite-dish me-2"></i>استعلام
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="col-12" id="resultArea" style="display:none;">
+        <div class="row g-4">
+            <!-- Map Placeholder + Basic Info -->
+            <div class="col-lg-5">
+                <div class="content-card h-100">
+                    <div class="card-header"><h5 class="mb-0 text-primary"><i class="fas fa-globe me-2"></i>الموقع الجغرافي</h5></div>
+                    <div class="card-body">
+                        <div id="mapContainer" style="height:220px; background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:8px;" class="mb-3 d-flex align-items-center justify-content-center">
+                            <div class="text-center text-secondary">
+                                <i class="fas fa-map fa-3x mb-2"></i><br>
+                                <small>الخريطة تحتاج إلى اتصال إنترنت</small>
+                            </div>
+                        </div>
+                        <div id="locationDetails"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Details -->
+            <div class="col-lg-7">
+                <div class="content-card h-100">
+                    <div class="card-header"><h5 class="mb-0 text-primary"><i class="fas fa-network-wired me-2"></i>تفاصيل الشبكة</h5></div>
+                    <div class="card-body">
+                        <div id="networkDetails"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="col-12 text-center py-5" id="loadingArea" style="display:none;">
+        <div class="spinner-border text-primary mb-3" style="width:3rem;height:3rem;"></div>
+        <p class="text-secondary">جارٍ استعلام بيانات العنوان...</p>
+        <div class="matrix-text"><small id="loadingText">RESOLVING IP ADDRESS...</small></div>
+    </div>
+
+    <!-- Error -->
+    <div class="col-12" id="errorArea" style="display:none;">
+        <div class="alert alert-danger cyber-border"><i class="fas fa-exclamation-triangle me-2"></i><span id="errorMsg"></span></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function runLookup() {
+    const ip = document.getElementById('ipInput').value.trim();
+    if (!ip) return;
+
+    showLoading(true);
+    document.getElementById('resultArea').style.display = 'none';
+    document.getElementById('errorArea').style.display = 'none';
+
+    fetch('{% url "osint_tools:api_ip_lookup" %}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
+        body: JSON.stringify({ip})
+    })
+    .then(r => r.json())
+    .then(res => {
+        showLoading(false);
+        if (!res.success) { showError(res.error); return; }
+        renderResults(res.data);
+    })
+    .catch(() => { showLoading(false); showError('فشل الاتصال بالخادم'); });
+}
+
+function renderResults(d) {
+    // Location details
+    document.getElementById('locationDetails').innerHTML = `
+        <table class="table table-dark table-sm mb-0">
+            <tr><td class="text-secondary">الدولة</td><td class="text-white fw-bold">${d.country || '-'} (${d.countryCode || ''})</td></tr>
+            <tr><td class="text-secondary">المنطقة</td><td class="text-white">${d.regionName || '-'}</td></tr>
+            <tr><td class="text-secondary">المدينة</td><td class="text-white">${d.city || '-'}</td></tr>
+            <tr><td class="text-secondary">المنطقة الزمنية</td><td class="text-white">${d.timezone || '-'}</td></tr>
+            <tr><td class="text-secondary">الإحداثيات</td><td class="text-info font-monospace">${d.lat || '-'}, ${d.lon || '-'}</td></tr>
+        </table>`;
+
+    // Network details
+    document.getElementById('networkDetails').innerHTML = `
+        <table class="table table-dark table-sm mb-0">
+            <tr><td class="text-secondary" width="40%">عنوان IP</td><td class="text-primary fw-bold font-monospace">${d.query || '-'}</td></tr>
+            <tr><td class="text-secondary">مزود الخدمة (ISP)</td><td class="text-white">${d.isp || '-'}</td></tr>
+            <tr><td class="text-secondary">المنظمة</td><td class="text-white">${d.org || '-'}</td></tr>
+            <tr><td class="text-secondary">رقم AS</td><td class="text-info font-monospace">${d.as || '-'}</td></tr>
+            <tr><td class="text-secondary">نوع الاتصال</td><td><span class="badge bg-${d.mobile?'warning':d.proxy?'danger':'secondary'}">${d.mobile?'موبايل':d.proxy?'بروكسي/VPN':'مباشر'}</span></td></tr>
+            <tr><td class="text-secondary">الكود البريدي</td><td class="text-white">${d.zip || '-'}</td></tr>
+        </table>`;
+
+    // Embed map if coords available
+    if (d.lat && d.lon) {
+        document.getElementById('mapContainer').innerHTML =
+            `<iframe src="https://www.openstreetmap.org/export/embed.html?bbox=${d.lon-0.5},${d.lat-0.5},${d.lon+0.5},${d.lat+0.5}&layer=mapnik&marker=${d.lat},${d.lon}"
+                     style="width:100%;height:100%;border:none;border-radius:8px;"></iframe>`;
+    }
+
+    document.getElementById('resultArea').style.display = 'block';
+}
+
+function showLoading(v) { document.getElementById('loadingArea').style.display = v ? 'block' : 'none'; }
+function showError(msg) { document.getElementById('errorMsg').textContent = msg; document.getElementById('errorArea').style.display = 'block'; }
+function getCsrf() { return document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''; }
+</script>
+{% endblock %}

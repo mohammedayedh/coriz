@@ -1,0 +1,65 @@
+أداة **MxToolbox OSINT Engine** هي عبارة عن محرك فحص متقدم للشبكات واستخبارات البريد الإلكتروني (Network & Email OSINT). تعتمد الأداة على التخاطب مع واجهة برمجة تطبيقات (API) الرسمية لموقع MxToolbox لتنفيذ فحوصات دقيقة على أي نطاق (Domain) أو عنوان (IP).
+
+### ماذا تعمل هذه الأداة؟
+الأداة مصممة لتكون "سكين سويسري" لمحللي الأمن السيبراني، حيث تقوم بـ 18 مهمة فحص مستقرة جداً، من أهمها:
+1. **Email Security (MX, SPF, DMARC):** فحص خوادم البريد الإلكتروني للهدف، والتأكد من قوة سياسات الحماية ضد الانتحال (Spoofing).
+2. **Reputation (Blacklist):** التحقق مما إذا كان عنوان الـ IP أو النطاق مدرجاً في أي قائمة سوداء عالمية للبريد المزعج (Spam).
+3. **Infrastructure (DNS, A, TXT, CNAME):** كشف البنية التحتية للشبكة والخوادم التي يستضيف عليها الهدف مواقعه.
+4. **Data Parsing & Export:** تأخذ البيانات المعقدة من خوادم MxToolbox، وتقوم بتفكيكها وطباعتها في الشاشة بشكل هندسي مفصل ومقروء باللغة الإنجليزية، ثم تحفظ النسخة الأصلية الكاملة في ملف `JSON`.
+
+---
+
+### كيف يتم استدعاء الأداة من ملف آخر؟ (Programmatic Execution)
+
+لاستدعاء هذه الأداة من داخل سكربت آخر (لعمليات الأتمتة والفحص الجماعي)، كل ما تحتاجه هو استيراد الملف، وتمرير مفتاح الـ API، والأمر المطلوب (Command)، والهدف (Target).
+
+قم بإنشاء ملف بايثون جديد (مثلاً `network_scanner.py`) واكتب بداخله هذا الكود:
+
+```python
+# 1. Import the tool module (Ensure mxtoolbox_tool.py is in the same folder)
+import mxtoolbox_tool
+
+# 2. Define your specific parameters
+API_KEY = "YOUR_API_KEY_HERE"  # Replace with your actual MxToolbox API Key
+target_domain = "cyberguardx.online"
+
+# Choose one of the 18 stable commands (e.g., 'mx', 'dns', 'blacklist', 'spf', 'txt')
+scan_command = "mx" 
+
+# Define the output file name dynamically
+output_json = f"report_{scan_command}_{target_domain.replace('.', '_')}.json"
+
+print(f"[*] Starting background Network Scan: {scan_command.upper()} for {target_domain}...")
+
+# 3. Call the execution engine
+# The function will run silently if integrated, or print its detailed tree if allowed
+results = mxtoolbox_tool.run_mxtoolbox(
+    api_key=API_KEY,
+    command=scan_command,
+    target=target_domain,
+    output_file=output_json
+)
+
+# 4. Handle the returned JSON data programmatically
+if results:
+    print("\n[+] Scan executed successfully. Data saved to JSON.")
+    
+    # Example: How to extract specific data from the results array
+    information_array = results.get("Information", [])
+    if information_array:
+        print(f"[*] Found {len(information_array)} records.")
+        # Print the first record as a quick check
+        print(f"[*] First Record Data: {information_array[0]}")
+    else:
+        print("[-] No detailed records found in the Information array.")
+else:
+    print("[-] Scan failed. Please check your API key or target format.")
+```
+
+### المعطيات المطلوبة للاستدعاء (Parameters):
+* `api_key`: مفتاح الـ API الخاص بك من موقع MxToolbox (مطلوب إجبارياً).
+* `command`: نوع الفحص المراد تنفيذه (مثل `"mx"`, `"blacklist"`, `"dns"`, `"tcp"`).
+* `target`: النطاق أو عنوان الـ IP الذي تريد فحصه.
+* `output_file`: اسم ملف الـ JSON الذي سيتم حفظ البيانات النهائية فيه.
+
+بهذه الطريقة، يمكنك بناء حلقة (Loop) في كودك الخارجي تمرر 10 نطاقات مختلفة لهذه الأداة، وستقوم هي بإنشاء 10 تقارير JSON مفصلة بكل هدوء.

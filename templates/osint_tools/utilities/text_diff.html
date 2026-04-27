@@ -1,0 +1,303 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}مقارن النصوص - كوريزا OSINT{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center mb-3">
+        <a href="{% url 'osint_tools:utilities_dashboard' %}" class="btn btn-outline-secondary me-3">
+            <i class="fas fa-arrow-right"></i> عودة
+        </a>
+        <h1 class="fw-bold mb-0 cyber-text typewriter">
+            <i class="fas fa-exchange-alt me-3"></i>مقارن النصوص (Text Diff)
+        </h1>
+    </div>
+    <p class="text-secondary">مقارنة النصوص والكود بشكل احترافي مع تمييز الاختلافات - أداة أساسية لمراجعة التغييرات والتحقيقات.</p>
+</div>
+
+<div class="row g-4 mt-2">
+    <!-- Text 1 -->
+    <div class="col-lg-6">
+        <div class="content-card h-100">
+            <div class="card-header">
+                <h5 class="mb-0 text-danger"><i class="fas fa-file-alt me-2"></i>النص الأول (الأصلي)</h5>
+            </div>
+            <div class="card-body p-0">
+                <textarea id="text1" class="form-control border-0 text-white p-3 font-monospace" 
+                          style="background: rgba(220,53,69,0.1); resize: none; height: 400px; font-size: 14px;" 
+                          placeholder="الصق النص الأول هنا..."
+                          oninput="compareTexts()"></textarea>
+            </div>
+            <div class="card-footer">
+                <small class="text-secondary">
+                    الأحرف: <span id="chars1">0</span> | 
+                    الكلمات: <span id="words1">0</span> | 
+                    الأسطر: <span id="lines1">0</span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Text 2 -->
+    <div class="col-lg-6">
+        <div class="content-card h-100">
+            <div class="card-header">
+                <h5 class="mb-0 text-success"><i class="fas fa-file-alt me-2"></i>النص الثاني (المعدل)</h5>
+            </div>
+            <div class="card-body p-0">
+                <textarea id="text2" class="form-control border-0 text-white p-3 font-monospace" 
+                          style="background: rgba(40,167,69,0.1); resize: none; height: 400px; font-size: 14px;" 
+                          placeholder="الصق النص الثاني هنا..."
+                          oninput="compareTexts()"></textarea>
+            </div>
+            <div class="card-footer">
+                <small class="text-secondary">
+                    الأحرف: <span id="chars2">0</span> | 
+                    الكلمات: <span id="words2">0</span> | 
+                    الأسطر: <span id="lines2">0</span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Results -->
+    <div class="col-lg-12">
+        <div class="content-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-info"><i class="fas fa-chart-line me-2"></i>نتائج المقارنة</h5>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary" onclick="copyDiff()">
+                        <i class="fas fa-copy me-1"></i> نسخ الاختلافات
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <div class="stat-box p-3 rounded text-center" style="background: rgba(40,167,69,0.1); border: 1px solid rgba(40,167,69,0.3);">
+                            <div class="stat-value text-success fs-3 fw-bold" id="addedLines">0</div>
+                            <div class="stat-label text-secondary">أسطر مضافة</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box p-3 rounded text-center" style="background: rgba(220,53,69,0.1); border: 1px solid rgba(220,53,69,0.3);">
+                            <div class="stat-value text-danger fs-3 fw-bold" id="removedLines">0</div>
+                            <div class="stat-label text-secondary">أسطر محذوفة</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box p-3 rounded text-center" style="background: rgba(255,193,7,0.1); border: 1px solid rgba(255,193,7,0.3);">
+                            <div class="stat-value text-warning fs-3 fw-bold" id="modifiedLines">0</div>
+                            <div class="stat-label text-secondary">أسطر معدلة</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box p-3 rounded text-center" style="background: rgba(0,123,255,0.1); border: 1px solid rgba(0,123,255,0.3);">
+                            <div class="stat-value text-info fs-3 fw-bold" id="similarity">100%</div>
+                            <div class="stat-label text-secondary">نسبة التشابه</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="diffOutput" class="p-3 rounded font-monospace" 
+                     style="background: rgba(0,0,0,0.3); max-height: 500px; overflow-y: auto; font-size: 14px; white-space: pre-wrap;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function compareTexts() {
+    const text1 = document.getElementById('text1').value;
+    const text2 = document.getElementById('text2').value;
+    
+    // تحديث الإحصائيات
+    updateStats('1', text1);
+    updateStats('2', text2);
+    
+    if (!text1 && !text2) {
+        document.getElementById('diffOutput').innerHTML = '<span class="text-secondary">أدخل النصوص للمقارنة...</span>';
+        resetDiffStats();
+        return;
+    }
+    
+    // تقسيم النصوص إلى أسطر
+    const lines1 = text1.split('\n');
+    const lines2 = text2.split('\n');
+    
+    // حساب الاختلافات
+    const diff = calculateDiff(lines1, lines2);
+    
+    // عرض النتائج
+    displayDiff(diff);
+    
+    // حساب نسبة التشابه
+    calculateSimilarity(text1, text2);
+}
+
+function updateStats(num, text) {
+    const chars = text.length;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const lines = text ? text.split('\n').length : 0;
+    
+    document.getElementById(`chars${num}`).textContent = chars;
+    document.getElementById(`words${num}`).textContent = words;
+    document.getElementById(`lines${num}`).textContent = lines;
+}
+
+function calculateDiff(lines1, lines2) {
+    const diff = [];
+    let added = 0, removed = 0, modified = 0;
+    
+    const maxLen = Math.max(lines1.length, lines2.length);
+    
+    for (let i = 0; i < maxLen; i++) {
+        const line1 = lines1[i];
+        const line2 = lines2[i];
+        
+        if (line1 === undefined && line2 !== undefined) {
+            // سطر مضاف
+            diff.push({ type: 'added', line: line2, num: i + 1 });
+            added++;
+        } else if (line1 !== undefined && line2 === undefined) {
+            // سطر محذوف
+            diff.push({ type: 'removed', line: line1, num: i + 1 });
+            removed++;
+        } else if (line1 !== line2) {
+            // سطر معدل
+            diff.push({ type: 'removed', line: line1, num: i + 1 });
+            diff.push({ type: 'added', line: line2, num: i + 1 });
+            modified++;
+        } else {
+            // سطر متطابق
+            diff.push({ type: 'unchanged', line: line1, num: i + 1 });
+        }
+    }
+    
+    document.getElementById('addedLines').textContent = added;
+    document.getElementById('removedLines').textContent = removed;
+    document.getElementById('modifiedLines').textContent = modified;
+    
+    return diff;
+}
+
+function displayDiff(diff) {
+    let html = '';
+    
+    diff.forEach(item => {
+        let lineClass = '';
+        let icon = '';
+        let bgColor = '';
+        
+        switch (item.type) {
+            case 'added':
+                lineClass = 'text-success';
+                icon = '+ ';
+                bgColor = 'rgba(40,167,69,0.15)';
+                break;
+            case 'removed':
+                lineClass = 'text-danger';
+                icon = '- ';
+                bgColor = 'rgba(220,53,69,0.15)';
+                break;
+            case 'unchanged':
+                lineClass = 'text-secondary';
+                icon = '  ';
+                bgColor = 'transparent';
+                break;
+        }
+        
+        html += `<div class="${lineClass}" style="background: ${bgColor}; padding: 2px 5px; margin: 1px 0;">${icon}${escapeHtml(item.line)}</div>`;
+    });
+    
+    document.getElementById('diffOutput').innerHTML = html || '<span class="text-secondary">لا توجد اختلافات</span>';
+}
+
+function calculateSimilarity(text1, text2) {
+    if (!text1 && !text2) {
+        document.getElementById('similarity').textContent = '100%';
+        return;
+    }
+    
+    if (!text1 || !text2) {
+        document.getElementById('similarity').textContent = '0%';
+        return;
+    }
+    
+    // حساب نسبة التشابه باستخدام Levenshtein distance
+    const distance = levenshteinDistance(text1, text2);
+    const maxLen = Math.max(text1.length, text2.length);
+    const similarity = ((1 - distance / maxLen) * 100).toFixed(1);
+    
+    document.getElementById('similarity').textContent = similarity + '%';
+}
+
+function levenshteinDistance(str1, str2) {
+    const matrix = [];
+    
+    for (let i = 0; i <= str2.length; i++) {
+        matrix[i] = [i];
+    }
+    
+    for (let j = 0; j <= str1.length; j++) {
+        matrix[0][j] = j;
+    }
+    
+    for (let i = 1; i <= str2.length; i++) {
+        for (let j = 1; j <= str1.length; j++) {
+            if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
+                );
+            }
+        }
+    }
+    
+    return matrix[str2.length][str1.length];
+}
+
+function resetDiffStats() {
+    document.getElementById('addedLines').textContent = '0';
+    document.getElementById('removedLines').textContent = '0';
+    document.getElementById('modifiedLines').textContent = '0';
+    document.getElementById('similarity').textContent = '100%';
+}
+
+function copyDiff() {
+    const diffOutput = document.getElementById('diffOutput').textContent;
+    
+    navigator.clipboard.writeText(diffOutput).then(() => {
+        const btn = event.target.closest('button');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check text-success me-1"></i> تم النسخ';
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+        }, 2000);
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// مثال افتراضي
+document.getElementById('text1').value = `مرحباً بك في كوريزا OSINT
+منصة الأمن السيبراني
+للمحققين والمختصين`;
+
+document.getElementById('text2').value = `مرحباً بك في كوريزا OSINT
+منصة الأمن السيبراني المتقدمة
+للمحققين والمختصين في OSINT`;
+
+compareTexts();
+</script>
+{% endblock %}

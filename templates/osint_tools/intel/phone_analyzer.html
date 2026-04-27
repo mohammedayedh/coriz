@@ -1,0 +1,102 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}Phone Analyzer - محلل أرقام الهواتف{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center mb-2">
+        <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-outline-secondary me-3"><i class="fas fa-arrow-right"></i></a>
+        <div>
+            <h1 class="fw-bold mb-0 cyber-text"><i class="fas fa-phone-alt me-2"></i>Phone Number Analyzer</h1>
+            <p class="text-secondary mb-0 small">تحليل أرقام الهواتف الدولية لمعرفة الدولة ومزود الخدمة والمنطقة الزمنية</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <!-- Search Box -->
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-body p-4">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text" style="background:rgba(0,0,0,0.4); border-color:#444;"><i class="fas fa-phone text-primary"></i></span>
+                    <input type="text" id="phoneInput" class="form-control text-white font-monospace"
+                           style="background:rgba(0,0,0,0.4); border-color:#444;"
+                           placeholder="أدخل رقم الهاتف مع رمز الدولة (مثال: +1234567890)..."
+                           onkeydown="if(event.key==='Enter') runAnalyze()">
+                    <button class="btn btn-primary px-5" id="analyzeBtn" onclick="runAnalyze()">
+                        <i class="fas fa-search me-2"></i>تحليل
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="col-12" id="resultArea" style="display:none;">
+        <div class="content-card">
+            <div class="card-header"><h5 class="mb-0 text-primary"><i class="fas fa-info-circle me-2"></i>تفاصيل الرقم</h5></div>
+            <div class="card-body">
+                <div id="phoneDetails"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="col-12 text-center py-5" id="loadingArea" style="display:none;">
+        <div class="spinner-border text-primary mb-3" style="width:3rem;height:3rem;"></div>
+        <p class="text-secondary">جارٍ تحليل الرقم...</p>
+        <div class="matrix-text"><small id="loadingText">ANALYZING NUMBER...</small></div>
+    </div>
+
+    <!-- Error -->
+    <div class="col-12" id="errorArea" style="display:none;">
+        <div class="alert alert-danger cyber-border"><i class="fas fa-exclamation-triangle me-2"></i><span id="errorMsg"></span></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function runAnalyze() {
+    const target = document.getElementById('phoneInput').value.trim();
+    if (!target) return;
+
+    showLoading(true);
+    document.getElementById('resultArea').style.display = 'none';
+    document.getElementById('errorArea').style.display = 'none';
+
+    fetch('{% url "osint_tools:api_phone_analyzer" %}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
+        body: JSON.stringify({target})
+    })
+    .then(r => r.json())
+    .then(res => {
+        showLoading(false);
+        if (!res.success) { showError(res.error); return; }
+        renderResults(res.data);
+    })
+    .catch(() => { showLoading(false); showError('فشل الاتصال بالخادم'); });
+}
+
+function renderResults(d) {
+    document.getElementById('phoneDetails').innerHTML = `
+        <table class="table table-dark mb-0">
+            <tr><td class="text-secondary" width="30%">الرقم المستهدف</td><td class="text-white font-monospace">${d.target}</td></tr>
+            <tr><td class="text-secondary">التنسيق الدولي</td><td class="text-info font-monospace">${d.formatted}</td></tr>
+            <tr><td class="text-secondary">الدولة</td><td class="text-white fw-bold">${d.country}</td></tr>
+            <tr><td class="text-secondary">مزود الخدمة (Carrier)</td><td class="text-primary">${d.carrier}</td></tr>
+            <tr><td class="text-secondary">المناطق الزمنية المحتملة</td><td class="text-white">${d.timezones.join(', ')}</td></tr>
+            <tr><td class="text-secondary">الحالة</td><td><span class="badge bg-success">رقم صالح دولياً</span></td></tr>
+        </table>`;
+    
+    document.getElementById('resultArea').style.display = 'block';
+}
+
+function showLoading(v) { document.getElementById('loadingArea').style.display = v ? 'block' : 'none'; }
+function showError(msg) { document.getElementById('errorMsg').textContent = msg; document.getElementById('errorArea').style.display = 'block'; }
+function getCsrf() { return document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''; }
+</script>
+{% endblock %}

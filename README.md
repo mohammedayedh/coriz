@@ -1,120 +1,279 @@
-# Coriza OSINT Platform
+# 🔍 Coriza OSINT Platform
 
-منصة **Coriza OSINT** توفّر بيئة متكاملة لجمع المعلومات المفتوحة، إدارة المحتوى الأمني، ولوحة تحكم متقدمة للمحللين. يجمع المشروع بين واجهة ويب تُعرض المحتوى، ونظام مصادقة متكامل، وواجهات REST، بالإضافة إلى مجموعة أدوات OSINT قابلة للتوسعة.
+<div align="center">
 
-## المحتوى
-- [المزايا الرئيسية](#المزايا-الرئيسية)
-- [هيكل المشروع](#هيكل-المشروع)
-- [المتطلبات](#المتطلبات)
-- [إعداد البيئة](#إعداد-البيئة)
-- [المتغيرات البيئية](#المتغيرات-البيئية)
-- [تشغيل أدوات OSINT](#تشغيل-أدوات-osint)
-- [الخدمات الداعمة (Cache / Broker)](#الخدمات-الداعمة-cache--broker)
-- [تشغيل المشروع](#تشغيل-المشروع)
-- [الاختبارات](#الاختبارات)
-- [إعداد البريد](#إعداد-البريد)
-- [مراقبة الأخطاء](#مراقبة-الأخطاء)
-- [خريطة المسارات](#خريطة-المسارات)
+![Coriza Logo](https://img.shields.io/badge/Coriza-OSINT%20Platform-6366f1?style=for-the-badge)
+![Python](https://img.shields.io/badge/Python-3.10+-blue?style=for-the-badge&logo=python)
+![Django](https://img.shields.io/badge/Django-5.2-green?style=for-the-badge&logo=django)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
-## المزايا الرئيسية
-- واجهة عامة لعرض المحتوى الأمني (مقالات، فئات، وسوم، بحث).
-- نظام مصادقة مخصص مع تحقق بالبريد ومراقبة محاولات الدخول.
-- لوحة تحكم للمستخدمين مع إحصاءات، إشعارات، إدارة منشورات، وإعدادات أمنية.
-- مجموعة أدوات OSINT قابلة للتشغيل عبر جلسات ديناميكية وتوليد تقارير.
-- واجهات REST لتكامل خارجي مع صلاحيات محكمة.
+**منصة استخبارات مفتوحة المصدر (OSINT) متكاملة للمحققين والباحثين الأمنيين**
 
-## هيكل المشروع
-```
-.
-├── authentication/      # إدارة المستخدمين والمصادقة
-├── main/                # الواجهة العامة ومحتوى الموقع
-├── dashboard/           # لوحة التحكم للمستخدمين
-├── osint_tools/         # أدوات وجلسات OSINT
-├── api/                 # واجهات REST (DRF)
-├── templates/           # قوالب HTML
-├── static/              # ملفات CSS/JS/صور ثابتة
-├── open_tool/           # الأدوات التنفيذية الخارجية (Sherlock، إلخ)
-├── coriza/              # إعدادات المشروع والمسارات الجذرية
-└── requirements*.txt    # متطلبات بايثون
-```
+[المميزات](#-المميزات) • [التثبيت](#-التثبيت) • [الاستخدام](#-الاستخدام) • [التوثيق](#-التوثيق) • [المساهمة](#-المساهمة)
 
-## المتطلبات
-- Python 3.11+
-- pip / virtualenv
-- Redis (للكاش ووسيط الرسائل)
-- PostgreSQL (اختياري للإنتاج – SQLite مفعلة افتراضيًا)
-- أدوات OSINT الخارجية (مثل Sherlock, Infoga ...) ضمن `open_tool/`
-
-## إعداد البيئة
-1. إنشاء بيئة افتراضية وتثبيت المتطلبات:
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate  # Windows
-   pip install -r requirements.txt
-   ```
-2. انسخ الملف `.env.example` إلى `.env` وعدّل القيم حسب بيئتك.
-3. أنشئ قاعدة البيانات (SQLite افتراضيًا) بإجراء الهجرات:
-   ```bash
-   python manage.py migrate
-   ```
-
-## المتغيرات البيئية
-| المتغير | الوصف |
-|---------|-------|
-| `SECRET_KEY` | مفتاح Django السري. | 
-| `DEBUG` | تعيين `false` في الإنتاج. |
-| `ALLOWED_HOSTS` | قائمة النطاقات المسموحة. |
-| `CSRF_TRUSTED_ORIGINS` | النطاقات الموثوقة للـ CSRF. |
-| `CORS_ALLOWED_ORIGINS` | مصادر CORS المسموحة. |
-| `CACHE_URL` | مسار Redis أو وسيلة Cache أخرى (مثال: `redis://localhost:6379/1`). |
-| `CELERY_BROKER_URL` | وسيط رسائل Celery (يفضل Redis أو RabbitMQ). |
-| `EMAIL_BACKEND` | Backend للبريد (يفضل `django.core.mail.backends.smtp.EmailBackend`). |
-| `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS` | بيانات مزود SMTP. |
-| `SENTRY_DSN` | رابط تكامل Sentry لمراقبة الأخطاء (اختياري). |
-
-المزيد من المتغيرات متاح في `.env.example`.
-
-## تشغيل أدوات OSINT
-- تُحفظ الأدوات التنفيذية ضمن مجلد `open_tool/`. يجب التأكد من أذونات التنفيذ (`chmod +x` في الأنظمة الشبيهة ب‍Unix).
-- حدّث بيانات كل أداة (المسار، الملف التنفيذي، قالب الأوامر) من خلال لوحة التحكم أو مباشرة في قاعدة البيانات.
-- يوصى بتشغيل الأدوات داخل بيئة معزولة (Sandbox أو Docker) وتقييد الموارد.
-
-### العمل مع Celery (اختياري)
-- لتشغيل الأدوات في صفوف مستقلة، فعّل Celery باستخدام `CELERY_BROKER_URL` و`CELERY_RESULT_BACKEND`.
-- أنشئ عامل (Worker) لتقليل زمن الاستجابة وعدم حجب السيرفر:
-  ```bash
-  celery -A coriza worker -l info
-  ```
-
-## الخدمات الداعمة (Cache / Broker)
-- تم تفعيل Cache عبر Redis عند توفر `CACHE_URL`. في حال عدم توفره، يستخدم المشروع `LocMemCache`.
-- يُستخدم نفس Redis كوسيط رسائل لـ Celery عبر `CELERY_BROKER_URL`.
-
-## تشغيل المشروع
-```bash
-python manage.py runserver
-```
-- اذهب إلى [http://localhost:8000](http://localhost:8000).
-- لوحة التحكم: `/dashboard/`
-- أدوات OSINT: `/osint/`
-
-## الاختبارات
-تشغيل الاختبارات:
-```bash
-python manage.py test
-```
-
-## إعداد البريد
-- عدّل إعدادات SMTP داخل `.env` كما هو موضّح.
-- تأكد من تمكين المصادقة الثنائية أو كلمات مرور التطبيقات في المزود (مثل Gmail، Mailgun، SendGrid).
-
-## مراقبة الأخطاء
-- يمكن تفعيل Sentry عبر المتغير `SENTRY_DSN`. انظر قسم "مراقبة الأخطاء" في `coriza/settings.py` لمزيد من التفاصيل.
-- كما تمت إضافة إعدادات logging لتسجيل الأخطاء في ملفات ضمن مجلد `logs/`.
-
-## خريطة المسارات
-- راجع المستند `docs/ROUTES.md` للحصول على تفاصيل كاملة حول مسارات HTML وREST.
+</div>
 
 ---
 
-> **ملاحظة:** بعض الأدوات (مثل Sherlock) تحتاج إلى متطلبات إضافية (Python modules، API Keys). راجع وثائق الأدوات داخل `open_tool/` أو موقعها الرسمي.
+## 📖 نظرة عامة
+
+**Coriza** هي منصة OSINT شاملة مبنية بـ Django توفر مجموعة متكاملة من الأدوات لجمع وتحليل المعلومات من مصادر مفتوحة. تم تصميمها خصيصاً للمحققين الرقميين، باحثي الأمن السيبراني، وفرق الاستخبارات.
+
+### ✨ المميزات الرئيسية
+
+#### 🛠️ أدوات OSINT المتكاملة
+- **Social Media Intelligence**: البحث عن الحسابات الاجتماعية عبر 50+ منصة
+- **Email OSINT**: تحليل البريد الإلكتروني، Gravatar، والتسريبات
+- **IP Geolocation**: تحديد الموقع الجغرافي مع خرائط تفاعلية
+- **Domain Intelligence**: فحص النطاقات، DNS، WHOIS، والنطاقات الفرعية
+- **GitHub OSINT**: تحليل الملفات الشخصية والمستودعات
+- **Google Dorks**: البحث المتقدم عن الملفات المكشوفة
+- **Reverse Image Search**: البحث العكسي عن الصور
+- **Certificate Transparency**: اكتشاف النطاقات الفرعية
+- **Breach Detection**: فحص التسريبات الأمنية
+
+#### 📊 إدارة التحقيقات
+- **Case Management**: إدارة القضايا والتحقيقات
+- **Session Tracking**: تتبع جلسات البحث والنتائج
+- **Smart Results**: عرض ذكي للنتائج مع تصنيف تلقائي
+- **Confidence Scoring**: تقييم موثوقية المعلومات
+- **Timeline Analysis**: تحليل زمني للأحداث
+
+#### 📈 التقارير والتحليلات
+- **Automated Reports**: تقارير تلقائية بصيغ متعددة (PDF, HTML, JSON, CSV)
+- **Visual Intelligence**: عرض مرئي ذكي للبيانات
+- **Analytics Dashboard**: لوحة تحليلات متقدمة
+- **Export Options**: تصدير النتائج بصيغ متعددة
+
+#### 🎨 واجهة مستخدم حديثة
+- **Dark Theme**: ثيم داكن احترافي
+- **RTL Support**: دعم كامل للغة العربية
+- **Responsive Design**: متوافق مع جميع الأجهزة
+- **Interactive UI**: واجهة تفاعلية سلسة
+
+#### 🔧 أدوات مساعدة
+- **Hash Generator**: توليد الهاش بأنواع متعددة
+- **Encoder/Decoder**: تشفير وفك تشفير البيانات
+- **Timestamp Converter**: تحويل الطوابع الزمنية
+- **JSON Formatter**: تنسيق ومدقق JSON
+- **Text Diff**: مقارنة النصوص
+- **Password Generator**: توليد كلمات مرور آمنة
+
+---
+
+## 🚀 التثبيت
+
+### المتطلبات الأساسية
+
+- Python 3.10 أو أحدث
+- pip (مدير حزم Python)
+- Git
+- Redis (اختياري - للمهام غير المتزامنة)
+
+### خطوات التثبيت
+
+1. **استنساخ المستودع**
+```bash
+git clone https://github.com/YOUR_USERNAME/coriza-osint.git
+cd coriza-osint
+```
+
+2. **إنشاء بيئة افتراضية**
+```bash
+python -m venv venv
+
+# تفعيل البيئة الافتراضية
+# على Windows:
+venv\Scripts\activate
+# على macOS/Linux:
+source venv/bin/activate
+```
+
+3. **تثبيت المتطلبات**
+```bash
+pip install -r requirements.txt
+```
+
+4. **إعداد ملف البيئة**
+```bash
+cp .env.example .env
+# قم بتعديل .env وإضافة المفاتيح السرية
+```
+
+5. **تهيئة قاعدة البيانات**
+```bash
+python manage.py migrate
+python manage.py createsuperuser
+```
+
+6. **جمع الملفات الثابتة**
+```bash
+python manage.py collectstatic --noinput
+```
+
+7. **تشغيل الخادم**
+```bash
+python manage.py runserver
+```
+
+8. **الوصول للمنصة**
+افتح المتصفح على: `http://127.0.0.1:8000`
+
+---
+
+## 📚 الاستخدام
+
+### البدء السريع
+
+1. **إنشاء حساب**: سجل دخول باستخدام حساب المدير
+2. **إنشاء قضية**: ابدأ قضية تحقيق جديدة
+3. **اختيار أداة**: اختر أداة OSINT مناسبة
+4. **إدخال الهدف**: أدخل البريد الإلكتروني، اسم المستخدم، أو النطاق
+5. **تشغيل البحث**: انقر على "بدء البحث"
+6. **تحليل النتائج**: استعرض النتائج مع الذكاء المرئي
+7. **إنشاء تقرير**: صدّر النتائج كتقرير احترافي
+
+### أمثلة الاستخدام
+
+#### البحث عن بريد إلكتروني
+```python
+# من واجهة الويب
+1. اختر أداة "Email OSINT"
+2. أدخل: example@domain.com
+3. شاهد: Gravatar، معلومات النطاق، الحسابات المحتملة
+```
+
+#### فحص نطاق
+```python
+# من واجهة الويب
+1. اختر أداة "Certificate Transparency"
+2. أدخل: example.com
+3. احصل على: جميع النطاقات الفرعية
+```
+
+---
+
+## 🏗️ البنية التقنية
+
+### التقنيات المستخدمة
+
+- **Backend**: Django 5.2, Python 3.10+
+- **Database**: SQLite (قابل للترقية لـ PostgreSQL)
+- **Task Queue**: Celery + Redis
+- **Frontend**: Bootstrap 5, JavaScript ES6+
+- **Styling**: Custom CSS with Dark Theme
+- **APIs**: RESTful API with Django REST Framework
+
+### هيكل المشروع
+
+```
+coriza/
+├── coriza/              # إعدادات المشروع الرئيسية
+├── osint_tools/         # تطبيق أدوات OSINT
+│   ├── models.py        # نماذج قاعدة البيانات
+│   ├── views.py         # المنطق والعرض
+│   ├── scrapers/        # أدوات جمع البيانات
+│   ├── tasks.py         # مهام Celery
+│   └── management/      # أوامر إدارية
+├── templates/           # قوالب HTML
+├── static/              # ملفات CSS/JS/Images
+├── media/               # ملفات المستخدمين
+└── requirements.txt     # المتطلبات
+```
+
+---
+
+## 🔒 الأمان
+
+### أفضل الممارسات
+
+- ✅ جميع كلمات المرور مشفرة
+- ✅ حماية CSRF مفعلة
+- ✅ التحقق من الصلاحيات
+- ✅ تسجيل جميع الأنشطة
+- ✅ معدل محدود للطلبات
+
+### ملاحظات أمنية
+
+⚠️ **مهم**: 
+- لا تشارك ملف `.env` أبداً
+- غيّر `SECRET_KEY` في الإنتاج
+- استخدم HTTPS في الإنتاج
+- فعّل جدار الحماية
+
+---
+
+## 📖 التوثيق
+
+للتوثيق الكامل، راجع:
+
+- [دليل المستخدم](GRADUATION_PROJECT_README.md)
+- [التوثيق التقني](GRADUATION_PROJECT_DOCUMENTATION.md)
+- [دليل النشر](DEPLOYMENT_CHECKLIST.md)
+- [كتالوج الأدوات](OSINT_TOOLS_CATALOG.md)
+
+---
+
+## 🤝 المساهمة
+
+نرحب بالمساهمات! إليك كيفية المساهمة:
+
+1. Fork المستودع
+2. أنشئ فرع للميزة (`git checkout -b feature/AmazingFeature`)
+3. Commit التغييرات (`git commit -m 'Add some AmazingFeature'`)
+4. Push للفرع (`git push origin feature/AmazingFeature`)
+5. افتح Pull Request
+
+### إرشادات المساهمة
+
+- اتبع معايير PEP 8 للكود
+- أضف اختبارات للميزات الجديدة
+- حدّث التوثيق
+- اكتب رسائل commit واضحة
+
+---
+
+## 📝 الترخيص
+
+هذا المشروع مرخص تحت رخصة MIT - راجع ملف [LICENSE](LICENSE) للتفاصيل.
+
+---
+
+## 👥 الفريق
+
+- **المطور الرئيسي**: [اسمك]
+- **المشرف الأكاديمي**: [اسم المشرف]
+- **الجامعة**: [اسم الجامعة]
+
+---
+
+## 🙏 شكر وتقدير
+
+- [Django](https://www.djangoproject.com/) - إطار العمل الرئيسي
+- [Bootstrap](https://getbootstrap.com/) - إطار عمل CSS
+- [Font Awesome](https://fontawesome.com/) - الأيقونات
+- جميع مساهمي المصادر المفتوحة
+
+---
+
+## 📞 التواصل
+
+- **البريد الإلكتروني**: your.email@example.com
+- **GitHub**: [@yourusername](https://github.com/yourusername)
+- **LinkedIn**: [Your Name](https://linkedin.com/in/yourprofile)
+
+---
+
+## 🌟 النجوم والمتابعة
+
+إذا أعجبك المشروع، لا تنسَ إعطاءه ⭐ على GitHub!
+
+---
+
+<div align="center">
+
+**صُنع بـ ❤️ لمجتمع OSINT**
+
+[⬆ العودة للأعلى](#-coriza-osint-platform)
+
+</div>

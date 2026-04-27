@@ -1,0 +1,69 @@
+how to import it via
+
+like this :
+
+*********************************************************************
+
+# 1. Import the Snov.io OSINT tool
+import snovio_tool
+
+# 2. Set your API Credentials
+# Replace these with your actual keys from Snov.io
+CLIENT_ID = "YOUR_CLIENT_ID_HERE" there's =>9d27b58759a2e864a1fc6b622c364ff9
+CLIENT_SECRET = "YOUR_CLIENT_SECRET_HERE" there's =>6fc72fe513e78369fe07d9942cb1152d
+
+# ==========================================
+# TEST 1: DOMAIN SEARCH (Extract all emails)
+# ==========================================
+print("\n--- Starting Automated Domain Scan ---")
+
+target_company = "stripe.com"
+domain_output = f"scan_domain_{target_company.replace('.', '_')}.json"
+
+domain_results = snovio_tool.run_snovio(
+    client_id=CLIENT_ID,
+    client_secret=CLIENT_SECRET,
+    command="domain",
+    target_data=target_company,
+    output_file=domain_output
+)
+
+# Parse and print a summary of the domain results
+if domain_results and "emails" in domain_results:
+    extracted_emails = domain_results["emails"]
+    print(f"\n[+] Success! Found {len(extracted_emails)} employee records for {target_company}.")
+    print("[*] Displaying top 3 results:")
+    for emp in extracted_emails[:3]:
+        email = emp.get("email", "Unknown")
+        position = emp.get("position", "No Position Listed")
+        print(f"    -> {email} ({position})")
+
+
+# ==========================================
+# TEST 2: PERSON SEARCH (Specific Target)
+# ==========================================
+print("\n--- Starting Specific Person Scan ---")
+
+target_person = {
+    "first_name": "Sam",
+    "last_name": "Altman",
+    "domain": "openai.com"
+}
+person_output = f"scan_person_{target_person['first_name']}_{target_person['last_name']}.json"
+
+person_results = snovio_tool.run_snovio(
+    client_id=CLIENT_ID,
+    client_secret=CLIENT_SECRET,
+    command="person",
+    target_data=target_person,
+    output_file=person_output
+)
+
+# Parse the specific person results
+if person_results and "emails" in person_results:
+    emails_found = person_results["emails"]
+    print(f"\n[+] Target Located! Found {len(emails_found)} email combinations.")
+    for record in emails_found:
+        email = record.get("email")
+        status = record.get("emailStatus", "Unknown")
+        print(f"    -> {email} | Status: {status}")

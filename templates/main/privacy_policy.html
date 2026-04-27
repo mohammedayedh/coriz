@@ -1,0 +1,78 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}سياسة الخصوصية - كوريزا{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card bg-dark border-secondary shadow-lg">
+                <div class="card-body p-5 text-light">
+                    <h1 class="display-4 text-info mb-4 fw-bold">سياسة الخصوصية</h1>
+                    <p class="lead text-secondary mb-5">تاريخ آخر تحديث: 25 أبريل 2026</p>
+
+                    <div class="privacy-section mb-5">
+                        <h3 class="text-info"><i class="fas fa-shield-alt me-2"></i> مقدمة</h3>
+                        <p>نحن في منصة "كوريزا" (Coriza) نولي أهمية قصوى لخصوصية مستخدمينا. بصفتنا منصة متخصصة في الاستخبارات مفتوحة المصدر (OSINT)، فإننا ندرك حساسية البيانات والعمليات التي يتم إجراؤها عبر نظامنا.</p>
+                    </div>
+
+                    <div class="privacy-section mb-5">
+                        <h3 class="text-info"><i class="fas fa-user-lock me-2"></i> جمع البيانات</h3>
+                        <p>نقوم بجمع البيانات الضرورية فقط لتقديم خدماتنا الاستخباراتية، وتشمل:</p>
+                        <ul>
+                            <li>معلومات الحساب: الاسم، البريد الإلكتروني، وكلمة المرور المشفرة.</li>
+                            <li>بيانات الجلسات: سجلات البحث والتحقيق التي تجريها (تكون مشفرة وخاصة بحسابك فقط).</li>
+                            <li>المرفقات والملاحظات: أي بيانات ترفعها ضمن القضايا تكون مخزنة بشكل آمن.</li>
+                        </ul>
+                    </div>
+
+                    <div class="privacy-section mb-5">
+                        <h3 class="text-info"><i class="fas fa-server me-2"></i> كيف نستخدم بياناتك</h3>
+                        <p>تُستخدم بياناتك حصرياً للأغراض التالية:</p>
+                        <ul>
+                            <li>توفير وتحسين خدمات البحث الاستخباراتي.</li>
+                            <li>تأمين حسابك ومنع الوصول غير المصرح به.</li>
+                            <li>توليد التقارير والتحليلات الخاصة بنشاطك الشخصي.</li>
+                        </ul>
+                    </div>
+
+                    <div class="privacy-section mb-5">
+                        <h3 class="text-info"><i class="fas fa-user-secret me-2"></i> حماية البيانات والسرية</h3>
+                        <p>نحن لا نقوم ببيع أو مشاركة بياناتك أو نتائج تحقيقاتك مع أي طرف ثالث. كافة نتائج الـ OSINT التي تحصل عليها هي ملكية خاصة لك ومخزنة في بيئة معزولة.</p>
+                    </div>
+
+                    <div class="privacy-section mb-5">
+                        <h3 class="text-info"><i class="fas fa-cookie-bite me-2"></i> ملفات تعريف الارتباط (Cookies)</h3>
+                        <p>نستخدم ملفات تعريف الارتباط الضرورية تقنياً لضمان استقرار جلسات العمل والحفاظ على تسجيل دخولك بشكل آمن.</p>
+                    </div>
+
+                    <div class="privacy-section mb-5">
+                        <h3 class="text-info"><i class="fas fa-envelope-open-text me-2"></i> اتصل بنا</h3>
+                        <p>إذا كان لديك أي استفسار حول سياسة الخصوصية، يمكنك التواصل مع الفريق الأمني عبر صفحة <a href="{% url 'main:contact' %}" class="text-info">اتصل بنا</a>.</p>
+                    </div>
+
+                    <div class="text-center mt-5">
+                        <a href="{% url 'main:home' %}" class="btn btn-outline-info px-4">العودة للرئيسية</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .privacy-section h3 {
+        border-right: 4px solid #0dcaf0;
+        padding-right: 15px;
+        margin-bottom: 20px;
+    }
+    .privacy-section p, .privacy-section li {
+        color: #cbd5e0;
+        line-height: 1.8;
+    }
+    .card {
+        border-radius: 20px;
+    }
+</style>
+{% endblock %}

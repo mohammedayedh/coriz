@@ -1,0 +1,61 @@
+أداة Hudson Rock (Infostealer OSINT) هي أداة استخبارات إلكترونية متخصصة في الكشف عن تسريبات البيانات الناتجة عن البرمجيات الخبيثة (Malware) وتحديداً برمجيات "سرقة المعلومات" (Infostealers) مثل RedLine و Raccoon.
+ماذا تعمل هذه الأداة؟
+
+عندما يُصاب جهاز شخص ما ببرمجية خبيثة، تقوم هذه البرمجية بسرقة جميع كلمات المرور المحفوظة في المتصفح، ملفات تعريف الارتباط (Cookies)، وبيانات النظام، ثم ترسلها للقراصنة. موقع Hudson Rock يمتلك قاعدة بيانات ضخمة لهذه الأجهزة المخترقة.
+
+تقوم أداتك بالتخاطب مع واجهة برمجة التطبيقات (API) المجانية الخاصة بهم للبحث داخل هذه القاعدة. وهي تدعم 4 أنواع من البحث:
+
+    Email (البريد الإلكتروني): للتحقق مما إذا كان بريد معين قد تم تسريبه.
+
+    Username (اسم المستخدم): للبحث عن أسماء مستخدمين محددة في قواعد البيانات المسروقة.
+
+    Domain (النطاق): للتحقق مما إذا كان موظفو شركة معينة (مثل tesla.com) قد تم اختراق أجهزتهم.
+
+    IP Address (عنوان الـ IP): للتحقق مما إذا كان عنوان IP محدد مرتبطاً بجهاز مخترق.
+
+تقوم الأداة بجلب النتائج بصيغة JSON، طباعتها بشكل مرتب لتسهيل قراءتها، ثم حفظها في ملف للاحتفاظ بالبيانات التقنية كاملة.
+كيف يتم استدعاء الأداة من ملف آخر؟
+
+لاستخدام هذه الأداة كجزء من سكربت أكبر أو لبرمجة فحص تلقائي، كل ما عليك فعله هو استيراد الملف وتمرير المعطيات للدالة run_hudsonrock.
+
+قم بإنشاء ملف بايثون جديد (مثلاً auto_scanner.py) في نفس المجلد الذي توجد فيه الأداة، واكتب الكود التالي:
+Python
+
+# 1. Import the Hudson Rock tool module
+import hudsonrock_tool
+
+# 2. Define your search parameters
+# query_type mapping: "1" = Email, "2" = Username, "3" = Domain, "4" = IP
+target_type = "3" 
+target_domain = "tesla.com"
+
+# Define the name of the output JSON file
+output_json = f"infostealer_report_{target_domain.replace('.', '_')}.json"
+
+print(f"[*] Starting automated Infostealer check for Domain: {target_domain}...")
+
+# 3. Call the main function
+# This runs the API request and saves the output silently
+results = hudsonrock_tool.run_hudsonrock(
+    query_type=target_type,
+    query_value=target_domain,
+    output_file=output_json
+)
+
+# 4. Handle the results programmatically in your script
+if results:
+    if "error" not in results:
+        print("[+] Check complete! Compromised data found and saved.")
+        # Example: You can extract specific keys from the JSON if needed
+    else:
+        print("[-] API returned an error or rate limit.")
+else:
+    print("[-] No compromised records found or request failed.")
+
+شرح المعطيات (Parameters):
+
+    query_type: يأخذ قيمة نصية من "1" إلى "4" لتحديد نوع الهدف (1 للإيميل، 3 للنطاق، وهكذا).
+
+    query_value: الهدف الذي تبحث عنه (مثلاً الإيميل أو اسم النطاق).
+
+    output_file: اسم الملف الذي سيتم حفظ نتائج الـ JSON بداخله.

@@ -1,0 +1,767 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}مركز الاستخبارات - {{ result.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --coriza-primary: #6366f1;
+        --coriza-secondary: #a855f7;
+        --coriza-dark: #0a0c10;
+        --coriza-card: rgba(17, 24, 39, 0.7);
+        --coriza-border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+        background-color: var(--coriza-dark) !important;
+        color: #f1f5f9;
+        font-family: 'Outfit', 'Cairo', sans-serif;
+    }
+
+    /* تأثير الزجاج البلوري */
+    .glass-card {
+        background: var(--coriza-card);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--coriza-border);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+        border-color: var(--coriza-primary);
+        box-shadow: 0 8px 32px 0 rgba(99, 102, 241, 0.15);
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .intel-header {
+        background: linear-gradient(to right, var(--coriza-primary), var(--coriza-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+    }
+
+    /* تنسيق نتائج البحث الاجتماعي */
+    .social-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+
+    .social-item {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--coriza-border);
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+        text-decoration: none !important;
+        color: inherit;
+    }
+
+    .social-item:hover {
+        background: rgba(99, 102, 241, 0.1);
+        transform: translateY(-5px);
+        border-color: var(--coriza-primary);
+    }
+
+    .social-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    /* تنسيق نتائج التسريبات */
+    .leak-row {
+        border-bottom: 1px solid var(--coriza-border);
+        padding: 12px 0;
+        transition: background 0.2s;
+    }
+
+    .leak-row:hover {
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .leak-badge {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+    }
+
+    /* تنسيقات إضافية للذكاء المرئي المتقدم */
+    .info-card {
+        background: rgba(99, 102, 241, 0.05);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+
+    .stat-box {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--coriza-border);
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .subdomain-item {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--coriza-border);
+        border-radius: 6px;
+        padding: 8px 12px;
+        margin: 5px;
+        display: inline-block;
+        font-family: monospace;
+        font-size: 0.85rem;
+    }
+
+    .email-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .github-repo {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--coriza-border);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        transition: all 0.3s;
+    }
+
+    .github-repo:hover {
+        background: rgba(99, 102, 241, 0.1);
+        border-color: var(--coriza-primary);
+    }
+
+    .dork-result {
+        background: rgba(255, 255, 255, 0.02);
+        border-left: 3px solid var(--coriza-primary);
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-left: 30px;
+        padding-bottom: 20px;
+        border-left: 2px solid var(--coriza-border);
+    }
+
+    .timeline-item:before {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 0;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--coriza-primary);
+    }
+
+    /* مشغل الـ JSON المحسن */
+    .json-explorer {
+        background: #0d1117;
+        border-radius: 12px;
+        padding: 20px;
+        font-family: 'Fira Code', monospace;
+        font-size: 13px;
+        color: #c9d1d9;
+        overflow: auto;
+        direction: ltr;
+        text-align: left;
+    }
+
+    .json-key { color: #79c0ff; }
+    .json-val-str { color: #a5d6ff; }
+    .json-val-num { color: #d2a8ff; }
+    .json-val-bool { color: #ff7b72; }
+
+    .nav-tabs {
+        border-bottom: 1px solid var(--coriza-border);
+    }
+
+    .nav-link {
+        color: #94a3b8 !important;
+        border: none !important;
+        padding: 12px 24px !important;
+        font-weight: 600 !important;
+    }
+
+    .nav-link.active {
+        background: transparent !important;
+        color: var(--coriza-primary) !important;
+        border-bottom: 2px solid var(--coriza-primary) !important;
+    }
+    
+    /* تحسينات الطباعة */
+    @media print {
+        body {
+            background: white !important;
+            color: black !important;
+        }
+        .glass-card {
+            border: 1px solid #ddd !important;
+            box-shadow: none !important;
+        }
+        .nav-tabs, .breadcrumb, button {
+            display: none !important;
+        }
+        #raw-content {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="margin-top: 80px;">
+    <!-- الرأس العلوية -->
+    <div class="row align-items-end mb-5">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="{% url 'osint_tools:dashboard' %}" class="text-muted">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'osint_tools:session_results' result.session.id %}" class="text-muted">النتائج</a></li>
+                    <li class="breadcrumb-item active">تحليل استخباراتي</li>
+                </ol>
+            </nav>
+            <h1 class="intel-header h2 mb-0">{{ result.source }} Report</h1>
+            <p class="text-muted mt-2 mb-0">المعرف الفرعي: <span class="text-light">{{ result.id }}</span> | التاريخ: {{ result.discovered_at|date:"Y-m-d H:i" }}</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <span class="status-badge {% if result.confidence == 'high' %}bg-success{% elif result.confidence == 'medium' %}bg-warning{% else %}bg-danger{% endif %} bg-opacity-10">
+                Confidence: {{ result.confidence }} ({{ result.confidence_score|floatformat:2 }})
+            </span>
+            <div class="mt-3">
+                <button class="btn btn-sm btn-outline-primary me-2" onclick="window.print()">
+                    <i class="fas fa-print me-1"></i> طباعة
+                </button>
+                <button class="btn btn-sm btn-outline-success" id="export-btn">
+                    <i class="fas fa-download me-1"></i> تصدير
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- التبويبات -->
+    <ul class="nav nav-tabs mb-4" id="intelTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="visual-tab" data-bs-toggle="tab" data-bs-target="#visual-content" type="button">
+                <i class="fas fa-eye me-2"></i> الذكاء المرئي
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="raw-tab" data-bs-toggle="tab" data-bs-target="#raw-content" type="button">
+                <i class="fas fa-code me-2"></i> البيانات الخام (JSON)
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="intelTabsContent">
+        <!-- تبويب الذكاء المرئي -->
+        <div class="tab-pane fade show active" id="visual-content" role="tabpanel">
+            <div class="row">
+                <!-- معلومات الهدف -->
+                <div class="col-lg-4 mb-4">
+                    <div class="glass-card p-4 h-100">
+                        <h5 class="mb-4 text-primary border-bottom border-secondary pb-2"><i class="fas fa-crosshairs me-2"></i> ملخص الهدف</h5>
+                        <div class="mb-3">
+                            <label class="text-muted small d-block">عنوان الفحص</label>
+                            <span class="h6 text-light">{{ result.title }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small d-block">المصدر الاستخباراتي</label>
+                            <span class="text-info font-monospace">{{ result.source }}</span>
+                        </div>
+                        {% if result.url %}
+                        <div class="mb-3">
+                            <label class="text-muted small d-block">الرابط المرجعي</label>
+                            <a href="{{ result.url }}" target="_blank" class="text-decoration-none text-warning">
+                                <i class="fas fa-external-link-alt me-1"></i> فتح الرابط الأصلي
+                            </a>
+                        </div>
+                        {% endif %}
+                        <div class="mt-auto pt-4">
+                            <div class="p-3 rounded bg-dark bg-opacity-50 border border-secondary">
+                                <p class="small text-muted mb-0">{{ result.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- مخرجات الذكاء المرئية الديناميكية -->
+                <div class="col-lg-8 mb-4">
+                    <div id="dynamic-visual-container" class="glass-card p-4 h-100">
+                        <!-- سيتم حقن المحتوى هنا بواسطة JavaScript بناءً على نوع البيانات -->
+                        <div class="text-center py-5" id="loader-placeholder">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-3 text-muted">جاري معالجة البيانات الاستخباراتية...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- تبويب البيانات الخام -->
+        <div class="tab-pane fade" id="raw-content" role="tabpanel">
+            <div class="glass-card p-0 position-relative">
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-secondary">
+                    <span class="small text-muted">JSON PAYLOAD</span>
+                    <button class="btn btn-sm btn-outline-primary" id="copy-btn">
+                        <i class="fas fa-copy me-1"></i> Copy to Clipboard
+                    </button>
+                </div>
+                <pre id="json-viewer" class="json-explorer m-0" style="max-height: 600px;"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- البيانات لتغذية الـ JS -->
+{{ result.raw_data|json_script:"intel-data" }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const data = JSON.parse(document.getElementById('intel-data').textContent);
+    const container = document.getElementById('dynamic-visual-container');
+    const jsonViewer = document.getElementById('json-viewer');
+
+    // عرض الـ JSON الخام بتنسيق أنيق وملون
+    renderColoredJSON(data, jsonViewer);
+
+    // معالجة العرض المرئي بناءً على محتوى البيانات
+    renderVisualIntel(data, container);
+
+    function renderVisualIntel(data, target) {
+        target.innerHTML = ''; // تنظيف الحاوية
+        
+        // ═══════════════════════════════════════════════════════════════
+        // 1. Email OSINT - معلومات البريد الإلكتروني
+        // ═══════════════════════════════════════════════════════════════
+        if (data.email || data.gravatar || data.domain_info) {
+            renderEmailOSINT(data, target);
+            return;
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // 2. IP Geolocation - الموقع الجغرافي
+        // ═══════════════════════════════════════════════════════════════
+        if (data.latitude && data.longitude) {
+            renderIPGeolocation(data, target);
+            return;
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // 3. Certificate Transparency - النطاقات الفرعية
+        // ═══════════════════════════════════════════════════════════════
+        if (data.subdomains && Array.isArray(data.subdomains)) {
+            renderSubdomains(data, target);
+            return;
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // 4. GitHub OSINT - معلومات GitHub
+        // ═══════════════════════════════════════════════════════════════
+        if (data.profile || data.repositories) {
+            renderGitHubOSINT(data, target);
+            return;
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // 5. Google Dorks - نتائج البحث المتقدم
+        // ═══════════════════════════════════════════════════════════════
+        if (data.dorks || data.exposed_files) {
+            renderGoogleDorks(data, target);
+            return;
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // 6. Reverse Image Search - البحث العكسي عن الصور
+        // ═══════════════════════════════════════════════════════════════
+        if (data.image_url || data.search_engines) {
+            renderReverseImage(data, target);
+            return;
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // 7. Social Media Accounts - الحسابات الاجتماعية
+        // ═══════════════════════════════════════════════════════════════
+        if (data.results && Array.isArray(data.results)) {
+            // حالة: حسابات اجتماعية (Social Investigator)
+            if (data.results.some(r => r.platform)) {
+                renderSocialAccounts(data, target);
+                return;
+            }
+
+            // حالة: تسريبات بيانات (Breach Detector)
+            if (data.results.some(r => r.type === 'data_leak')) {
+                renderDataBreaches(data, target);
+                return;
+            }
+
+            // حالة افتراضية للنتائج المنسقة
+            renderGenericResults(data, target);
+            return;
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // 8. عرض افتراضي ذكي للبيانات غير المصنفة
+        // ═══════════════════════════════════════════════════════════════
+        renderSmartDefault(data, target);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // دوال العرض المتخصصة
+    // ═══════════════════════════════════════════════════════════════
+    
+    function renderEmailOSINT(data, target) {
+        let html = '<h5 class="mb-4"><i class="fas fa-envelope me-2 text-primary"></i> تحليل البريد الإلكتروني</h5>';
+        
+        // معلومات أساسية
+        html += '<div class="email-info-grid">';
+        
+        if (data.email) {
+            html += `<div class="stat-box">
+                <div class="text-muted small">البريد الإلكتروني</div>
+                <div class="fw-bold text-info mt-2">${data.email}</div>
+            </div>`;
+        }
+        
+        if (data.domain_info) {
+            html += `<div class="stat-box">
+                <div class="text-muted small">النطاق</div>
+                <div class="fw-bold mt-2">${data.domain_info.domain || 'N/A'}</div>
+            </div>`;
+        }
+        
+        if (data.gravatar) {
+            html += `<div class="stat-box">
+                <div class="text-muted small">Gravatar</div>
+                <img src="${data.gravatar.profile_url}" class="rounded mt-2" style="max-width: 80px;">
+            </div>`;
+        }
+        
+        html += '</div>';
+        
+        // تفاصيل إضافية
+        if (data.variations && data.variations.length > 0) {
+            html += '<div class="mt-4"><h6 class="text-muted mb-3">تنويعات البريد المحتملة</h6>';
+            data.variations.slice(0, 10).forEach(v => {
+                html += `<span class="subdomain-item">${v}</span>`;
+            });
+            html += '</div>';
+        }
+        
+        target.innerHTML = html;
+    }
+    
+    function renderIPGeolocation(data, target) {
+        let html = `
+            <h5 class="mb-4"><i class="fas fa-map-marked-alt me-2 text-primary"></i> الموقع الجغرافي المكتشف</h5>
+            <div class="ratio ratio-16x9 rounded overflow-hidden border border-secondary mb-3">
+                <iframe src="https://maps.google.com/maps?q=${data.latitude},${data.longitude}&z=12&output=embed" frameborder="0"></iframe>
+            </div>
+            <div class="row text-center g-3">
+                <div class="col-md-3"><div class="stat-box"><div class="text-muted small">الدولة</div><div class="fw-bold mt-2">${data.country || 'N/A'}</div></div></div>
+                <div class="col-md-3"><div class="stat-box"><div class="text-muted small">المدينة</div><div class="fw-bold mt-2">${data.city || 'N/A'}</div></div></div>
+                <div class="col-md-3"><div class="stat-box"><div class="text-muted small">المزود</div><div class="fw-bold mt-2">${data.isp || 'N/A'}</div></div></div>
+                <div class="col-md-3"><div class="stat-box"><div class="text-muted small">المنطقة الزمنية</div><div class="fw-bold mt-2">${data.timezone || 'N/A'}</div></div></div>
+            </div>
+        `;
+        
+        if (data.org || data.as) {
+            html += '<div class="mt-4">';
+            if (data.org) html += `<div class="info-card"><strong>المنظمة:</strong> ${data.org}</div>`;
+            if (data.as) html += `<div class="info-card"><strong>AS Number:</strong> ${data.as}</div>`;
+            html += '</div>';
+        }
+        
+        target.innerHTML = html;
+    }
+    
+    function renderSubdomains(data, target) {
+        const subdomains = data.subdomains || [];
+        let html = `<h5 class="mb-4"><i class="fas fa-sitemap me-2 text-primary"></i> النطاقات الفرعية المكتشفة (${subdomains.length})</h5>`;
+        
+        if (subdomains.length > 0) {
+            html += '<div class="mb-3">';
+            subdomains.slice(0, 100).forEach(sub => {
+                html += `<span class="subdomain-item">${sub}</span>`;
+            });
+            if (subdomains.length > 100) {
+                html += `<div class="text-muted small mt-3">... و ${subdomains.length - 100} نطاق فرعي إضافي</div>`;
+            }
+            html += '</div>';
+        } else {
+            html += '<p class="text-muted">لم يتم العثور على نطاقات فرعية</p>';
+        }
+        
+        target.innerHTML = html;
+    }
+    
+    function renderGitHubOSINT(data, target) {
+        let html = '<h5 class="mb-4"><i class="fab fa-github me-2 text-primary"></i> معلومات GitHub</h5>';
+        
+        if (data.profile) {
+            const p = data.profile;
+            html += `
+                <div class="info-card mb-3">
+                    <div class="d-flex align-items-center">
+                        ${p.avatar_url ? `<img src="${p.avatar_url}" class="rounded me-3" style="width: 60px;">` : ''}
+                        <div>
+                            <h6 class="mb-1">${p.name || p.login}</h6>
+                            <p class="text-muted small mb-0">${p.bio || 'لا يوجد وصف'}</p>
+                        </div>
+                    </div>
+                    <div class="row text-center mt-3">
+                        <div class="col-4"><strong>${p.public_repos || 0}</strong><br><small class="text-muted">مستودعات</small></div>
+                        <div class="col-4"><strong>${p.followers || 0}</strong><br><small class="text-muted">متابعون</small></div>
+                        <div class="col-4"><strong>${p.following || 0}</strong><br><small class="text-muted">يتابع</small></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (data.repositories && data.repositories.length > 0) {
+            html += '<h6 class="mt-4 mb-3">المستودعات</h6>';
+            data.repositories.slice(0, 10).forEach(repo => {
+                html += `
+                    <div class="github-repo">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1"><a href="${repo.html_url}" target="_blank" class="text-info">${repo.name}</a></h6>
+                                <p class="text-muted small mb-2">${repo.description || 'لا يوجد وصف'}</p>
+                            </div>
+                            <span class="badge bg-warning bg-opacity-10 text-warning">⭐ ${repo.stargazers_count || 0}</span>
+                        </div>
+                        ${repo.language ? `<span class="badge bg-primary bg-opacity-10 text-primary">${repo.language}</span>` : ''}
+                    </div>
+                `;
+            });
+        }
+        
+        target.innerHTML = html;
+    }
+    
+    function renderGoogleDorks(data, target) {
+        let html = '<h5 class="mb-4"><i class="fas fa-search me-2 text-primary"></i> نتائج البحث المتقدم</h5>';
+        
+        const results = data.dorks || data.exposed_files || data.results || [];
+        
+        if (results.length > 0) {
+            results.forEach(item => {
+                html += `
+                    <div class="dork-result">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="mb-1">${item.title || item.name || 'نتيجة'}</h6>
+                            ${item.type ? `<span class="badge bg-danger bg-opacity-10 text-danger">${item.type}</span>` : ''}
+                        </div>
+                        <p class="text-muted small mb-2">${item.snippet || item.description || ''}</p>
+                        ${item.url ? `<a href="${item.url}" target="_blank" class="small text-warning">زيارة <i class="fas fa-external-link-alt ms-1"></i></a>` : ''}
+                    </div>
+                `;
+            });
+        } else {
+            html += '<p class="text-muted">لم يتم العثور على نتائج</p>';
+        }
+        
+        target.innerHTML = html;
+    }
+    
+    function renderReverseImage(data, target) {
+        let html = '<h5 class="mb-4"><i class="fas fa-image me-2 text-primary"></i> نتائج البحث العكسي عن الصورة</h5>';
+        
+        if (data.image_url) {
+            html += `<div class="text-center mb-4"><img src="${data.image_url}" class="img-fluid rounded border border-secondary" style="max-height: 300px;"></div>`;
+        }
+        
+        if (data.search_engines) {
+            html += '<div class="row g-3">';
+            Object.keys(data.search_engines).forEach(engine => {
+                const url = data.search_engines[engine];
+                html += `
+                    <div class="col-md-4">
+                        <a href="${url}" target="_blank" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-search me-2"></i> ${engine}
+                        </a>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+        
+        target.innerHTML = html;
+    }
+    
+    function renderSocialAccounts(data, target) {
+        let html = '<h5 class="mb-4"><i class="fas fa-users me-2 text-primary"></i> الحسابات المكتشفة (' + data.results.length + ')</h5>';
+        html += '<div class="social-grid">';
+        data.results.forEach(acc => {
+            const icon = getSocialIcon(acc.platform);
+            html += `
+                <a href="${acc.url}" target="_blank" class="social-item">
+                    <span class="social-icon">${icon}</span>
+                    <div class="small fw-bold">${acc.platform}</div>
+                    <div class="text-muted" style="font-size: 0.6rem;">${acc.status || 'Found'}</div>
+                </a>
+            `;
+        });
+        html += '</div>';
+        target.innerHTML = html;
+    }
+    
+    function renderDataBreaches(data, target) {
+        let html = '<h5 class="mb-4"><i class="fas fa-exclamation-triangle me-2 text-danger"></i> قواعد البيانات المتضررة</h5>';
+        html += '<div class="leak-list">';
+        data.results.forEach(leak => {
+            html += `
+                <div class="leak-row d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-bold text-light">${leak.source}</div>
+                        <div class="small text-muted">${leak.description}</div>
+                    </div>
+                    <span class="leak-badge">LEAKED</span>
+                </div>
+            `;
+        });
+        html += '</div>';
+        target.innerHTML = html;
+    }
+    
+    function renderGenericResults(data, target) {
+        let html = '<h5 class="mb-4"><i class="fas fa-list me-2 text-primary"></i> النتائج المكتشفة (' + data.results.length + ')</h5>';
+        data.results.forEach(item => {
+            html += `
+                <div class="p-3 mb-3 rounded bg-dark bg-opacity-25 border border-secondary">
+                    <div class="d-flex justify-content-between">
+                        <div class="fw-bold text-info">${item.title || item.subdomain || item.name || 'نتيجة'}</div>
+                        <span class="badge bg-primary bg-opacity-10 text-primary">${item.type || 'info'}</span>
+                    </div>
+                    <div class="text-muted small mt-1">${item.description || item.snippet || ''}</div>
+                    ${item.url ? `<a href="${item.url}" target="_blank" class="small text-warning mt-2 d-inline-block">زيارة الرابط <i class="fas fa-external-link-alt ms-1"></i></a>` : ''}
+                </div>
+            `;
+        });
+        target.innerHTML = html;
+    }
+    
+    function renderSmartDefault(data, target) {
+        // عرض ذكي للبيانات غير المصنفة
+        let html = '<h5 class="mb-4"><i class="fas fa-database me-2 text-primary"></i> البيانات المكتشفة</h5>';
+        
+        // محاولة استخراج معلومات مفيدة
+        const keys = Object.keys(data);
+        let hasUsefulData = false;
+        
+        keys.forEach(key => {
+            const value = data[key];
+            if (value && typeof value !== 'object') {
+                hasUsefulData = true;
+                html += `
+                    <div class="info-card">
+                        <strong>${key}:</strong> ${value}
+                    </div>
+                `;
+            }
+        });
+        
+        if (!hasUsefulData) {
+            html = `
+                <div class="text-center py-5">
+                    <i class="fas fa-database mb-3 fa-3x text-muted opacity-25"></i>
+                    <p class="text-muted">لا يوجد عرض مرئي مخصص لهذا النوع من البيانات.<br>يرجى مراجعة تبويب البيانات الخام (JSON) للاطلاع على التفاصيل الكاملة.</p>
+                </div>
+            `;
+        }
+        
+        target.innerHTML = html;
+    }
+
+    function getSocialIcon(platform) {
+        const platforms = {
+            'Facebook': '<i class="fab fa-facebook text-primary"></i>',
+            'Twitter/X': '<i class="fab fa-twitter text-light"></i>',
+            'Instagram': '<i class="fab fa-instagram text-danger"></i>',
+            'LinkedIn': '<i class="fab fa-linkedin text-info"></i>',
+            'YouTube': '<i class="fab fa-youtube text-danger"></i>',
+            'GitHub': '<i class="fab fa-github text-light"></i>',
+            'Reddit': '<i class="fab fa-reddit text-warning"></i>',
+            'TikTok': '<i class="fab fa-tiktok text-light"></i>',
+            'Pinterest': '<i class="fab fa-pinterest text-danger"></i>',
+            'Snapchat': '<i class="fab fa-snapchat text-warning"></i>'
+        };
+        return platforms[platform] || '<i class="fas fa-user-circle"></i>';
+    }
+    
+    function renderColoredJSON(obj, element) {
+        // تلوين JSON بشكل احترافي
+        const jsonString = JSON.stringify(obj, null, 2);
+        const coloredJSON = jsonString
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'json-val-num';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-val-str';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-val-bool';
+                } else if (/null/.test(match)) {
+                    cls = 'json-val-bool';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        element.innerHTML = coloredJSON;
+    }
+
+    // زر النسخ
+    document.getElementById('copy-btn').addEventListener('click', function() {
+        navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+        const btn = this;
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i> Copy to Clipboard', 2000);
+    });
+    
+    // زر التصدير
+    document.getElementById('export-btn').addEventListener('click', function() {
+        const dataStr = JSON.stringify(data, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'osint_result_{{ result.id }}.json';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        const btn = this;
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> تم التصدير';
+        setTimeout(() => btn.innerHTML = originalHTML, 2000);
+    });
+});
+</script>
+{% endblock %}

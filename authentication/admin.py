@@ -54,15 +54,15 @@ class UserAdmin(BaseUserAdmin):
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     """إدارة ملفات المستخدمين"""
-    list_display = ['user', 'bio_preview', 'website']
-    list_filter = []
+    list_display = ['user', 'clearance_badge', 'bio_preview', 'website']
+    list_filter = ['clearance_level']
     search_fields = ['user__username', 'user__email', 'bio']
     readonly_fields = []
     
     fieldsets = (
-        (None, {'fields': ('user',)}),
+        (None, {'fields': ('user', 'clearance_level')}),
         ('معلومات إضافية', {
-            'fields': ('bio', 'website')
+            'fields': ('bio', 'organization', 'website')
         }),
         ('وسائل التواصل الاجتماعي', {
             'fields': ('social_media',),
@@ -79,6 +79,20 @@ class UserProfileAdmin(admin.ModelAdmin):
             return obj.bio[:50] + '...' if len(obj.bio) > 50 else obj.bio
         return '-'
     bio_preview.short_description = 'نبذة مختصرة'
+
+    def clearance_badge(self, obj):
+        colors = {
+            'L1': '#6c757d',
+            'L2': '#17a2b8',
+            'L3': '#ffc107',
+            'L4': '#dc3545',
+        }
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 10px; font-weight: bold;">{}</span>',
+            colors.get(obj.clearance_level, '#000'),
+            obj.get_clearance_level_display()
+        )
+    clearance_badge.short_description = 'مستوى التصريح'
 
 
 @admin.register(EmailVerification)

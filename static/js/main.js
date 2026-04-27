@@ -1,5 +1,80 @@
 // كوريزا - ملف JavaScript الرئيسي
 
+// ============================================================================
+// CSRF Token Support - إصلاح المشكلة الحرجة #4
+// ============================================================================
+
+/**
+ * الحصول على CSRF token من الكوكيز
+ * @param {string} name - اسم الكوكي
+ * @returns {string|null} - قيمة الكوكي أو null
+ */
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+/**
+ * الحصول على CSRF token
+ * @returns {string} - CSRF token
+ */
+function getCSRFToken() {
+    return getCookie('csrftoken');
+}
+
+/**
+ * إضافة CSRF token إلى headers
+ * @param {Object} headers - كائن headers
+ * @returns {Object} - headers مع CSRF token
+ */
+function addCSRFToken(headers = {}) {
+    const csrfToken = getCSRFToken();
+    if (csrfToken) {
+        headers['X-CSRFToken'] = csrfToken;
+    }
+    return headers;
+}
+
+/**
+ * fetch مع دعم CSRF تلقائي
+ * @param {string} url - عنوان URL
+ * @param {Object} options - خيارات fetch
+ * @returns {Promise} - Promise من fetch
+ */
+function csrfFetch(url, options = {}) {
+    // إضافة CSRF token للطلبات غير GET
+    if (!options.method || options.method.toUpperCase() !== 'GET') {
+        options.headers = addCSRFToken(options.headers || {});
+    }
+    
+    // إضافة Content-Type إذا لم يكن موجوداً
+    if (!options.headers['Content-Type'] && options.body && typeof options.body === 'string') {
+        options.headers['Content-Type'] = 'application/json';
+    }
+    
+    return fetch(url, options);
+}
+
+// تصدير الوظائف للاستخدام العام
+window.getCookie = getCookie;
+window.getCSRFToken = getCSRFToken;
+window.addCSRFToken = addCSRFToken;
+window.csrfFetch = csrfFetch;
+
+// ============================================================================
+// تهيئة التطبيق
+// ============================================================================
+
 // تهيئة التطبيق مع معالجة الأخطاء
 document.addEventListener('DOMContentLoaded', function() {
     try {
@@ -204,26 +279,8 @@ function initializeNavigation() {
         });
     }
     
-    // تحسين القوائم المنسدلة
-    const dropdowns = document.querySelectorAll('.dropdown');
-    dropdowns.forEach(dropdown => {
-        const toggle = dropdown.querySelector('.dropdown-toggle');
-        const menu = dropdown.querySelector('.dropdown-menu');
-        
-        if (toggle && menu) {
-            toggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                menu.classList.toggle('show');
-            });
-            
-            // إغلاق القائمة عند النقر خارجها
-            document.addEventListener('click', function(e) {
-                if (!dropdown.contains(e.target)) {
-                    menu.classList.remove('show');
-                }
-            });
-        }
-    });
+    // تحسين القوائم المنسدلة - Bootstrap 5 يتعامل معها تلقائيًا
+    // لا حاجة لكود إضافي
 }
 
 // تهيئة البحث
@@ -260,7 +317,7 @@ function performSearch(query) {
     // إظهار مؤشر التحميل
     showLoadingIndicator();
     
-    // تنفيذ طلب البحث
+    // تنفيذ طلب البحث (GET لا يحتاج CSRF token)
     fetch(`/search/?q=${encodeURIComponent(query)}`)
         .then(response => response.json())
         .then(data => {
@@ -530,13 +587,57 @@ setTimeout(function() {
 
 // تصدير الوظائف للاستخدام العام
 window.CorizaApp = {
+    // CSRF Support
+    getCookie,
+    getCSRFToken,
+    addCSRFToken,
+    csrfFetch,
+    // UI Functions
     showNotification,
     showLoadingIndicator,
     hideLoadingIndicator,
     copyToClipboard,
+    // Formatting
     formatDate,
     formatNumber,
+    // Utilities
     debounce,
     throttle
 };
+
+// ============================================================================
+// مثال على استخدام CSRF في POST requests
+// ============================================================================
+
+/**
+ * مثال: إرسال بيانات مع CSRF token
+ * 
+ * // الطريقة القديمة (بدون CSRF - سيفشل الآن)
+ * fetch('/api/endpoint/', {
+ *     method: 'POST',
+ *     headers: {
+ *         'Content-Type': 'application/json'
+ *     },
+ *     body: JSON.stringify(data)
+ * });
+ * 
+ * // الطريقة الجديدة (مع CSRF - صحيحة)
+ * csrfFetch('/api/endpoint/', {
+ *     method: 'POST',
+ *     headers: {
+ *         'Content-Type': 'application/json'
+ *     },
+ *     body: JSON.stringify(data)
+ * });
+ * 
+ * // أو يدوياً
+ * fetch('/api/endpoint/', {
+ *     method: 'POST',
+ *     headers: {
+ *         'Content-Type': 'application/json',
+ *         'X-CSRFToken': getCSRFToken()
+ *     },
+ *     body: JSON.stringify(data)
+ * });
+ */
 

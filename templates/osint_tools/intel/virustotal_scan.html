@@ -1,0 +1,189 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+{% block title %}VirusTotal Scan - فحص الملفات والروابط{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center mb-2">
+        <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-outline-secondary me-3"><i class="fas fa-arrow-right"></i></a>
+        <div>
+            <h1 class="fw-bold mb-0 cyber-text"><i class="fas fa-shield-virus me-2"></i>VirusTotal Intelligence Scan</h1>
+            <p class="text-secondary mb-0 small">فحص الروابط، الملفات، و Hashes عبر 70+ محرك أمني</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <!-- Input -->
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label text-secondary">نوع الفحص</label>
+                        <select id="scanType" class="form-select" style="background:rgba(0,0,0,0.5);border-color:#444;color:white;">
+                            <option value="url">رابط / URL</option>
+                            <option value="hash">بصمة ملف / Hash</option>
+                        </select>
+                    </div>
+                    <div class="col-md-7">
+                        <label class="form-label text-secondary">الهدف المراد فحصه</label>
+                        <input type="text" id="targetInput" class="form-control text-white font-monospace"
+                               style="background:rgba(0,0,0,0.4);border-color:#444;"
+                               placeholder="أدخل رابط أو بصمة ملف..."
+                               onkeydown="if(event.key==='Enter') runScan()">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" onclick="runScan()">
+                            <i class="fas fa-virus-slash me-2"></i>فحص
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="col-12 text-center py-5" id="loadingArea" style="display:none;">
+        <div class="spinner-border text-danger mb-3" style="width:3rem;height:3rem;"></div>
+        <p class="text-secondary">جارٍ إرسال الهدف لمحركات الفحص...</p>
+    </div>
+
+    <!-- Error -->
+    <div class="col-12" id="errorArea" style="display:none;">
+        <div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i><span id="errorMsg"></span></div>
+    </div>
+
+    <!-- Demo Notice -->
+    <div class="col-12" id="demoNotice" style="display:none;">
+        <div class="alert alert-warning"><i class="fas fa-info-circle me-2"></i>
+            وضع العرض التوضيحي — أضف مفتاح <strong>VIRUSTOTAL_API_KEY</strong> في إعدادات Django للحصول على نتائج حقيقية من API.
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="col-12" id="resultArea" style="display:none;">
+        <div class="row g-4">
+            <!-- Gauge -->
+            <div class="col-lg-4">
+                <div class="content-card h-100 text-center">
+                    <div class="card-header"><h5 class="mb-0">ملخص الفحص</h5></div>
+                    <div class="card-body pb-4">
+                        <div id="riskGauge" class="my-4" style="font-size:6rem;"></div>
+                        <h3 id="riskLabel" class="fw-bold mb-2"></h3>
+                        <p class="text-secondary small" id="riskDesc"></p>
+                        <a id="vtLink" href="#" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
+                            <i class="fas fa-external-link-alt me-1"></i>عرض على VirusTotal
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Breakdown -->
+            <div class="col-lg-8">
+                <div class="content-card h-100">
+                    <div class="card-header"><h5 class="mb-0">توزيع نتائج المحركات</h5></div>
+                    <div class="card-body">
+                        <div class="row g-3 mb-4" id="statsRow"></div>
+                        <div id="maliciousEngines"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function runScan() {
+    const target = document.getElementById('targetInput').value.trim();
+    const scan_type = document.getElementById('scanType').value;
+    if (!target) return;
+
+    document.getElementById('loadingArea').style.display = 'block';
+    document.getElementById('resultArea').style.display = 'none';
+    document.getElementById('errorArea').style.display = 'none';
+    document.getElementById('demoNotice').style.display = 'none';
+
+    fetch('{% url "osint_tools:api_virustotal_scan" %}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
+        body: JSON.stringify({target, scan_type})
+    })
+    .then(r => r.json())
+    .then(res => {
+        document.getElementById('loadingArea').style.display = 'none';
+        if (!res.success) { showError(res.error); return; }
+        if (res.demo) document.getElementById('demoNotice').style.display = 'block';
+        renderResults(res.data);
+    })
+    .catch(() => { document.getElementById('loadingArea').style.display = 'none'; showError('فشل الاتصال بالخادم'); });
+}
+
+function renderResults(d) {
+    const stats = d.stats || {};
+    const malicious = stats.malicious || 0;
+    const suspicious = stats.suspicious || 0;
+    const total = stats.total || (malicious + suspicious + (stats.undetected||0) + (stats.harmless||0)) || 75;
+    const threatScore = malicious + suspicious;
+
+    // Risk gauge
+    let riskIcon, riskColor, riskText, riskDesc;
+    if (malicious === 0 && suspicious === 0) {
+        riskIcon = '✅'; riskColor = 'success'; riskText = 'آمن'; riskDesc = 'لم يُكتشف أي تهديد من قِبل محركات الفحص.';
+    } else if (malicious === 0 && suspicious > 0) {
+        riskIcon = '⚠️'; riskColor = 'warning'; riskText = 'مشبوه'; riskDesc = `أبلغ ${suspicious} محرك عن سلوك مشبوه.`;
+    } else {
+        riskIcon = '🚨'; riskColor = 'danger'; riskText = 'خطير'; riskDesc = `اكتشف ${malicious} محرك تهديداً صريحاً.`;
+    }
+
+    document.getElementById('riskGauge').textContent = riskIcon;
+    document.getElementById('riskLabel').innerHTML = `<span class="text-${riskColor}">${riskText}</span>`;
+    document.getElementById('riskDesc').textContent = riskDesc;
+    document.getElementById('vtLink').href = d.permalink || '#';
+
+    // Stats cards
+    const statDefs = [
+        {key: 'malicious', label: 'خبيث', color: 'danger', icon: 'skull-crossbones'},
+        {key: 'suspicious', label: 'مشبوه', color: 'warning', icon: 'exclamation-triangle'},
+        {key: 'undetected', label: 'غير مكتشف', color: 'secondary', icon: 'question-circle'},
+        {key: 'harmless', label: 'آمن', color: 'success', icon: 'check-circle'},
+    ];
+    document.getElementById('statsRow').innerHTML = statDefs.map(s => `
+        <div class="col-6 col-md-3">
+            <div class="stat-card cyber-border text-center p-3">
+                <i class="fas fa-${s.icon} fa-2x text-${s.color} mb-2"></i>
+                <h3 class="fw-bold text-${s.color} mb-0">${stats[s.key] ?? 0}</h3>
+                <small class="text-secondary">${s.label}</small>
+            </div>
+        </div>`).join('');
+
+    // Malicious engines list
+    if (d.malicious_engines && d.malicious_engines.length > 0) {
+        document.getElementById('maliciousEngines').innerHTML = `
+            <h6 class="text-danger mb-2"><i class="fas fa-list me-2"></i>محركات الكشف</h6>
+            <div class="table-responsive">
+            <table class="table table-dark table-sm">
+                <thead><tr><th>المحرك</th><th>التصنيف</th><th>اسم التهديد</th></tr></thead>
+                <tbody>${d.malicious_engines.map(e => `
+                    <tr>
+                        <td class="text-white">${e.engine}</td>
+                        <td><span class="badge bg-${e.category==='malicious'?'danger':'warning'}">${e.category}</span></td>
+                        <td class="text-danger font-monospace small">${e.result || '-'}</td>
+                    </tr>`).join('')}</tbody>
+            </table></div>`;
+    } else {
+        document.getElementById('maliciousEngines').innerHTML = '';
+    }
+
+    document.getElementById('resultArea').style.display = 'block';
+}
+
+function showError(msg) {
+    document.getElementById('errorMsg').textContent = msg;
+    document.getElementById('errorArea').style.display = 'block';
+}
+function getCsrf() { return document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''; }
+</script>
+{% endblock %}

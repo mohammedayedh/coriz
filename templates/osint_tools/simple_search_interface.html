@@ -1,0 +1,731 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}بحث OSINT المبسط - كوريزا{% endblock %}
+
+{% block extra_css %}
+<style>
+/* واجهة بحث مبسطة وجذابة - ثيم داكن */
+.simple-search-container {
+    min-height: 100vh;
+    background: #0f1419;
+    padding: 80px 0 40px;
+}
+
+.search-card {
+    background: linear-gradient(135deg, #1a1f2e 0%, #161b28 100%);
+    border-radius: 20px;
+    border: 2px solid #2d3748;
+    padding: 40px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.search-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.search-subtitle {
+    color: #cbd5e0;
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 1.1rem;
+}
+
+.search-input-group {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 20px 60px 20px 20px;
+    font-size: 1.2rem;
+    border: 2px solid #2d3748;
+    border-radius: 15px;
+    transition: all 0.3s;
+    background: #1e2433;
+    color: #e2e8f0;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: #252b3b;
+}
+
+.search-input::placeholder {
+    color: #718096;
+}
+
+.search-btn {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.search-btn:hover {
+    transform: translateY(-50%) scale(1.05);
+}
+
+.search-type-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.type-option {
+    background: rgba(0,0,0,0.3);
+    border: 2px solid #2d3748;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.type-option:hover {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+}
+
+.type-option.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+}
+
+.type-option i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    display: block;
+    color: inherit;
+}
+
+.type-option span {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: inherit;
+}
+
+.quick-examples {
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 30px;
+    border: 1px solid #2d3748;
+}
+
+.quick-examples h6 {
+    color: #e2e8f0;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.example-tag {
+    display: inline-block;
+    background: #1e2433;
+    border: 2px solid #2d3748;
+    padding: 8px 15px;
+    border-radius: 20px;
+    margin: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+    color: #cbd5e0;
+}
+
+.example-tag:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+}
+
+.results-container {
+    margin-top: 40px;
+    display: none;
+}
+
+.result-card {
+    background: linear-gradient(135deg, rgba(26, 31, 46, 0.8) 0%, rgba(22, 27, 40, 0.9) 100%);
+    border: 2px solid #2d3748;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: all 0.3s;
+}
+
+.result-card:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 10px;
+}
+
+.result-title {
+    font-weight: 600;
+    color: #e2e8f0;
+    font-size: 1.1rem;
+}
+
+.result-source {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.result-description {
+    color: #cbd5e0;
+    margin-bottom: 10px;
+}
+
+.result-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: #a0aec0;
+}
+
+.result-meta a {
+    color: #667eea !important;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 40px;
+    display: none;
+}
+
+.spinner {
+    border: 4px solid #2d3748;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.stats-bar {
+    display: flex;
+    justify-content: space-around;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    border: 1px solid #2d3748;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-label {
+    color: #cbd5e0;
+    font-size: 0.9rem;
+}
+
+.tools-running {
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 20px;
+    display: none;
+    border: 1px solid #2d3748;
+}
+
+.tool-progress {
+    background: linear-gradient(135deg, rgba(26, 31, 46, 0.8) 0%, rgba(22, 27, 40, 0.9) 100%);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid #2d3748;
+}
+
+.tool-name {
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 8px;
+}
+
+.progress-bar-container {
+    background: #1e2433;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #2d3748;
+}
+
+.progress-bar-fill {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    height: 100%;
+    transition: width 0.3s;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="simple-search-container">
+    <div class="container">
+        <div class="search-card">
+            <!-- العنوان -->
+            <h1 class="search-title">
+                <i class="fas fa-search"></i>
+                ابحث عن أي شيء
+            </h1>
+            <p class="search-subtitle">
+                أدخل البريد الإلكتروني، اسم المستخدم، رقم الهاتف، أو أي معلومة تريد البحث عنها
+            </p>
+
+            <!-- إحصائيات سريعة -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_tools }}</div>
+                    <div class="stat-label">أداة متاحة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_sources }}</div>
+                    <div class="stat-label">مصدر بيانات</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_searches }}</div>
+                    <div class="stat-label">عملية بحث</div>
+                </div>
+            </div>
+
+            <!-- نوع البحث -->
+            <div class="search-type-selector">
+                <div class="type-option active" data-type="auto">
+                    <i class="fas fa-magic"></i>
+                    <span>تلقائي</span>
+                </div>
+                <div class="type-option" data-type="email">
+                    <i class="fas fa-envelope"></i>
+                    <span>بريد إلكتروني</span>
+                </div>
+                <div class="type-option" data-type="username">
+                    <i class="fas fa-user"></i>
+                    <span>اسم مستخدم</span>
+                </div>
+                <div class="type-option" data-type="phone">
+                    <i class="fas fa-phone"></i>
+                    <span>رقم هاتف</span>
+                </div>
+                <div class="type-option" data-type="domain">
+                    <i class="fas fa-globe"></i>
+                    <span>موقع/نطاق</span>
+                </div>
+                <div class="type-option" data-type="ip">
+                    <i class="fas fa-network-wired"></i>
+                    <span>عنوان IP</span>
+                </div>
+            </div>
+
+            <!-- حقل البحث -->
+            <div class="search-input-group">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput"
+                    placeholder="مثال: user@example.com أو john_doe أو +967123456789"
+                    autocomplete="off"
+                >
+                <button class="search-btn" id="searchBtn">
+                    <i class="fas fa-search me-2"></i>
+                    ابحث الآن
+                </button>
+            </div>
+
+            <!-- أمثلة سريعة -->
+            <div class="quick-examples">
+                <h6><i class="fas fa-lightbulb me-2"></i>أمثلة للبحث:</h6>
+                <span class="example-tag" data-example="test@example.com">test@example.com</span>
+                <span class="example-tag" data-example="john_doe">john_doe</span>
+                <span class="example-tag" data-example="+1234567890">+1234567890</span>
+                <span class="example-tag" data-example="example.com">example.com</span>
+                <span class="example-tag" data-example="192.168.1.1">192.168.1.1</span>
+            </div>
+
+            <!-- الأدوات قيد التشغيل -->
+            <div class="tools-running" id="toolsRunning">
+                <h6 style="color: #e2e8f0; margin-bottom: 15px;">
+                    <i class="fas fa-cog fa-spin me-2"></i>
+                    جاري البحث في المصادر...
+                </h6>
+                <div id="toolsProgress"></div>
+            </div>
+
+            <!-- مؤشر التحميل -->
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+                <p style="color: #cbd5e0;">جاري البحث في جميع المصادر المتاحة...</p>
+            </div>
+
+            <!-- النتائج -->
+            <div class="results-container" id="resultsContainer">
+                <h5 style="color: #e2e8f0; margin-bottom: 20px;">
+                    <i class="fas fa-check-circle me-2" style="color: #10b981;"></i>
+                    النتائج المكتشفة (<span id="resultsCount">0</span>)
+                </h5>
+                <div id="resultsContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// دالة للحصول على CSRF Token
+function getCsrfToken() {
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const typeOptions = document.querySelectorAll('.type-option');
+    const exampleTags = document.querySelectorAll('.example-tag');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const resultsContent = document.getElementById('resultsContent');
+    const resultsCount = document.getElementById('resultsCount');
+    const toolsRunning = document.getElementById('toolsRunning');
+    const toolsProgress = document.getElementById('toolsProgress');
+    
+    let selectedType = 'auto';
+    let activeSearches = [];
+
+    // اختيار نوع البحث
+    typeOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            typeOptions.forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+            selectedType = this.dataset.type;
+        });
+    });
+
+    // الأمثلة السريعة
+    exampleTags.forEach(tag => {
+        tag.addEventListener('click', function() {
+            searchInput.value = this.dataset.example;
+            searchInput.focus();
+        });
+    });
+
+    // البحث
+    searchBtn.addEventListener('click', performSearch);
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+
+    function performSearch() {
+        const query = searchInput.value.trim();
+        
+        if (!query) {
+            alert('الرجاء إدخال شيء للبحث عنه');
+            return;
+        }
+
+        // إخفاء النتائج السابقة
+        resultsContainer.style.display = 'none';
+        resultsContent.innerHTML = '';
+        
+        // إظهار التحميل
+        loadingSpinner.style.display = 'block';
+        toolsRunning.style.display = 'block';
+        
+        // تحديد الأدوات المناسبة
+        const tools = determineTools(query, selectedType);
+        
+        // تشغيل الأدوات
+        runTools(query, tools);
+    }
+
+    function determineTools(query, type) {
+        // تحديد تلقائي لنوع البحث
+        if (type === 'auto') {
+            if (query.includes('@')) {
+                type = 'email';
+            } else if (query.match(/^\+?\d+$/)) {
+                type = 'phone';
+            } else if (query.match(/^(\d{1,3}\.){3}\d{1,3}$/)) {
+                type = 'ip';
+            } else if (query.includes('.')) {
+                type = 'domain';
+            } else {
+                type = 'username';
+            }
+        }
+
+        // قائمة الأدوات حسب النوع - محدثة بالأدوات الجديدة
+        const toolsMap = {
+            'email': ['email-osint', 'breach-detector', 'infoga', 'hudsonrock-pro', 'holehe-pro'],
+            'username': ['sherlock', 'github-osint', 'social-investigator'],
+            'phone': ['phone-analyzer'],
+            'domain': ['wayback-machine', 'cert-transparency', 'subdomain-enum', 'google-dorks', 'cvestalker-pro', 'mxtoolbox-pro', 'viewdns-pro'],
+            'ip': ['ip-geolocation'],
+        };
+
+        return toolsMap[type] || [];
+    }
+
+    function runTools(query, tools) {
+        activeSearches = [];
+        toolsProgress.innerHTML = '';
+        
+        tools.forEach(toolSlug => {
+            // إنشاء شريط تقدم للأداة
+            const progressHtml = `
+                <div class="tool-progress" id="progress-${toolSlug}">
+                    <div class="tool-name">
+                        <i class="fas fa-cog fa-spin me-2"></i>
+                        ${getToolName(toolSlug)}
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            `;
+            toolsProgress.insertAdjacentHTML('beforeend', progressHtml);
+            
+            // تشغيل الأداة
+            fetch(`/osint/tools/${toolSlug}/run/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    target: query,
+                    options: {
+                        save_results: true
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    activeSearches.push({
+                        tool: toolSlug,
+                        sessionId: data.session_id
+                    });
+                    
+                    // مراقبة التقدم
+                    monitorProgress(toolSlug, data.session_id);
+                } else {
+                    updateToolProgress(toolSlug, 100, 'failed');
+                }
+            })
+            .catch(error => {
+                console.error(`Error running ${toolSlug}:`, error);
+                updateToolProgress(toolSlug, 100, 'failed');
+            });
+        });
+    }
+
+    function monitorProgress(toolSlug, sessionId) {
+        let lastResultCount = 0;
+        const interval = setInterval(() => {
+            fetch(`/osint/ajax/session-status/${sessionId}/`)
+            .then(response => response.json())
+            .then(data => {
+                updateToolProgress(toolSlug, data.progress, data.status);
+                
+                // جلب النتائج دورياً حتى لو لم تكتمل الأداة
+                if (data.results_count > lastResultCount) {
+                    fetchResults(sessionId);
+                    lastResultCount = data.results_count;
+                }
+
+                if (data.status === 'completed' || data.status === 'failed') {
+                    clearInterval(interval);
+                    fetchResults(sessionId); // جلب نهائي للنتائج
+                }
+                
+                // التحقق من اكتمال جميع الأدوات
+                checkAllCompleted();
+            })
+            .catch(error => {
+                console.error('Error monitoring progress:', error);
+                clearInterval(interval);
+            });
+        }, 3000);
+    }
+
+    function updateToolProgress(toolSlug, progress, status) {
+        const progressEl = document.querySelector(`#progress-${toolSlug} .progress-bar-fill`);
+        const toolNameEl = document.querySelector(`#progress-${toolSlug} .tool-name`);
+        
+        if (progressEl) {
+            progressEl.style.width = progress + '%';
+        }
+        
+        if (toolNameEl && status === 'completed') {
+            toolNameEl.innerHTML = `
+                <i class="fas fa-check-circle me-2" style="color: #48bb78;"></i>
+                ${getToolName(toolSlug)}
+            `;
+        } else if (toolNameEl && status === 'failed') {
+            toolNameEl.innerHTML = `
+                <i class="fas fa-times-circle me-2" style="color: #f56565;"></i>
+                ${getToolName(toolSlug)}
+            `;
+        }
+    }
+
+    function fetchResults(sessionId) {
+        fetch(`/osint/ajax/session-results/${sessionId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.results && data.results.length > 0) {
+                displayResults(data.results);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching results:', error);
+        });
+    }
+
+    const displayedResultIds = new Set();
+
+    function displayResults(results) {
+        let newResultsFound = false;
+        results.forEach(result => {
+            // منع التكرار باستخدام المعرف الفريد
+            if (displayedResultIds.has(result.id)) return;
+            displayedResultIds.add(result.id);
+            newResultsFound = true;
+
+            const resultHtml = `
+                <div class="result-card" style="animation: fadeIn 0.5s ease-out;">
+                    <div class="result-header">
+                        <div class="result-title">
+                            <i class="fas fa-link me-2"></i>
+                            ${result.title}
+                        </div>
+                        <div class="result-source">${result.source}</div>
+                    </div>
+                    <div class="result-description">${result.description || 'لا يوجد وصف'}</div>
+                    <div class="result-meta">
+                        <span><i class="fas fa-tag me-1"></i>${result.result_type}</span>
+                        <span><i class="fas fa-shield-alt me-1"></i>${result.confidence}</span>
+                        ${result.url ? `<a href="${result.url}" target="_blank"><i class="fas fa-external-link-alt me-1"></i>فتح الرابط</a>` : ''}
+                    </div>
+                </div>
+            `;
+            resultsContent.insertAdjacentHTML('afterbegin', resultHtml); // إضافة النتائج الأحدث في الأعلى
+        });
+        
+        if (newResultsFound) {
+            // تحديث العداد
+            resultsCount.textContent = displayedResultIds.size;
+            // إظهار الحاوية
+            resultsContainer.style.display = 'block';
+        }
+    }
+
+    function checkAllCompleted() {
+        const allProgress = document.querySelectorAll('.tool-progress');
+        const allCompleted = Array.from(allProgress).every(el => {
+            const icon = el.querySelector('.tool-name i');
+            return icon && (icon.classList.contains('fa-check-circle') || icon.classList.contains('fa-times-circle'));
+        });
+        
+        if (allCompleted) {
+            loadingSpinner.style.display = 'none';
+            
+            if (parseInt(resultsCount.textContent) === 0) {
+                resultsContent.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #cbd5e0;">
+                        <i class="fas fa-search fa-3x mb-3" style="color: #667eea; opacity: 0.5;"></i>
+                        <h5 style="color: #e2e8f0;">لم يتم العثور على نتائج</h5>
+                        <p style="color: #a0aec0;">جرب البحث بمعلومات مختلفة</p>
+                    </div>
+                `;
+                resultsContainer.style.display = 'block';
+            }
+        }
+    }
+
+    function getToolName(slug) {
+        const names = {
+            'sherlock': 'Sherlock Social Search',
+            'github-osint': 'GitHub Investigator',
+            'email-osint': 'Advanced Email Analyzer',
+            'breach-detector': 'Data Breach Detector',
+            'google-dorks': 'Google Dorks Scraper',
+            'wayback-machine': 'Wayback Machine Archive',
+            'cert-transparency': 'SSL Certificate Transparency',
+            'ip-geolocation': 'IP Geolocation Intelligence',
+            'phone-analyzer': 'Phone Number Intelligence',
+            'subdomain-enum': 'Subdomain Enumerator',
+            'social-investigator': 'Social Media Investigator',
+            'infoga': 'Infoga Email Gatherer',
+            'cvestalker-pro': 'CVE-Stalker Vulnerabilities',
+            'mxtoolbox-pro': 'MxToolbox Intelligence',
+            'viewdns-pro': 'ViewDNS Ultimate Toolkit',
+            'hudsonrock-pro': 'Hudson Rock Infostealer',
+            'holehe-pro': 'Holehe Account Scanner',
+            'reverse-image': 'Reverse Image Search'
+        };
+        return names[slug] || slug;
+    }
+});
+</script>
+{% endblock %}

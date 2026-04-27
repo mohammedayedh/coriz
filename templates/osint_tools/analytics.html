@@ -1,0 +1,381 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}التحليلات الاستخباراتية المتقدمة - كوريزا{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.css">
+<style>
+    .analytics-container {
+        min-height: 100vh;
+        background: #0b0f19;
+        padding: 100px 0 60px;
+    }
+
+    .glass-card {
+        background: rgba(26, 32, 44, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 25px;
+        height: 100%;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        border-color: rgba(102, 126, 234, 0.5);
+    }
+
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .stat-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #a0aec0;
+        margin: 0;
+    }
+
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #667eea;
+        font-size: 1.2rem;
+    }
+
+    .stat-big-value {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff 0%, #a0aec0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 10px 0;
+    }
+
+    .stat-trend {
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .trend-up { color: #48bb78; }
+    .trend-down { color: #f56565; }
+
+    .chart-box {
+        margin-top: 30px;
+    }
+
+    .analytics-section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .analytics-section-title::after {
+        content: '';
+        height: 2px;
+        flex-grow: 1;
+        background: linear-gradient(90deg, #667eea, transparent);
+        border-radius: 2px;
+    }
+
+    .performance-table {
+        width: 100%;
+        color: #e2e8f0;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+    .performance-table th {
+        padding: 15px;
+        color: #718096;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+
+    .performance-table td {
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .performance-table tr td:first-child { border-radius: 12px 0 0 12px; }
+    .performance-table tr td:last-child { border-radius: 0 12px 12px 0; }
+
+    .badge-custom {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge-success { background: rgba(72, 187, 120, 0.2); color: #48bb78; }
+    .badge-primary { background: rgba(102, 126, 234, 0.2); color: #667eea; }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #718096;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-container">
+    <div class="container">
+        
+        <div class="analytics-section-title">
+            <i class="fas fa-microchip text-primary"></i>
+            نظرة عامة على الذكاء الاستخباراتي
+        </div>
+
+        <div class="row g-4 mb-5">
+            <!-- كروت الإحصائيات السريعة -->
+            <div class="col-md-3">
+                <div class="glass-card">
+                    <div class="stat-header">
+                        <h4 class="stat-title">إجمالي الجلسات</h4>
+                        <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+                    </div>
+                    <div class="stat-big-value">{{ sessions_stats.total }}</div>
+                    <div class="stat-trend trend-up">
+                        <i class="fas fa-check-circle"></i>
+                        <span>{{ sessions_stats.completed }} مكتملة بنجاح</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card">
+                    <div class="stat-header">
+                        <h4 class="stat-title">إجمالي النتائج</h4>
+                        <div class="stat-icon"><i class="fas fa-database"></i></div>
+                    </div>
+                    <div class="stat-big-value">{{ results_stats.total }}</div>
+                    <div class="stat-trend trend-up">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>{{ results_stats.high_confidence }} نتائج عالية الثقة</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card">
+                    <div class="stat-header">
+                        <h4 class="stat-title">كفاءة النظام</h4>
+                        <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+                    </div>
+                    <div class="stat-big-value">{{ avg_results_per_session|default:"0.0" }}</div>
+                    <div class="stat-trend" style="color: #a0aec0;">
+                        <span>متوسط النتائج المستخرجة لكل جلسة</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card">
+                    <div class="stat-header">
+                        <h4 class="stat-title">أهداف قيد المعالجة</h4>
+                        <div class="stat-icon"><i class="fas fa-spinner fa-spin"></i></div>
+                    </div>
+                    <div class="stat-big-value">{{ sessions_stats.running }}</div>
+                    <div class="stat-trend" style="color: #cbd5e0;">
+                        <span>تجري حالياً في الخلفية</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <!-- مخطط النشاط اليومي -->
+            <div class="col-lg-8">
+                <div class="glass-card">
+                    <h5 class="mb-4"><i class="fas fa-chart-area me-2 text-primary"></i>النشاط الاستخباراتي (آخر 14 يوم)</h5>
+                    <div style="height: 300px;">
+                        <canvas id="dailyActivityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- توزيع أنواع الأدوات -->
+            <div class="col-lg-4">
+                <div class="glass-card">
+                    <h5 class="mb-4"><i class="fas fa-chart-pie me-2 text-primary"></i>توزيع الاهتمامات</h5>
+                    <div style="height: 300px;">
+                        <canvas id="typeDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="analytics-section-title">
+            <i class="fas fa-shield-alt text-primary"></i>
+            تحليل أداء الأدوات والنتائج
+        </div>
+
+        <div class="row g-4">
+            <!-- جدول أداء الأدوات -->
+            <div class="col-lg-7">
+                <div class="glass-card">
+                    <h5 class="mb-4"><i class="fas fa-vial me-2 text-primary"></i>أداء الأدوات العشر الأكثر استخداماً</h5>
+                    <div class="table-responsive">
+                        <table class="performance-table">
+                            <thead>
+                                <tr>
+                                    <th>الأداة</th>
+                                    <th>التشغيل</th>
+                                    <th>النجاح</th>
+                                    <th>النتائج</th>
+                                    <th>الكفاءة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tool in tools_performance %}
+                                <tr>
+                                    <td class="fw-bold">{{ tool.name }}</td>
+                                    <td>{{ tool.total_runs }}</td>
+                                    <td><span class="badge-custom badge-success">{{ tool.success_runs }}</span></td>
+                                    <td>{{ tool.found_results }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="flex-grow-1" style="height: 6px; background: #2d3748; border-radius: 3px; overflow: hidden; width: 60px;">
+                                                <div style="width: {{ tool.success_rate }}%; height: 100%; background: #667eea;"></div>
+                                            </div>
+                                            <small>{{ tool.success_rate }}%</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="empty-state">لا توجد بيانات تشغيل متاحة حالياً</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-5">
+                <div class="glass-card mb-4">
+                    <h5 class="mb-4"><i class="fas fa-crown me-2 text-primary"></i>أفضل مصادر البيانات</h5>
+                    {% for source in top_sources %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>{{ source.source }}</span>
+                        <span class="badge-custom badge-primary">{{ source.count }} نتيجة</span>
+                    </div>
+                    {% empty %}
+                    <p class="empty-state">لا توجد بيانات متاحة</p>
+                    {% endfor %}
+                </div>
+
+                <div class="glass-card">
+                    <h5 class="mb-4"><i class="fas fa-tags me-2 text-primary"></i>تصنيف البيانات المستخرجة</h5>
+                    <div style="height: 250px;">
+                        <canvas id="resultsByTypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script>
+    // إعدادات الخطوط والألوان العامة
+    Chart.defaults.color = '#718096';
+    Chart.defaults.font.family = 'Cairo, sans-serif';
+
+    // 1. مخطط النشاط اليومي
+    const dailyCtx = document.getElementById('dailyActivityChart').getContext('2d');
+    new Chart(dailyCtx, {
+        type: 'line',
+        data: {
+            labels: [{% for item in daily_activity %}'{{ item.date|date:"d M" }}',{% endfor %}],
+            datasets: [{
+                label: 'عدد الجلسات',
+                data: [{% for item in daily_activity %}{{ item.count }},{% endfor %}],
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3,
+                pointBackgroundColor: '#667eea',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 2. مخطط توزيع أنواع الأدوات
+    const typeCtx = document.getElementById('typeDistributionChart').getContext('2d');
+    new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [{% for item in type_distribution %}'{{ item.tool__tool_type }}',{% endfor %}],
+            datasets: [{
+                data: [{% for item in type_distribution %}{{ item.count }},{% endfor %}],
+                backgroundColor: ['#667eea', '#764ba2', '#48bb78', '#ed64a6', '#ecc94b'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
+            },
+            cutout: '70%'
+        }
+    });
+
+    // 3. مخطط تصنيف البيانات المستخرجة
+    const resultsCtx = document.getElementById('resultsByTypeChart').getContext('2d');
+    new Chart(resultsCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for item in results_by_type %}'{{ item.result_type }}',{% endfor %}],
+            datasets: [{
+                label: 'عدد السجلات',
+                data: [{% for item in results_by_type %}{{ item.count }},{% endfor %}],
+                backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                borderRadius: 8,
+                hoverBackgroundColor: '#667eea'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { color: 'rgba(255,255,255,0.05)' } },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+</script>
+{% endblock %}

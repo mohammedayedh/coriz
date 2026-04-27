@@ -1,0 +1,21 @@
+إذا كنت تفضل أداة تعمل بشكل مستقل (Stand-alone Binary) بدون أي متطلبات مسبقة، نفذ هذه الأوامر الثلاثة بالترتيب لتحميلها ونقلها إلى مسار النظام:
+Bash
+
+wget https://github.com/mike-engel/jwt-cli/releases/latest/download/jwt-linux.tar.gz
+tar -xzf jwt-linux.tar.gz
+sudo mv jwt /usr/local/bin/
+
+🔍 كيف تستخدم الأداة؟
+
+بمجرد التثبيت، يصبح فحص أي رمز أمراً في غاية البساطة. افتح موجه الأوامر (Terminal) واكتب كلمة jwt ثم decode ثم الصق الرمز الخاص بك:
+Bash
+
+jwt decode eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+ماذا ستعطيك الأداة؟
+
+    ستطبع لك الـ Header (نوع التشفير المستخدم مثل HS256).
+
+    ستطبع لك الـ Payload (البيانات المخفية داخل الرمز مثل اسم المستخدم، صلاحياته، وهل هو Admin أم لا).
+
+    ميزة رائعة: ستقوم الأداة تلقائياً بتحويل التواريخ المشفرة (مثل iat أو exp) إلى تواريخ مقروءة باللغة البشرية لتخبرك متى ينتهي هذا الرمز بالضبط!

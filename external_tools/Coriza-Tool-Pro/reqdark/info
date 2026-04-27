@@ -1,0 +1,8 @@
+to work the tool and extract data from dark web you could implement this steps:
+
+1- sudo apt install tor
+2- sudo nano /etc/tor/torcc
+	uncommant in "ControlPort 9051" and "CookieAuthentication 1"
+3- sudo pip install requests_tor
+4- sudo service tor restart
+5- implement the code 

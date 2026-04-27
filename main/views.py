@@ -13,6 +13,7 @@ import logging
 from .models import Post, Category, Comment, Tag, ContactMessage, Newsletter, SiteSettings
 from .forms import ContactForm, NewsletterForm
 from authentication.models import User
+from osint_tools.models import OSINTTool
 
 logger = logging.getLogger(__name__)
 
@@ -24,29 +25,8 @@ def home_view(request):
     except SiteSettings.DoesNotExist:
         site_settings = None
     
-    featured_posts = Post.objects.filter(
-        status='published',
-        is_featured=True
-    ).order_by('-published_at')[:6]
-    
-    latest_posts = Post.objects.filter(
-        status='published'
-    ).order_by('-published_at')[:8]
-    
-    categories = Category.objects.filter(is_active=True).annotate(
-        posts_count=Count('posts', filter=Q(posts__status='published'))
-    ).order_by('name')
-    
-    popular_tags = Tag.objects.annotate(
-        posts_count=Count('posts', filter=Q(posts__status='published'))
-    ).order_by('-posts_count')[:10]
-    
     context = {
         'site_settings': site_settings,
-        'featured_posts': featured_posts,
-        'latest_posts': latest_posts,
-        'categories': categories,
-        'popular_tags': popular_tags,
     }
     
     return render(request, 'main/home.html', context)
@@ -60,129 +40,7 @@ def custom_page_not_found(request, exception=None):
     return render(request, 'errors/404.html', context, status=404)
 
 
-def posts_list_view(request):
-    """قائمة المنشورات"""
-    posts = Post.objects.filter(status='published').order_by('-published_at')
-    
-    search_query = request.GET.get('search')
-    if search_query:
-        posts = posts.filter(
-            Q(title__icontains=search_query) |
-            Q(content__icontains=search_query) |
-            Q(excerpt__icontains=search_query)
-        )
-    
-    category_slug = request.GET.get('category')
-    if category_slug:
-        category = get_object_or_404(Category, slug=category_slug, is_active=True)
-        posts = posts.filter(category=category)
-    else:
-        category = None
-    
-    tag_slug = request.GET.get('tag')
-    if tag_slug:
-        tag = get_object_or_404(Tag, slug=tag_slug)
-        posts = posts.filter(tags=tag)
-    else:
-        tag = None
-    
-    paginator = Paginator(posts, 12)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    categories = Category.objects.filter(is_active=True).annotate(
-        posts_count=Count('posts', filter=Q(posts__status='published'))
-    ).order_by('name')
-    
-    tags = Tag.objects.annotate(
-        posts_count=Count('posts', filter=Q(posts__status='published'))
-    ).order_by('name')
-    
-    context = {
-        'page_obj': page_obj,
-        'categories': categories,
-        'tags': tags,
-        'current_category': category,
-        'current_tag': tag,
-        'search_query': search_query,
-    }
-    
-    return render(request, 'main/posts_list.html', context)
 
-
-def post_detail_view(request, slug):
-    """تفاصيل المنشور"""
-    post = get_object_or_404(Post, slug=slug, status='published')
-    
-    post.views_count += 1
-    post.save(update_fields=['views_count'])
-    
-    related_posts = Post.objects.filter(
-        status='published',
-        category=post.category
-    ).exclude(id=post.id).order_by('-published_at')[:4]
-    
-    comments = Comment.objects.filter(
-        post=post,
-        is_approved=True,
-        parent=None
-    ).order_by('-created_at')
-    
-    for comment in comments:
-        comment.replies = Comment.objects.filter(
-            parent=comment,
-            is_approved=True
-        ).order_by('created_at')
-    
-    context = {
-        'post': post,
-        'related_posts': related_posts,
-        'comments': comments,
-    }
-    
-    return render(request, 'main/post_detail.html', context)
-
-
-@login_required
-@require_http_methods(["POST"])
-def add_comment_view(request, post_id):
-    """إضافة تعليق"""
-    post = get_object_or_404(Post, id=post_id, status='published')
-    
-    try:
-        data = json.loads(request.body)
-        content = data.get('content', '').strip()
-        parent_id = data.get('parent_id')
-        
-        if not content:
-            return JsonResponse({'success': False, 'message': 'محتوى التعليق مطلوب'})
-        
-        parent = None
-        if parent_id:
-            try:
-                parent = Comment.objects.get(id=parent_id, post=post)
-            except Comment.DoesNotExist:
-                return JsonResponse({'success': False, 'message': 'التعليق الأب غير موجود'})
-        
-        comment = Comment.objects.create(
-            post=post,
-            author=request.user,
-            content=content,
-            parent=parent
-        )
-        
-        post.comments_count += 1
-        post.save(update_fields=['comments_count'])
-        
-        return JsonResponse({
-            'success': True,
-            'message': 'تم إضافة التعليق بنجاح',
-            'comment_id': comment.id
-        })
-        
-    except Exception as e:
-        logger.error(f"خطأ في إضافة التعليق: {e}")
-        return JsonResponse({'success': False, 'message': 'حدث خطأ أثناء إضافة التعليق'})
 
 
 @require_http_methods(["GET", "POST"])
@@ -213,10 +71,15 @@ def contact_view(request):
     return render(request, 'main/contact.html', {'form': form})
 
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def newsletter_subscribe_view(request):
-    """الاشتراك في النشرة الإخبارية"""
+    """
+    الاشتراك في النشرة الإخبارية
+    
+    إصلاح المشكلة الحرجة #4: إزالة csrf_exempt
+    هذا endpoint يستقبل POST requests ويجب أن يكون محمياً بـ CSRF
+    إذا كان يُستدعى من JavaScript، يجب إرسال CSRF token في الـ headers
+    """
     try:
         data = json.loads(request.body)
         email = data.get('email', '').strip()
@@ -228,24 +91,37 @@ def newsletter_subscribe_view(request):
         if not form.is_valid():
             return JsonResponse({'success': False, 'message': form.errors['email'][0]})
         
-        newsletter, created = Newsletter.objects.get_or_create(
-            email=email,
-            defaults={'is_active': True}
-        )
+        # إصلاح إضافي: معالجة race condition في get_or_create
+        from django.db import IntegrityError
+        try:
+            newsletter, created = Newsletter.objects.get_or_create(
+                email=email,
+                defaults={'is_active': True}
+            )
+        except IntegrityError:
+            # حدث تزامن - نحاول الحصول على السجل الموجود
+            newsletter = Newsletter.objects.get(email=email)
+            created = False
         
         if not created and not newsletter.is_active:
             newsletter.is_active = True
             newsletter.unsubscribed_at = None
-            newsletter.save()
+            newsletter.save(update_fields=['is_active', 'unsubscribed_at'])
         
         return JsonResponse({
             'success': True,
             'message': 'تم الاشتراك في النشرة الإخبارية بنجاح'
         })
         
+    except json.JSONDecodeError:
+        logger.error("خطأ في تحليل JSON في الاشتراك بالنشرة الإخبارية")
+        return JsonResponse({'success': False, 'message': 'بيانات غير صحيحة'}, status=400)
+    except Newsletter.DoesNotExist:
+        logger.error("خطأ غير متوقع: Newsletter.DoesNotExist بعد get_or_create")
+        return JsonResponse({'success': False, 'message': 'حدث خطأ في الخادم'}, status=500)
     except Exception as e:
-        logger.error(f"خطأ في الاشتراك في النشرة الإخبارية: {e}")
-        return JsonResponse({'success': False, 'message': 'حدث خطأ في الخادم'})
+        logger.exception(f"خطأ غير متوقع في الاشتراك في النشرة الإخبارية: {e}")
+        return JsonResponse({'success': False, 'message': 'حدث خطأ في الخادم'}, status=500)
 
 
 def about_view(request):
@@ -274,12 +150,11 @@ def search_view(request):
     results = []
     
     if query:
-        results = Post.objects.filter(
-            Q(title__icontains=query) |
-            Q(content__icontains=query) |
-            Q(excerpt__icontains=query),
-            status='published'
-        ).order_by('-published_at')
+        results = OSINTTool.objects.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query),
+            is_active=True
+        ).order_by('-created_at')
         
         paginator = Paginator(results, 10)
         page_number = request.GET.get('page')
@@ -296,61 +171,3 @@ def search_view(request):
     return render(request, 'main/search.html', context)
 
 
-def category_posts_view(request, slug):
-    """منشورات الفئة"""
-    category = get_object_or_404(Category, slug=slug, is_active=True)
-    posts = Post.objects.filter(
-        category=category,
-        status='published'
-    ).order_by('-published_at')
-    
-    paginator = Paginator(posts, 12)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'category': category,
-        'page_obj': page_obj,
-    }
-    
-    return render(request, 'main/category_posts.html', context)
-
-
-def tag_posts_view(request, slug):
-    """منشورات العلامة"""
-    tag = get_object_or_404(Tag, slug=slug)
-    posts = Post.objects.filter(
-        tags=tag,
-        status='published'
-    ).order_by('-published_at')
-    
-    paginator = Paginator(posts, 12)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'tag': tag,
-        'page_obj': page_obj,
-    }
-    
-    return render(request, 'main/tag_posts.html', context)
-
-
-def author_posts_view(request, username):
-    """منشورات المؤلف"""
-    author = get_object_or_404(User, username=username, is_active=True)
-    posts = Post.objects.filter(
-        author=author,
-        status='published'
-    ).order_by('-published_at')
-    
-    paginator = Paginator(posts, 12)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'author': author,
-        'page_obj': page_obj,
-    }
-    
-    return render(request, 'main/author_posts.html', context)

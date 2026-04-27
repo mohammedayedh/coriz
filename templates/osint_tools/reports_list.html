@@ -8,10 +8,7 @@
 {% block content %}
 <!-- Override the main content -->
 <div class="content-header">
-    <div class="d-flex align-items-center mb-3">
-        <button class="btn btn-outline-primary me-3 sidebar-toggle" id="sidebarToggle" aria-label="تبديل الشريط الجانبي">
-            <i class="fas fa-bars"></i>
-        </button>
+    <div class="mb-3">
         <h1 class="fw-bold mb-0 cyber-text typewriter">
             <i class="fas fa-file-alt me-3"></i>تقارير OSINT
         </h1>
@@ -114,11 +111,11 @@
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-list me-2"></i>قائمة التقارير
-                    <span class="badge bg-primary ms-2">{{ reports|length }}</span>
+                    <span class="badge bg-primary ms-2">{{ page_obj.paginator.count|default:0 }}</span>
                 </h5>
             </div>
             <div class="card-body">
-                {% if reports %}
+                {% if page_obj.object_list %}
                     <div class="table-responsive">
                         <table class="table table-dark table-hover">
                             <thead>
@@ -133,7 +130,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for report in reports %}
+                                {% for report in page_obj %}
                                 <tr>
                                     <td>
                                         <strong class="text-white">{{ report.title }}</strong>
@@ -229,7 +226,7 @@
                     </div>
 
                     <!-- Pagination -->
-                    {% if is_paginated %}
+                    {% if page_obj.has_other_pages %}
                         <nav aria-label="ترقيم الصفحات">
                             <ul class="pagination justify-content-center">
                                 {% if page_obj.has_previous %}
@@ -330,21 +327,28 @@
 
 <script>
 function generateReport() {
-    // تحميل الجلسات المتاحة
-    fetch('/osint/sessions/available/')
+    // تحميل الجلسات المكتملة المتاحة
+    fetch('/osint/ajax/completed-sessions/')
         .then(response => response.json())
         .then(data => {
             const select = document.getElementById('reportSession');
             select.innerHTML = '<option value="">اختر الجلسة</option>';
-            data.sessions.forEach(session => {
-                const option = document.createElement('option');
-                option.value = session.id;
-                option.textContent = `${session.tool_name} - ${session.target}`;
-                select.appendChild(option);
-            });
+            
+            if (data.sessions && data.sessions.length > 0) {
+                data.sessions.forEach(session => {
+                    const option = document.createElement('option');
+                    option.value = session.id;
+                    option.textContent = `${session.tool_name} - ${session.target} (${session.results_count} نتيجة)`;
+                    select.appendChild(option);
+                });
+            } else {
+                select.innerHTML = '<option value="">لا توجد جلسات مكتملة</option>';
+            }
         })
         .catch(error => {
             console.error('Error:', error);
+            const select = document.getElementById('reportSession');
+            select.innerHTML = '<option value="">خطأ في تحميل الجلسات</option>';
         });
     
     new bootstrap.Modal(document.getElementById('generateReportModal')).show();
@@ -359,10 +363,33 @@ function submitGenerateReport() {
         description: document.getElementById('reportDescription').value,
     };
     
-    fetch('/osint/reports/generate/', {
+    // التحقق من البيانات
+    if (!formData.title || !formData.session_id) {
+        alert('الرجاء ملء جميع الحقول المطلوبة');
+        return;
+    }
+    
+    // الحصول على CSRF token
+    function getCsrfToken() {
+        const name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    fetch(`/osint/sessions/${formData.session_id}/report/`, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-CSRFToken': getCsrfToken(),
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
@@ -370,9 +397,10 @@ function submitGenerateReport() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            alert('تم إنشاء التقرير بنجاح!');
             location.reload();
         } else {
-            alert('حدث خطأ في إنشاء التقرير: ' + data.error);
+            alert('حدث خطأ في إنشاء التقرير: ' + (data.message || data.error || 'خطأ غير معروف'));
         }
     })
     .catch(error => {
@@ -382,25 +410,48 @@ function submitGenerateReport() {
 }
 
 function viewReport(reportId) {
-    window.open(`/osint/reports/${reportId}/view/`, '_blank');
+    window.open(`/osint/reports/${reportId}/`, '_blank');
 }
 
 function shareReport(reportId) {
-    // يمكن إضافة منطق المشاركة هنا
-    alert('ميزة المشاركة قيد التطوير');
+    const url = window.location.origin + `/osint/reports/${reportId}/`;
+    navigator.clipboard.writeText(url).then(function() {
+        alert('تم نسخ رابط التقرير إلى الحافظة');
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+        alert('رابط التقرير: ' + url);
+    });
 }
 
 function deleteReport(reportId) {
     if (confirm('هل أنت متأكد من حذف هذا التقرير؟')) {
+        // الحصول على CSRF token
+        function getCsrfToken() {
+            const name = 'csrftoken';
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
         fetch(`/osint/reports/${reportId}/delete/`, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-CSRFToken': getCsrfToken(),
             },
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                alert('تم حذف التقرير بنجاح');
                 location.reload();
             } else {
                 alert('حدث خطأ في حذف التقرير');
@@ -415,12 +466,11 @@ function deleteReport(reportId) {
 
 function exportAllReports() {
     const params = new URLSearchParams(window.location.search);
-    params.set('export', 'all');
-    window.open(`/osint/reports/export/?${params.toString()}`, '_blank');
+    window.open(`/osint/ajax/export-results/all/?${params.toString()}`, '_blank');
 }
 
 function scheduleReport() {
-    alert('ميزة جدولة التقارير قيد التطوير');
+    alert('ميزة جدولة التقارير ستكون متاحة قريباً.\n\nيمكنك حالياً:\n• إنشاء تقارير فورية\n• تصدير التقارير بصيغ متعددة\n• مشاركة التقارير');
 }
 </script>
 

@@ -70,32 +70,28 @@
         
         {% if page_obj %}
         <div class="row g-4">
-            {% for post in page_obj %}
+            {% for tool in page_obj %}
             <div class="col-lg-6">
                 <div class="search-result-card cyber-border">
                     <div class="result-content">
                         <div class="result-meta mb-2">
-                            <span class="badge bg-primary">{{ post.category.name }}</span>
-                            <small class="text-secondary ms-2">
-                                <i class="fas fa-calendar me-1"></i>{{ post.published_at|date:"Y/m/d" }}
-                            </small>
+                            <span class="badge bg-primary">{{ tool.get_category_display }}</span>
+                            <span class="badge bg-danger ms-2">{{ tool.get_clearance_level_display }}</span>
                         </div>
                         <h5 class="result-title">
-                            <a href="{% url 'main:post_detail' post.slug %}" class="text-decoration-none">
-                                {{ post.title }}
+                            <a href="{% url 'osint_tools:run_tool' tool.id %}" class="text-decoration-none">
+                                {{ tool.name }}
                             </a>
                         </h5>
-                        <p class="result-excerpt">{{ post.excerpt|truncatewords:20 }}</p>
+                        <p class="result-excerpt">{{ tool.description|truncatewords:20 }}</p>
                         <div class="result-stats">
                             <small class="text-secondary">
-                                <i class="fas fa-user me-1"></i>{{ post.author.first_name|default:post.author.username }}
-                                <i class="fas fa-eye ms-3 me-1"></i>{{ post.views_count }}
-                                <i class="fas fa-comment ms-3 me-1"></i>{{ post.comments_count }}
+                                <i class="fas fa-satellite-dish me-1"></i> نوع المصدر: {{ tool.get_source_type_display }}
                             </small>
                         </div>
                         <div class="result-actions mt-3">
-                            <a href="{% url 'main:post_detail' post.slug %}" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-arrow-left me-1"></i>اقرأ المزيد
+                            <a href="{% url 'osint_tools:run_tool' tool.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-play me-1"></i>فتح الأداة
                             </a>
                         </div>
                     </div>

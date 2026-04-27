@@ -28,8 +28,17 @@ class User(AbstractUser):
 
 class UserProfile(models.Model):
     """ملف المستخدم الشخصي"""
+    CLEARANCE_LEVELS = [
+        ('L1', 'Level 1 - Public OSINT (مصادر مفتوحة)'),
+        ('L2', 'Level 2 - Commercial APIs (تجارية)'),
+        ('L3', 'Level 3 - Private & Leaked (خاصة وتسريبات)'),
+        ('L4', 'Level 4 - Agency / Admin (جهات عليا)'),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile', verbose_name="المستخدم")
     bio = models.TextField(blank=True, null=True, verbose_name="نبذة شخصية")
+    organization = models.CharField(max_length=150, blank=True, null=True, verbose_name="المؤسسة / الجهة")
+    clearance_level = models.CharField(max_length=2, choices=CLEARANCE_LEVELS, default='L1', verbose_name="مستوى التصريح الأمني")
     website = models.URLField(blank=True, null=True, verbose_name="الموقع الإلكتروني")
     social_media = models.JSONField(default=dict, blank=True, verbose_name="وسائل التواصل الاجتماعي")
     preferences = models.JSONField(default=dict, blank=True, verbose_name="التفضيلات")
@@ -39,7 +48,7 @@ class UserProfile(models.Model):
         verbose_name_plural = "ملفات المستخدمين"
     
     def __str__(self):
-        return f"ملف {self.user.username}"
+        return f"ملف {self.user.username} - {self.get_clearance_level_display()}"
 
 
 class EmailVerification(models.Model):

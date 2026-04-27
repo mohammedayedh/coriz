@@ -31,6 +31,33 @@ class JSONValidationMixin:
         return super().save(*args, **kwargs)
 
 
+class InvestigationCase(models.Model):
+    """نموذج القضايا الاستخباراتية (Case Management)"""
+    STATUS_CHOICES = [
+        ('open', 'مفتوحة'),
+        ('in_progress', 'قيد التحقيق'),
+        ('closed', 'مغلقة'),
+    ]
+
+    title = models.CharField(max_length=200, verbose_name="عنوان القضية / الهدف")
+    description = models.TextField(blank=True, verbose_name="وصف القضية")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='investigation_cases', verbose_name="المحقق")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open', verbose_name="الحالة")
+    notes = models.TextField(blank=True, verbose_name="ملاحظات المحقق")
+    tags = models.JSONField(default=list, blank=True, verbose_name="العلامات (Tags)")
+    
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الفتح")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="آخر تحديث")
+
+    class Meta:
+        verbose_name = "قضية استخباراتية"
+        verbose_name_plural = "القضايا الاستخباراتية"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} ({self.get_status_display()})"
+
+
 class OSINTTool(JSONValidationMixin, models.Model):
     """نموذج أدوات OSINT"""
     TOOL_TYPES = [
@@ -50,11 +77,26 @@ class OSINTTool(JSONValidationMixin, models.Model):
         ('maintenance', 'صيانة'),
         ('deprecated', 'مهمل'),
     ]
+
+    SOURCE_TYPES = [
+        ('open', 'OSINT (مصادر مفتوحة)'),
+        ('private', 'Private API (واجهات خاصة/مدفوعة)'),
+        ('leaked', 'Leaked Data (تسريبات Dark Web)'),
+    ]
+
+    CLEARANCE_LEVELS = [
+        ('L1', 'Level 1 - Public OSINT'),
+        ('L2', 'Level 2 - Commercial APIs'),
+        ('L3', 'Level 3 - Private & Leaked'),
+        ('L4', 'Level 4 - Admins Only'),
+    ]
     
     name = models.CharField(max_length=100, verbose_name="اسم الأداة")
     slug = models.SlugField(max_length=100, unique=True, verbose_name="الرابط")
     description = models.TextField(verbose_name="الوصف")
     tool_type = models.CharField(max_length=20, choices=TOOL_TYPES, verbose_name="نوع الأداة")
+    source_type = models.CharField(max_length=20, choices=SOURCE_TYPES, default='open', verbose_name="نوع المصدر")
+    required_clearance = models.CharField(max_length=2, choices=CLEARANCE_LEVELS, default='L1', verbose_name="الصلاحية المطلوبة")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name="الحالة")
     icon = models.CharField(max_length=50, default='fas fa-search', verbose_name="الأيقونة")
     color = models.CharField(max_length=7, default='#007bff', verbose_name="اللون")
@@ -106,6 +148,7 @@ class OSINTSession(JSONValidationMixin, models.Model):
         ('cancelled', 'ملغية'),
     ]
     
+    investigation_case = models.ForeignKey('InvestigationCase', on_delete=models.CASCADE, null=True, blank=True, related_name='sessions', verbose_name="تتبع للقضية المفتوحة")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='osint_sessions', verbose_name="المستخدم")
     tool = models.ForeignKey(OSINTTool, on_delete=models.CASCADE, related_name='sessions', verbose_name="الأداة")
     target = models.CharField(max_length=500, verbose_name="الهدف")
@@ -118,7 +161,7 @@ class OSINTSession(JSONValidationMixin, models.Model):
     
     # معلومات التقدم
     progress = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)], verbose_name="التقدم")
-    current_step = models.CharField(max_length=200, blank=True, verbose_name="الخطوة الحالية")
+    current_step = models.TextField(blank=True, verbose_name="الخطوة الحالية")
     
     # النتائج
     results_count = models.PositiveIntegerField(default=0, verbose_name="عدد النتائج")
@@ -311,13 +354,14 @@ class OSINTReport(models.Model):
 
     # التواريخ
     generated_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاريخ التحديث")
     downloaded_count = models.PositiveIntegerField(default=0, verbose_name="عدد التحميلات")
-    
+
     class Meta:
         verbose_name = "تقرير OSINT"
         verbose_name_plural = "تقارير OSINT"
         ordering = ['-generated_at']
-    
+
     def __str__(self):
         return f"{self.title} - {self.session.tool.name}"
 
@@ -325,17 +369,18 @@ class OSINTReport(models.Model):
         self.celery_task_id = task_id
         self.status = 'running'
         self.error_message = ''
-        self.save(update_fields=['celery_task_id', 'status', 'error_message', 'updated_at'])
+        # نستخدم save() بدون update_fields حتى يُحدَّث updated_at (auto_now)
+        self.save(update_fields=['celery_task_id', 'status', 'error_message'])
 
     def mark_failed(self, message):
         self.status = 'failed'
         self.error_message = message
-        self.save(update_fields=['status', 'error_message', 'updated_at'])
+        self.save(update_fields=['status', 'error_message'])
 
     def mark_completed(self):
         self.status = 'completed'
         self.error_message = ''
-        self.save(update_fields=['status', 'error_message', 'updated_at'])
+        self.save(update_fields=['status', 'error_message'])
 
 
 class OSINTConfiguration(JSONValidationMixin, models.Model):

@@ -1,0 +1,23 @@
+# متطلبات مصادر OSINT الجديدة (Web Scrapers)
+# جميع المكتبات مجانية ومفتوحة المصدر
+
+# Core scraping libraries
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# HTML parsing and browser automation (optional - for advanced scraping)
+selenium>=4.15.0
+# webdriver-manager>=4.0.0  # لإدارة drivers تلقائياً
+
+# Data processing
+python-dateutil>=2.8.2
+
+# Image processing (for reverse image search)
+Pillow>=10.0.0
+
+# Additional utilities
+urllib3>=2.0.0
+certifi>=2023.7.22
+
+# Note: Django is already in main requirements.txt

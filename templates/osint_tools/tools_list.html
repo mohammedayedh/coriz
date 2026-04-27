@@ -5,6 +5,436 @@
 
 {% block meta_description %}استكشف مجموعة شاملة من أدوات OSINT المتقدمة{% endblock %}
 
+{% block extra_css %}
+<style>
+/* ثيم داكن احترافي مع تباين كامل */
+body {
+    background: #0f1419 !important;
+    color: #e2e8f0 !important;
+}
+
+/* تحسين التباين والألوان للبطاقات - ثيم داكن */
+.tool-card {
+    background: linear-gradient(135deg, #1a1f2e 0%, #161b28 100%) !important;
+    border: 1px solid #2d3748 !important;
+    transition: all 0.3s ease;
+    box-shadow: none !important;
+}
+
+.tool-card:hover {
+    box-shadow: none !important;
+    border-color: #667eea !important;
+    transform: translateY(-5px);
+}
+
+.tool-card .card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    padding: 1.25rem;
+}
+
+.tool-card .card-header i {
+    color: #ffffff !important;
+}
+
+.tool-card .card-header .badge {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+
+.tool-card .card-body {
+    background: linear-gradient(135deg, #1e2433 0%, #1a1f2e 100%);
+    padding: 1.5rem;
+}
+
+.tool-card .card-title {
+    color: #f7fafc !important;
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+}
+
+.tool-card .card-text {
+    color: #cbd5e0 !important;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.tool-card small {
+    color: #e2e8f0 !important;
+    font-weight: 500;
+}
+
+.tool-card small i {
+    color: #a0d8f1 !important;
+}
+
+/* تحسين الـ badges */
+.tool-card .badge {
+    font-weight: 600;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+}
+
+.badge-auth {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: #ffffff !important;
+    border: none;
+}
+
+.badge-api {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+    border: none;
+}
+
+.badge-success-custom {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: #ffffff !important;
+    border: none;
+}
+
+/* زر التشغيل */
+.tool-card .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    padding: 0.5rem 1.25rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    color: #ffffff !important;
+}
+
+.tool-card .btn-primary:hover {
+    transform: translateY(-2px);
+}
+
+.tool-card .btn-primary i {
+    color: #ffffff !important;
+}
+
+/* تحسين قسم البحث */
+.search-section .card {
+    background: linear-gradient(135deg, #1a1f2e 0%, #161b28 100%);
+    border: 1px solid #2d3748;
+}
+
+.search-section .card-body {
+    background: transparent;
+}
+
+.search-section .form-control,
+.search-section .form-select {
+    background: #1e2433 !important;
+    border: 2px solid #2d3748 !important;
+    padding: 0.65rem 1rem;
+    font-weight: 500;
+    color: #e2e8f0 !important;
+}
+
+/* إصلاح أيقونة dropdown في select */
+.search-section .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e2e8f0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: left 0.75rem center !important;
+    background-size: 16px 12px !important;
+}
+
+.search-section .form-select option {
+    background: #1e2433;
+    color: #e2e8f0;
+}
+
+.search-section .form-control::placeholder {
+    color: #718096 !important;
+}
+
+.search-section .form-control:focus,
+.search-section .form-select:focus {
+    background: #252b3b !important;
+    border-color: #667eea !important;
+    box-shadow: none !important;
+    color: #e2e8f0 !important;
+    outline: none !important;
+}
+
+.search-section .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    font-weight: 600;
+    padding: 0.65rem 1.5rem;
+    color: #ffffff !important;
+}
+
+.search-section .btn-primary i {
+    color: #ffffff !important;
+}
+
+.search-section .btn-outline-secondary {
+    border: 2px solid #2d3748 !important;
+    color: #cbd5e0 !important;
+    font-weight: 600;
+    background: transparent !important;
+}
+
+.search-section .btn-outline-secondary:hover {
+    background: #1e2433 !important;
+    border-color: #4a5568 !important;
+    color: #e2e8f0 !important;
+}
+
+.search-section .btn-outline-secondary i {
+    color: inherit !important;
+}
+
+/* تحسين العنوان */
+.cyber-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.cyber-text i {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.lead {
+    color: #cbd5e0 !important;
+    font-weight: 500;
+}
+
+/* إصلاح navbar و dropdown */
+.navbar {
+    background: rgba(26, 26, 46, 0.95) !important;
+}
+
+.navbar .nav-link {
+    color: #e2e8f0 !important;
+}
+
+.navbar .dropdown-menu {
+    background: #1a1f2e !important;
+    border: 1px solid #2d3748 !important;
+}
+
+.navbar .dropdown-item {
+    color: #e2e8f0 !important;
+}
+
+.navbar .dropdown-item:hover {
+    background: #252b3b !important;
+    color: #ffffff !important;
+}
+
+.navbar .dropdown-toggle::after {
+    border-top-color: #e2e8f0 !important;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28226, 232, 240, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* تحسين الـ Pagination */
+.pagination .page-link {
+    background: #1a1f2e !important;
+    border: 1px solid #2d3748 !important;
+    color: #cbd5e0 !important;
+}
+
+.pagination .page-link:hover {
+    background: #252b3b !important;
+    border-color: #667eea !important;
+    color: #e2e8f0 !important;
+}
+
+.pagination .page-link i {
+    color: inherit !important;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-color: #667eea !important;
+    color: #ffffff !important;
+}
+
+/* رسالة عدم وجود أدوات */
+.text-center i {
+    color: #667eea !important;
+    opacity: 0.6;
+}
+
+.text-center h4 {
+    color: #e2e8f0 !important;
+    font-weight: 600;
+}
+
+.text-center p {
+    color: #cbd5e0 !important;
+}
+
+/* إصلاح جميع الأيقونات */
+i.fas, i.far, i.fab, i.fa {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* إصلاح الأيقونات في البطاقات */
+.tool-card .card-body i {
+    color: #a0d8f1 !important;
+    font-weight: 600;
+}
+
+/* إصلاح أيقونات الـ badges */
+.badge i {
+    color: inherit !important;
+    opacity: 1 !important;
+}
+
+/* إصلاح أيقونات الأزرار */
+.btn i {
+    color: inherit !important;
+    opacity: 1 !important;
+}
+
+/* إصلاح النصوص في الصفحة */
+section {
+    color: #e2e8f0;
+}
+
+/* إصلاح container */
+.container {
+    color: #e2e8f0;
+}
+
+/* إصلاح جميع العناصر النصية */
+h1, h2, h3, h4, h5, h6 {
+    color: #e2e8f0 !important;
+}
+
+p, span, div, small {
+    color: #cbd5e0;
+}
+
+/* إصلاح الروابط */
+a {
+    color: #a0d8f1 !important;
+}
+
+a:hover {
+    color: #667eea !important;
+}
+
+/* إصلاح أيقونات Font Awesome بشكل عام */
+.fa, .fas, .far, .fal, .fad, .fab {
+    -webkit-font-smoothing: antialiased;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+}
+
+/* تأكيد ظهور جميع الأيقونات */
+i[class*="fa-"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* إصلاح أيقونات navbar */
+.navbar i {
+    color: #e2e8f0 !important;
+}
+
+.navbar .dropdown-item i {
+    color: #a0d8f1 !important;
+}
+
+/* إصلاح أيقونات البحث */
+.search-section i {
+    color: #e2e8f0 !important;
+}
+
+/* إصلاح أيقونات pagination */
+.pagination i {
+    color: #cbd5e0 !important;
+}
+
+.pagination .active i {
+    color: #ffffff !important;
+}
+
+/* إصلاح footer */
+footer {
+    background: #0f1419 !important;
+    color: #e2e8f0 !important;
+}
+
+footer h5, footer h6 {
+    color: #e2e8f0 !important;
+}
+
+footer p, footer a {
+    color: #cbd5e0 !important;
+}
+
+footer a:hover {
+    color: #667eea !important;
+}
+
+footer i {
+    color: #a0d8f1 !important;
+}
+
+/* إصلاح form labels */
+label {
+    color: #e2e8f0 !important;
+}
+
+/* إصلاح card titles */
+.card-title {
+    color: #f7fafc !important;
+}
+
+.card-text {
+    color: #cbd5e0 !important;
+}
+
+/* إصلاح جميع الأزرار */
+.btn {
+    color: #ffffff !important;
+}
+
+.btn i {
+    color: #ffffff !important;
+}
+
+.btn-outline-secondary {
+    color: #cbd5e0 !important;
+}
+
+.btn-outline-secondary i {
+    color: #cbd5e0 !important;
+}
+
+.btn-outline-secondary:hover {
+    color: #e2e8f0 !important;
+}
+
+.btn-outline-secondary:hover i {
+    color: #e2e8f0 !important;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- Header Section -->
 <section class="py-5 mt-5">
@@ -14,7 +444,7 @@
                 <h1 class="display-4 fw-bold cyber-text typewriter">
                     <i class="fas fa-tools me-3"></i>أدوات OSINT المتقدمة
                 </h1>
-                <p class="lead text-secondary mt-3">
+                <p class="lead mt-3">
                     مجموعة شاملة من الأدوات المتخصصة لجمع المعلومات المفتوحة
                 </p>
             </div>
@@ -23,15 +453,15 @@
 </section>
 
 <!-- Search and Filter Section -->
-<section class="py-4">
+<section class="py-4 search-section">
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <div class="card border-0 shadow-sm">
+                <div class="card border-0">
                     <div class="card-body">
                         <form method="get" class="row g-3">
                             <div class="col-md-4">
-                                <input type="text" name="search" class="form-control" placeholder="البحث في الأدوات..." value="{{ search_query }}">
+                                <input type="text" name="search" class="form-control" placeholder="البحث في الأدوات..." value="{% if search_query %}{{ search_query }}{% endif %}">
                             </div>
                             <div class="col-md-3">
                                 <select name="type" class="form-select">
@@ -67,53 +497,53 @@
         <div class="row g-4">
             {% for tool in page_obj %}
             <div class="col-lg-4 col-md-6">
-                <div class="card h-100 border-0 shadow-sm tool-card" data-tool-type="{{ tool.tool_type }}">
-                    <div class="card-header bg-body-tertiary border-bottom">
+                <div class="card h-100 border-0 tool-card" data-tool-type="{{ tool.tool_type }}">
+                    <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <i class="{{ tool.icon }} fa-2x text-primary"></i>
+                                <i class="{{ tool.icon }} fa-2x"></i>
                             </div>
                             <div class="text-end">
-                                <span class="badge bg-primary-subtle text-primary fw-semibold">
+                                <span class="badge">
                                     {{ tool.get_tool_type_display }}
                                 </span>
                             </div>
                         </div>
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title fw-bold">{{ tool.name }}</h5>
-                        <p class="card-text text-muted">{{ tool.description|truncatewords:20 }}</p>
+                        <h5 class="card-title">{{ tool.name }}</h5>
+                        <p class="card-text">{{ tool.description|truncatewords:20 }}</p>
                         
                         <div class="row g-2 mb-3">
                             <div class="col-6">
-                                <small class="text-muted">
+                                <small>
                                     <i class="fas fa-clock me-1"></i>
                                     {{ tool.timeout }} ثانية
                                 </small>
                             </div>
                             <div class="col-6">
-                                <small class="text-muted">
+                                <small>
                                     <i class="fas fa-tachometer-alt me-1"></i>
                                     {{ tool.rate_limit }}/ساعة
                                 </small>
                             </div>
                         </div>
                         
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <div class="d-flex gap-2 flex-wrap">
                                 {% if tool.requires_auth %}
-                                <span class="badge bg-warning text-dark">
-                                    <i class="fas fa-lock me-1"></i>يتطلب مصادقة
+                                <span class="badge badge-auth">
+                                    <i class="fas fa-lock me-1"></i>مصادقة
                                 </span>
                                 {% endif %}
                                 {% if tool.api_key_required %}
-                                <span class="badge bg-info text-dark">
-                                    <i class="fas fa-key me-1"></i>مفتاح API
+                                <span class="badge badge-api">
+                                    <i class="fas fa-key me-1"></i>API
                                 </span>
                                 {% endif %}
                             </div>
                             <div>
-                                <span class="badge bg-success">
+                                <span class="badge badge-success-custom">
                                     <i class="fas fa-chart-line me-1"></i>
                                     {{ tool.success_rate|floatformat:1 }}%
                                 </span>
@@ -121,12 +551,12 @@
                         </div>
                         
                         <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">
+                            <small>
                                 <i class="fas fa-play me-1"></i>
                                 {{ tool.usage_count }} استخدام
                             </small>
                             <div>
-                                <a href="{% url 'osint_tools:tool_detail' tool.slug %}" class="btn btn-primary btn-sm">
+                                <a href="{% url 'osint_tools:tool_detail' tool.slug %}{% if request.GET.case_id %}?case_id={{ request.GET.case_id }}{% endif %}" class="btn btn-primary btn-sm">
                                     <i class="fas fa-play me-1"></i>تشغيل
                                 </a>
                             </div>
@@ -137,9 +567,16 @@
             {% empty %}
             <div class="col-12">
                 <div class="text-center py-5">
-                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                    <h4 class="text-muted">لا توجد أدوات متاحة</h4>
-                    <p class="text-muted">لم يتم العثور على أدوات تطابق معايير البحث</p>
+                    <i class="fas fa-search fa-3x mb-3"></i>
+                    <h4>لا توجد أدوات متاحة</h4>
+                    {% if tool_type or search_query %}
+                    <p>لم يتم العثور على أدوات تطابق معايير البحث المحددة</p>
+                    <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-list me-2"></i>عرض جميع الأدوات
+                    </a>
+                    {% else %}
+                    <p>لم يتم العثور على أدوات في النظام</p>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
@@ -217,6 +654,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const typeFilter = document.querySelector('select[name="type"]');
     if (typeFilter) {
         typeFilter.addEventListener('change', function() {
+            // إزالة حقل البحث الفارغ قبل الإرسال
+            const searchInput = this.form.querySelector('input[name="search"]');
+            if (searchInput && !searchInput.value.trim()) {
+                searchInput.removeAttribute('name');
+            }
             this.form.submit();
         });
     }

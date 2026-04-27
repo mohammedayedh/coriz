@@ -1,0 +1,293 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}محول الطوابع الزمنية - كوريزا OSINT{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center mb-3">
+        <a href="{% url 'osint_tools:utilities_dashboard' %}" class="btn btn-outline-secondary me-3">
+            <i class="fas fa-arrow-right"></i> عودة
+        </a>
+        <h1 class="fw-bold mb-0 cyber-text typewriter">
+            <i class="fas fa-clock me-3"></i>محول الطوابع الزمنية (Timestamp Converter)
+        </h1>
+    </div>
+    <p class="text-secondary">تحويل بين Unix Timestamp والتواريخ القابلة للقراءة بجميع المناطق الزمنية - أداة أساسية لتحليل السجلات والتحقيقات الرقمية.</p>
+</div>
+
+<div class="row g-4 mt-2">
+    <!-- Current Time -->
+    <div class="col-lg-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="mb-0 text-primary"><i class="fas fa-clock me-2"></i>الوقت الحالي</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary">Unix Timestamp (ثانية)</label>
+                        <div class="input-group">
+                            <input type="text" id="currentTimestamp" class="form-control font-monospace fs-5 text-primary" readonly>
+                            <button class="btn btn-outline-primary" onclick="copyToClipboard('currentTimestamp')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary">التاريخ والوقت</label>
+                        <input type="text" id="currentDateTime" class="form-control font-monospace fs-5 text-success" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timestamp to Date -->
+    <div class="col-lg-6">
+        <div class="content-card h-100">
+            <div class="card-header">
+                <h5 class="mb-0 text-info"><i class="fas fa-arrow-left me-2"></i>Timestamp → التاريخ</h5>
+            </div>
+            <div class="card-body">
+                <label class="form-label text-secondary">أدخل Unix Timestamp</label>
+                <input type="number" id="timestampInput" class="form-control font-monospace mb-3" 
+                       placeholder="1234567890" oninput="convertTimestampToDate()">
+                
+                <div class="result-box p-3 rounded" style="background: rgba(0,255,0,0.05); border: 1px solid rgba(0,255,0,0.2);">
+                    <div class="mb-3">
+                        <small class="text-secondary d-block mb-1">التاريخ والوقت (محلي)</small>
+                        <div id="localDateTime" class="text-success font-monospace fs-6">-</div>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-secondary d-block mb-1">UTC</small>
+                        <div id="utcDateTime" class="text-info font-monospace fs-6">-</div>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-secondary d-block mb-1">ISO 8601</small>
+                        <div id="isoDateTime" class="text-warning font-monospace fs-6">-</div>
+                    </div>
+                    <div>
+                        <small class="text-secondary d-block mb-1">منذ</small>
+                        <div id="relativeTime" class="text-primary fs-6">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date to Timestamp -->
+    <div class="col-lg-6">
+        <div class="content-card h-100">
+            <div class="card-header">
+                <h5 class="mb-0 text-warning"><i class="fas fa-arrow-right me-2"></i>التاريخ → Timestamp</h5>
+            </div>
+            <div class="card-body">
+                <label class="form-label text-secondary">اختر التاريخ والوقت</label>
+                <input type="datetime-local" id="dateInput" class="form-control mb-2" onchange="convertDateToTimestamp()">
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="useUTC" onchange="convertDateToTimestamp()">
+                    <label class="form-check-label text-secondary" for="useUTC">
+                        استخدام UTC بدلاً من التوقيت المحلي
+                    </label>
+                </div>
+                
+                <div class="result-box p-3 rounded" style="background: rgba(255,165,0,0.05); border: 1px solid rgba(255,165,0,0.2);">
+                    <div class="mb-3">
+                        <small class="text-secondary d-block mb-1">Unix Timestamp (ثانية)</small>
+                        <div class="input-group">
+                            <input type="text" id="timestampSeconds" class="form-control font-monospace text-warning" readonly>
+                            <button class="btn btn-outline-warning btn-sm" onclick="copyToClipboard('timestampSeconds')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <small class="text-secondary d-block mb-1">Unix Timestamp (ميلي ثانية)</small>
+                        <div class="input-group">
+                            <input type="text" id="timestampMillis" class="form-control font-monospace text-info" readonly>
+                            <button class="btn btn-outline-info btn-sm" onclick="copyToClipboard('timestampMillis')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Conversions -->
+    <div class="col-lg-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="mb-0 text-success"><i class="fas fa-bolt me-2"></i>تحويلات سريعة</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-primary w-100" onclick="setQuickTime(0)">
+                            <i class="fas fa-clock me-1"></i> الآن
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-success w-100" onclick="setQuickTime(-3600)">
+                            <i class="fas fa-minus me-1"></i> قبل ساعة
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-info w-100" onclick="setQuickTime(-86400)">
+                            <i class="fas fa-calendar-minus me-1"></i> قبل يوم
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-warning w-100" onclick="setQuickTime(-604800)">
+                            <i class="fas fa-calendar-week me-1"></i> قبل أسبوع
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// تحديث الوقت الحالي كل ثانية
+function updateCurrentTime() {
+    const now = new Date();
+    const timestamp = Math.floor(now.getTime() / 1000);
+    document.getElementById('currentTimestamp').value = timestamp;
+    document.getElementById('currentDateTime').value = now.toLocaleString('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
+}
+
+// تحويل Timestamp إلى تاريخ
+function convertTimestampToDate() {
+    const timestamp = document.getElementById('timestampInput').value;
+    
+    if (!timestamp) {
+        document.getElementById('localDateTime').textContent = '-';
+        document.getElementById('utcDateTime').textContent = '-';
+        document.getElementById('isoDateTime').textContent = '-';
+        document.getElementById('relativeTime').textContent = '-';
+        return;
+    }
+    
+    // التعامل مع الثواني أو الميلي ثانية
+    const ts = timestamp.length > 10 ? parseInt(timestamp) : parseInt(timestamp) * 1000;
+    const date = new Date(ts);
+    
+    if (isNaN(date.getTime())) {
+        document.getElementById('localDateTime').textContent = 'تاريخ غير صالح';
+        return;
+    }
+    
+    // التاريخ المحلي
+    document.getElementById('localDateTime').textContent = date.toLocaleString('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
+    
+    // UTC
+    document.getElementById('utcDateTime').textContent = date.toUTCString();
+    
+    // ISO 8601
+    document.getElementById('isoDateTime').textContent = date.toISOString();
+    
+    // الوقت النسبي
+    document.getElementById('relativeTime').textContent = getRelativeTime(date);
+}
+
+// تحويل تاريخ إلى Timestamp
+function convertDateToTimestamp() {
+    const dateInput = document.getElementById('dateInput').value;
+    const useUTC = document.getElementById('useUTC').checked;
+    
+    if (!dateInput) {
+        document.getElementById('timestampSeconds').value = '';
+        document.getElementById('timestampMillis').value = '';
+        return;
+    }
+    
+    let date;
+    if (useUTC) {
+        date = new Date(dateInput + 'Z');
+    } else {
+        date = new Date(dateInput);
+    }
+    
+    const timestampMs = date.getTime();
+    const timestampSec = Math.floor(timestampMs / 1000);
+    
+    document.getElementById('timestampSeconds').value = timestampSec;
+    document.getElementById('timestampMillis').value = timestampMs;
+}
+
+// حساب الوقت النسبي
+function getRelativeTime(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHour / 24);
+    const diffMonth = Math.floor(diffDay / 30);
+    const diffYear = Math.floor(diffDay / 365);
+    
+    if (diffSec < 0) return 'في المستقبل';
+    if (diffSec < 60) return `منذ ${diffSec} ثانية`;
+    if (diffMin < 60) return `منذ ${diffMin} دقيقة`;
+    if (diffHour < 24) return `منذ ${diffHour} ساعة`;
+    if (diffDay < 30) return `منذ ${diffDay} يوم`;
+    if (diffMonth < 12) return `منذ ${diffMonth} شهر`;
+    return `منذ ${diffYear} سنة`;
+}
+
+// تعيين وقت سريع
+function setQuickTime(offsetSeconds) {
+    const timestamp = Math.floor(Date.now() / 1000) + offsetSeconds;
+    document.getElementById('timestampInput').value = timestamp;
+    convertTimestampToDate();
+}
+
+// نسخ إلى الحافظة
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    const text = element.value || element.textContent;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        // إظهار رسالة نجاح
+        const btn = event.target.closest('button');
+        if (btn) {
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check text-success"></i>';
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+            }, 2000);
+        }
+    });
+}
+
+// تهيئة
+updateCurrentTime();
+setInterval(updateCurrentTime, 1000);
+
+// تعيين التاريخ الحالي في حقل الإدخال
+document.getElementById('dateInput').value = new Date().toISOString().slice(0, 16);
+convertDateToTimestamp();
+</script>
+{% endblock %}

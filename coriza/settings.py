@@ -13,8 +13,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 import sys
-from dotenv import load_dotenv
 import logging
+
+try:
+    from dotenv import load_dotenv
+    DOTENV_AVAILABLE = True
+except ImportError:
+    DOTENV_AVAILABLE = False
 
 try:
     import sentry_sdk
@@ -24,18 +29,39 @@ except ImportError:  # pragma: no cover - optional dependency at runtime
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 # Load .env if present (useful locally; on server systemd EnvironmentFile will set env)
-load_dotenv(BASE_DIR / '.env')
+if DOTENV_AVAILABLE:
+    load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'insecure-development-key')
+# إصلاح المشكلة الحرجة #3: SECRET_KEY آمن افتراضياً
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    if os.getenv('DEBUG', 'false').lower() == 'true':
+        # في بيئة التطوير فقط، نستخدم مفتاح غير آمن
+        SECRET_KEY = 'insecure-development-key-CHANGE-THIS-IN-PRODUCTION'
+        import warnings
+        warnings.warn(
+            "Using insecure SECRET_KEY for development. "
+            "Set SECRET_KEY environment variable in production!",
+            RuntimeWarning
+        )
+    else:
+        # في الإنتاج، نرفض التشغيل بدون SECRET_KEY
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured(
+            'SECRET_KEY environment variable must be set in production. '
+            'Generate one with: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"'
+        )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'true').lower() == 'true'
+# إصلاح المشكلة الحرجة #2: DEBUG آمن افتراضياً (false)
+DEBUG = os.getenv('DEBUG', 'false').lower() == 'true'
 
 _default_allowed_hosts = 'localhost,127.0.0.1,[::1],coriza.cloud'
 _default_csrf_trusted_origins = 'https://coriza.cloud,https://www.coriza.cloud'
@@ -236,22 +262,50 @@ CAPTCHA_TIMEOUT = 5
 # Redis & caching
 REDIS_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1')
 
+# Check if we're in testing mode
+TESTING = 'test' in sys.argv
+
+# Check if Redis is available
+REDIS_AVAILABLE = False
+if not TESTING:
+    try:
+        import redis
+        r = redis.from_url(REDIS_URL, socket_connect_timeout=1)
+        r.ping()
+        REDIS_AVAILABLE = True
+        r.close()
+    except Exception:
+        REDIS_AVAILABLE = False
+        import warnings
+        warnings.warn(
+            "Redis is not available. Celery tasks will run synchronously. "
+            "For production, install and start Redis: brew install redis && brew services start redis",
+            RuntimeWarning
+        )
+
+# For local development without Redis running, use LocMemCache
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL,
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-        'TIMEOUT': int(os.getenv('CACHE_DEFAULT_TIMEOUT', '300')),
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'coriza-default-cache',
     }
 }
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'default'
+# Switch back to DB session engine to prevent session loss on restart without Redis
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', REDIS_URL)
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', REDIS_URL)
+# Celery Configuration
+if REDIS_AVAILABLE:
+    # Use Redis for Celery when available
+    CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', REDIS_URL)
+    CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', REDIS_URL)
+else:
+    # Fallback to synchronous execution (development only)
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+    CELERY_BROKER_URL = 'memory://'
+    CELERY_RESULT_BACKEND = 'cache+memory://'
+
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = int(os.getenv('CELERY_TASK_TIME_LIMIT', '1800'))
 CELERY_TASK_SOFT_TIME_LIMIT = int(os.getenv('CELERY_TASK_SOFT_TIME_LIMIT', '1200'))
@@ -261,7 +315,7 @@ CELERY_TASK_ROUTES = {
     'osint_tools.tasks.generate_osint_report': {'queue': 'osint_reports'},
 }
 
-TESTING = 'test' in sys.argv
+# Testing mode cache configuration
 if TESTING:
     CACHES['default'] = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',

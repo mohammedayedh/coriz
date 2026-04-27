@@ -1,0 +1,321 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}منسق ومدقق JSON - كوريزا OSINT{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center mb-3">
+        <a href="{% url 'osint_tools:utilities_dashboard' %}" class="btn btn-outline-secondary me-3">
+            <i class="fas fa-arrow-right"></i> عودة
+        </a>
+        <h1 class="fw-bold mb-0 cyber-text typewriter">
+            <i class="fas fa-code me-3"></i>منسق ومدقق JSON
+        </h1>
+    </div>
+    <p class="text-secondary">تنسيق، تدقيق، وتحليل بيانات JSON بشكل احترافي - أداة أساسية للعمل مع APIs والبيانات المنظمة.</p>
+</div>
+
+<div class="row g-4 mt-2">
+    <!-- Input Section -->
+    <div class="col-lg-6">
+        <div class="content-card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-primary"><i class="fas fa-file-import me-2"></i>JSON المدخل</h5>
+                <div>
+                    <button class="btn btn-sm btn-outline-warning me-2" onclick="minifyJSON()">
+                        <i class="fas fa-compress me-1"></i> ضغط
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="clearInput()">
+                        <i class="fas fa-trash me-1"></i> مسح
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <textarea id="jsonInput" class="form-control border-0 text-white p-3 font-monospace" 
+                          style="background: rgba(0,0,0,0.3); resize: none; height: 500px; font-size: 14px;" 
+                          placeholder='{"name": "كوريزا", "type": "OSINT Platform"}'
+                          oninput="formatJSON()"></textarea>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-secondary">
+                        <i class="fas fa-info-circle me-1"></i>
+                        الأحرف: <span id="charCount">0</span> | 
+                        الأسطر: <span id="lineCount">0</span>
+                    </small>
+                    <div id="validationStatus"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Output Section -->
+    <div class="col-lg-6">
+        <div class="content-card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-success"><i class="fas fa-file-export me-2"></i>JSON المنسق</h5>
+                <div>
+                    <label class="text-secondary me-2" style="font-size: 0.9rem;">المسافات:</label>
+                    <select id="indentSize" class="form-select form-select-sm d-inline-block" style="width: auto;" onchange="formatJSON()">
+                        <option value="2" selected>2</option>
+                        <option value="4">4</option>
+                        <option value="8">8</option>
+                    </select>
+                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="copyOutput()">
+                        <i class="fas fa-copy me-1"></i> نسخ
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <pre id="jsonOutput" class="m-0 p-3 text-success font-monospace" 
+                     style="background: rgba(0,0,0,0.3); height: 500px; overflow-y: auto; font-size: 14px;"></pre>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-sm btn-outline-info me-2" onclick="downloadJSON()">
+                    <i class="fas fa-download me-1"></i> تحميل JSON
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="showTree()">
+                    <i class="fas fa-sitemap me-1"></i> عرض الشجرة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="col-lg-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="mb-0 text-info"><i class="fas fa-chart-bar me-2"></i>إحصائيات JSON</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3" id="statsContainer">
+                    <div class="col-md-3">
+                        <div class="stat-box p-3 rounded text-center" style="background: rgba(0,123,255,0.1); border: 1px solid rgba(0,123,255,0.3);">
+                            <div class="stat-value text-info fs-3 fw-bold" id="objectCount">0</div>
+                            <div class="stat-label text-secondary">كائنات (Objects)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box p-3 rounded text-center" style="background: rgba(40,167,69,0.1); border: 1px solid rgba(40,167,69,0.3);">
+                            <div class="stat-value text-success fs-3 fw-bold" id="arrayCount">0</div>
+                            <div class="stat-label text-secondary">مصفوفات (Arrays)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box p-3 rounded text-center" style="background: rgba(255,193,7,0.1); border: 1px solid rgba(255,193,7,0.3);">
+                            <div class="stat-value text-warning fs-3 fw-bold" id="keyCount">0</div>
+                            <div class="stat-label text-secondary">مفاتيح (Keys)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box p-3 rounded text-center" style="background: rgba(220,53,69,0.1); border: 1px solid rgba(220,53,69,0.3);">
+                            <div class="stat-value text-danger fs-3 fw-bold" id="depthLevel">0</div>
+                            <div class="stat-label text-secondary">مستوى العمق</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tree View Modal -->
+    <div class="modal fade" id="treeModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
+                <div class="modal-header">
+                    <h5 class="modal-title text-primary"><i class="fas fa-sitemap me-2"></i>عرض الشجرة</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="treeView" class="font-monospace" style="font-size: 14px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let parsedJSON = null;
+
+function formatJSON() {
+    const input = document.getElementById('jsonInput').value.trim();
+    const indentSize = parseInt(document.getElementById('indentSize').value);
+    
+    // تحديث العدادات
+    document.getElementById('charCount').textContent = input.length;
+    document.getElementById('lineCount').textContent = input.split('\n').length;
+    
+    if (!input) {
+        document.getElementById('jsonOutput').textContent = '';
+        document.getElementById('validationStatus').innerHTML = '';
+        resetStats();
+        return;
+    }
+    
+    try {
+        parsedJSON = JSON.parse(input);
+        const formatted = JSON.stringify(parsedJSON, null, indentSize);
+        document.getElementById('jsonOutput').textContent = formatted;
+        
+        // حالة صحيحة
+        document.getElementById('validationStatus').innerHTML = 
+            '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>JSON صحيح</span>';
+        
+        // حساب الإحصائيات
+        calculateStats(parsedJSON);
+        
+    } catch (error) {
+        document.getElementById('jsonOutput').textContent = 'خطأ في التنسيق:\n' + error.message;
+        document.getElementById('validationStatus').innerHTML = 
+            '<span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i>JSON غير صحيح</span>';
+        resetStats();
+    }
+}
+
+function minifyJSON() {
+    const input = document.getElementById('jsonInput').value.trim();
+    if (!input) return;
+    
+    try {
+        const parsed = JSON.parse(input);
+        const minified = JSON.stringify(parsed);
+        document.getElementById('jsonInput').value = minified;
+        formatJSON();
+    } catch (error) {
+        alert('لا يمكن ضغط JSON غير صحيح');
+    }
+}
+
+function clearInput() {
+    document.getElementById('jsonInput').value = '';
+    document.getElementById('jsonOutput').textContent = '';
+    document.getElementById('validationStatus').innerHTML = '';
+    resetStats();
+}
+
+function copyOutput() {
+    const output = document.getElementById('jsonOutput').textContent;
+    if (!output) return;
+    
+    navigator.clipboard.writeText(output).then(() => {
+        const btn = event.target.closest('button');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check text-success me-1"></i> تم النسخ';
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+        }, 2000);
+    });
+}
+
+function downloadJSON() {
+    const output = document.getElementById('jsonOutput').textContent;
+    if (!output) return;
+    
+    const blob = new Blob([output], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'formatted_' + Date.now() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function calculateStats(obj) {
+    let objects = 0;
+    let arrays = 0;
+    let keys = 0;
+    let maxDepth = 0;
+    
+    function traverse(item, depth = 0) {
+        maxDepth = Math.max(maxDepth, depth);
+        
+        if (Array.isArray(item)) {
+            arrays++;
+            item.forEach(element => traverse(element, depth + 1));
+        } else if (typeof item === 'object' && item !== null) {
+            objects++;
+            Object.keys(item).forEach(key => {
+                keys++;
+                traverse(item[key], depth + 1);
+            });
+        }
+    }
+    
+    traverse(obj);
+    
+    document.getElementById('objectCount').textContent = objects;
+    document.getElementById('arrayCount').textContent = arrays;
+    document.getElementById('keyCount').textContent = keys;
+    document.getElementById('depthLevel').textContent = maxDepth;
+}
+
+function resetStats() {
+    document.getElementById('objectCount').textContent = '0';
+    document.getElementById('arrayCount').textContent = '0';
+    document.getElementById('keyCount').textContent = '0';
+    document.getElementById('depthLevel').textContent = '0';
+}
+
+function showTree() {
+    if (!parsedJSON) {
+        alert('الرجاء إدخال JSON صحيح أولاً');
+        return;
+    }
+    
+    const treeView = document.getElementById('treeView');
+    treeView.innerHTML = generateTreeHTML(parsedJSON);
+    
+    const modal = new bootstrap.Modal(document.getElementById('treeModal'));
+    modal.show();
+}
+
+function generateTreeHTML(obj, level = 0) {
+    const indent = '  '.repeat(level);
+    let html = '';
+    
+    if (Array.isArray(obj)) {
+        html += `${indent}<span class="text-warning">[</span>\n`;
+        obj.forEach((item, index) => {
+            html += generateTreeHTML(item, level + 1);
+            if (index < obj.length - 1) html += `${indent}  <span class="text-secondary">,</span>\n`;
+        });
+        html += `\n${indent}<span class="text-warning">]</span>`;
+    } else if (typeof obj === 'object' && obj !== null) {
+        html += `${indent}<span class="text-info">{</span>\n`;
+        const keys = Object.keys(obj);
+        keys.forEach((key, index) => {
+            html += `${indent}  <span class="text-primary">"${key}"</span>: `;
+            html += generateTreeHTML(obj[key], level + 1);
+            if (index < keys.length - 1) html += `<span class="text-secondary">,</span>`;
+            html += '\n';
+        });
+        html += `${indent}<span class="text-info">}</span>`;
+    } else if (typeof obj === 'string') {
+        html += `<span class="text-success">"${obj}"</span>`;
+    } else if (typeof obj === 'number') {
+        html += `<span class="text-warning">${obj}</span>`;
+    } else if (typeof obj === 'boolean') {
+        html += `<span class="text-danger">${obj}</span>`;
+    } else if (obj === null) {
+        html += `<span class="text-secondary">null</span>`;
+    }
+    
+    return html;
+}
+
+// مثال افتراضي
+document.getElementById('jsonInput').value = `{
+  "platform": "كوريزا OSINT",
+  "version": "1.0",
+  "features": ["OSINT", "Crypto", "Analysis"],
+  "active": true,
+  "users": 1250
+}`;
+formatJSON();
+</script>
+{% endblock %}

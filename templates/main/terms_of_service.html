@@ -1,0 +1,65 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}شروط الخدمة - كوريزا{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card bg-dark border-secondary shadow-lg">
+                <div class="card-body p-5 text-light">
+                    <h1 class="display-4 text-warning mb-4 fw-bold">شروط الخدمة</h1>
+                    <p class="lead text-secondary mb-5">تاريخ آخر تحديث: 25 أبريل 2026</p>
+
+                    <div class="terms-section mb-5">
+                        <h3 class="text-warning"><i class="fas fa-gavel me-2"></i> 1. قبول الشروط</h3>
+                        <p>باستخدامك لمنصة "كوريزا"، فإنك تقر وتوافق على الالتزام بهذه الشروط والأحكام. إذا كنت لا توافق على أي جزء منها، يجب عليك التوقف فوراً عن استخدام المنصة.</p>
+                    </div>
+
+                    <div class="terms-section mb-5">
+                        <h3 class="text-warning"><i class="fas fa-balance-scale me-2"></i> 2. الاستخدام المشروع</h3>
+                        <p>تُستخدم هذه المنصة لأغراض البحث والاستخبارات القانونية والأخلاقية فقط. يمنع منعاً باتاً:</p>
+                        <ul>
+                            <li>استخدام المنصة لأغراض الابتزاز أو التهديد.</li>
+                            <li>اختراق خصوصية الأفراد بشكل غير قانوني.</li>
+                            <li>محاولة تعطيل أو مهاجمة البنية التحتية للمنصة.</li>
+                        </ul>
+                    </div>
+
+                    <div class="terms-section mb-5">
+                        <h3 class="text-warning"><i class="fas fa-exclamation-triangle me-2"></i> 3. إخلاء المسؤولية</h3>
+                        <p>تعتمد المنصة على مصادر مفتوحة (OSINT) قد تكون عرضة للتغيير أو الخطأ. "كوريزا" لا تضمن دقة المعلومات المستخرجة بنسبة 100%، وتخلي مسؤوليتها عن أي قرارات تُتخذ بناءً على هذه البيانات.</p>
+                    </div>
+
+                    <div class="terms-section mb-5">
+                        <h3 class="text-warning"><i class="fas fa-user-check me-2"></i> 4. مسؤولية الحساب</h3>
+                        <p>أنت مسؤول عن الحفاظ على سرية بيانات دخولك. أي نشاط يتم عبر حسابك يُعتبر مسؤوليتك الشخصية والقانونية.</p>
+                    </div>
+
+                    <div class="terms-section mb-5">
+                        <h3 class="text-warning"><i class="fas fa-ban me-2"></i> 5. إنهاء الخدمة</h3>
+                        <p>نحتفظ بالحق في تعليق أو إنهاء وصولك إلى المنصة في حال ثبوت مخالفة شروط الاستخدام أو القوانين السيبرانية المعمول بها.</p>
+                    </div>
+
+                    <div class="text-center mt-5">
+                        <a href="{% url 'main:home' %}" class="btn btn-outline-warning px-4">أوافق والعودة للرئيسية</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .terms-section h3 {
+        border-right: 4px solid #ffc107;
+        padding-right: 15px;
+        margin-bottom: 20px;
+    }
+    .terms-section p, .terms-section li {
+        color: #cbd5e0;
+        line-height: 1.8;
+    }
+</style>
+{% endblock %}

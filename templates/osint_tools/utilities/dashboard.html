@@ -1,0 +1,127 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}الأدوات المساعدة والتشفير - كوريزا OSINT{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center mb-3">
+        <button class="btn btn-outline-primary me-3 sidebar-toggle" id="sidebarToggle" aria-label="تبديل الشريط الجانبي">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="fw-bold mb-0 cyber-text typewriter">
+            <i class="fas fa-toolbox me-3"></i>أدوات الهندسة العكسية والتشفير
+        </h1>
+    </div>
+    <p class="text-secondary">مجموعة من أدوات التشفير، فك التشفير، والمولدات (Client-Side) لا تتطلب اتصالاً بالإنترنت أو إرسال بيانات للسيرفر.</p>
+    <div class="matrix-text mt-2">
+        <small>CYBER UTILITIES & CRYPTO SUITE</small>
+    </div>
+</div>
+
+<div class="row g-4 mt-2">
+    <!-- Password Generator -->
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card cyber-border text-center p-4 action-card" onclick="window.location.href='{% url 'osint_tools:password_generator' %}'">
+            <div class="icon-circle mb-3 mx-auto" style="width: 70px; height: 70px; background: rgba(0, 255, 0, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-key fa-2x hacker-glow"></i>
+            </div>
+            <h5 class="fw-bold text-white mb-2">مولد كلمات المرور</h5>
+            <p class="text-secondary small mb-0">إنشاء كلمات مرور شديدة التعقيد وآمنة مع مقياس قوة.</p>
+        </div>
+    </div>
+
+    <!-- Hash Generator -->
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card cyber-border text-center p-4 action-card" onclick="window.location.href='{% url 'osint_tools:hash_generator' %}'">
+            <div class="icon-circle mb-3 mx-auto" style="width: 70px; height: 70px; background: rgba(0, 255, 0, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-fingerprint fa-2x hacker-glow"></i>
+            </div>
+            <h5 class="fw-bold text-white mb-2">مُولّد الهاش (Hash)</h5>
+            <p class="text-secondary small mb-0">توليد بصمات رقمية MD5, SHA1, SHA256 لحظياً.</p>
+        </div>
+    </div>
+
+    <!-- Coder / Decoder -->
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card cyber-border text-center p-4 action-card" onclick="window.location.href='{% url 'osint_tools:coder_decoder' %}'">
+            <div class="icon-circle mb-3 mx-auto" style="width: 70px; height: 70px; background: rgba(0, 255, 0, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-random fa-2x hacker-glow"></i>
+            </div>
+            <h5 class="fw-bold text-white mb-2">تشفير وفك التشفير</h5>
+            <p class="text-secondary small mb-0">ترميز النصوص Base64 و URL و Hex والعكس.</p>
+        </div>
+    </div>
+
+    <!-- JWT Inspector -->
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card cyber-border text-center p-4 action-card" onclick="window.location.href='{% url 'osint_tools:jwt_inspector' %}'">
+            <div class="icon-circle mb-3 mx-auto" style="width: 70px; height: 70px; background: rgba(0, 255, 0, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-barcode fa-2x hacker-glow"></i>
+            </div>
+            <h5 class="fw-bold text-white mb-2">مُفتش JWT</h5>
+            <p class="text-secondary small mb-0">تحليل وفك توكن المصادقة وقراءة محتويات الحمولة (Payload).</p>
+        </div>
+    </div>
+
+    <!-- Timestamp Converter -->
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card cyber-border text-center p-4 action-card" onclick="window.location.href='{% url 'osint_tools:timestamp_converter' %}'">
+            <div class="icon-circle mb-3 mx-auto" style="width: 70px; height: 70px; background: rgba(0, 123, 255, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-clock fa-2x text-info"></i>
+            </div>
+            <h5 class="fw-bold text-white mb-2">محول الطوابع الزمنية</h5>
+            <p class="text-secondary small mb-0">تحويل Unix Timestamp والتواريخ بجميع المناطق الزمنية.</p>
+        </div>
+    </div>
+
+    <!-- JSON Formatter -->
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card cyber-border text-center p-4 action-card" onclick="window.location.href='{% url 'osint_tools:json_formatter' %}'">
+            <div class="icon-circle mb-3 mx-auto" style="width: 70px; height: 70px; background: rgba(40, 167, 69, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-code fa-2x text-success"></i>
+            </div>
+            <h5 class="fw-bold text-white mb-2">منسق ومدقق JSON</h5>
+            <p class="text-secondary small mb-0">تنسيق وتدقيق وتحليل بيانات JSON بشكل احترافي.</p>
+        </div>
+    </div>
+
+    <!-- Text Diff Checker -->
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card cyber-border text-center p-4 action-card" onclick="window.location.href='{% url 'osint_tools:text_diff' %}'">
+            <div class="icon-circle mb-3 mx-auto" style="width: 70px; height: 70px; background: rgba(255, 193, 7, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-exchange-alt fa-2x text-warning"></i>
+            </div>
+            <h5 class="fw-bold text-white mb-2">مقارن النصوص</h5>
+            <p class="text-secondary small mb-0">مقارنة النصوص والكود مع تمييز الاختلافات.</p>
+        </div>
+    </div>
+
+    <!-- Coming Soon Placeholder -->
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card cyber-border text-center p-4" style="opacity: 0.6; cursor: not-allowed;">
+            <div class="icon-circle mb-3 mx-auto" style="width: 70px; height: 70px; background: rgba(108, 117, 125, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-plus fa-2x text-secondary"></i>
+            </div>
+            <h5 class="fw-bold text-secondary mb-2">المزيد قريباً</h5>
+            <p class="text-secondary small mb-0">أدوات إضافية قيد التطوير...</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.action-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: var(--bg-secondary);
+}
+.action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 255, 0, 0.2);
+    border-color: var(--primary-color) !important;
+}
+</style>
+{% endblock %}

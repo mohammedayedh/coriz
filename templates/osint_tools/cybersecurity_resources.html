@@ -1,0 +1,1344 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}مصادر الأمن السيبراني - كوريزا OSINT{% endblock %}
+
+{% block content %}
+<div class="content-header mb-4">
+    <div class="d-flex align-items-center mb-3">
+        <button class="btn btn-outline-primary me-3 sidebar-toggle" id="sidebarToggle" aria-label="تبديل الشريط الجانبي">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div>
+            <h1 class="fw-bold mb-2 cyber-text">
+                <i class="fas fa-shield-alt me-3"></i>مركز مصادر الأمن السيبراني
+            </h1>
+            <p class="text-secondary mb-0">مجموعة شاملة من أفضل المصادر المجانية للأخبار، الأدوات، والموارد التعليمية في مجال الأمن السيبراني والـ OSINT</p>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Tabs -->
+<div class="resources-tabs-container mb-4">
+    <ul class="nav nav-pills resources-tabs" id="resourceTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-tab" data-bs-toggle="pill" data-bs-target="#all" type="button">
+                <i class="fas fa-globe me-2"></i>الكل
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="news-tab" data-bs-toggle="pill" data-bs-target="#news" type="button">
+                <i class="fas fa-newspaper me-2"></i>الأخبار
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="threat-tab" data-bs-toggle="pill" data-bs-target="#threat" type="button">
+                <i class="fas fa-bug me-2"></i>التهديدات
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tools-tab" data-bs-toggle="pill" data-bs-target="#tools" type="button">
+                <i class="fas fa-tools me-2"></i>الأدوات
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="learning-tab" data-bs-toggle="pill" data-bs-target="#learning" type="button">
+                <i class="fas fa-graduation-cap me-2"></i>التعليم
+            </button>
+        </li>
+    </ul>
+</div>
+
+<div class="tab-content" id="resourceTabsContent">
+    <!-- All Tab -->
+    <div class="tab-pane fade show active" id="all" role="tabpanel">
+        
+        <!-- Quick Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="resources-stat-card">
+                    <div class="stat-icon-wrapper bg-primary-subtle">
+                        <i class="fas fa-newspaper text-primary"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 class="stat-value text-primary">50+</h3>
+                        <p class="stat-label">مصدر إخباري</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="resources-stat-card">
+                    <div class="stat-icon-wrapper bg-danger-subtle">
+                        <i class="fas fa-bug text-danger"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 class="stat-value text-danger">30+</h3>
+                        <p class="stat-label">مصدر تهديدات</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="resources-stat-card">
+                    <div class="stat-icon-wrapper bg-success-subtle">
+                        <i class="fas fa-tools text-success"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 class="stat-value text-success">100+</h3>
+                        <p class="stat-label">أداة مجانية</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="resources-stat-card">
+                    <div class="stat-icon-wrapper bg-warning-subtle">
+                        <i class="fas fa-graduation-cap text-warning"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 class="stat-value text-warning">20+</h3>
+                        <p class="stat-label">مصدر تعليمي</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured Resources -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-9">
+                <div class="content-card featured-section">
+                    <div class="card-header featured-main-header">
+                        <div class="featured-main-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-1">المصادر المميزة</h3>
+                            <p class="mb-0 text-white-50 small">أفضل المصادر الموثوقة في مجال الأمن السيبراني</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- Krebs on Security -->
+                            <div class="col-md-6">
+                                <div class="featured-resource-card">
+                                    <div class="featured-header">
+                                        <div class="featured-icon bg-primary-subtle">
+                                            <i class="fas fa-shield-alt text-primary"></i>
+                                        </div>
+                                        <div class="featured-title">
+                                            <h6 class="mb-0">Krebs on Security</h6>
+                                            <small class="text-secondary">أخبار أمنية متعمقة</small>
+                                        </div>
+                                    </div>
+                                    <p class="featured-description">تحليلات وتحقيقات أمنية من خبير الأمن السيبراني Brian Krebs</p>
+                                    <div class="featured-actions">
+                                        <a href="https://krebsonsecurity.com" target="_blank" class="btn btn-sm btn-primary flex-grow-1">
+                                            <i class="fas fa-external-link-alt me-1"></i> زيارة
+                                        </a>
+                                        <a href="https://krebsonsecurity.com/feed/" target="_blank" class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-rss"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- The Hacker News -->
+                            <div class="col-md-6">
+                                <div class="featured-resource-card">
+                                    <div class="featured-header">
+                                        <div class="featured-icon bg-danger-subtle">
+                                            <i class="fas fa-newspaper text-danger"></i>
+                                        </div>
+                                        <div class="featured-title">
+                                            <h6 class="mb-0">The Hacker News</h6>
+                                            <small class="text-secondary">أخبار الاختراقات</small>
+                                        </div>
+                                    </div>
+                                    <p class="featured-description">آخر أخبار الثغرات الأمنية والاختراقات والتهديدات السيبرانية</p>
+                                    <div class="featured-actions">
+                                        <a href="https://thehackernews.com" target="_blank" class="btn btn-sm btn-danger flex-grow-1">
+                                            <i class="fas fa-external-link-alt me-1"></i> زيارة
+                                        </a>
+                                        <a href="https://feeds.feedburner.com/TheHackersNews" target="_blank" class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-rss"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CISA -->
+                            <div class="col-md-6">
+                                <div class="featured-resource-card">
+                                    <div class="featured-header">
+                                        <div class="featured-icon bg-success-subtle">
+                                            <i class="fas fa-flag-usa text-success"></i>
+                                        </div>
+                                        <div class="featured-title">
+                                            <h6 class="mb-0">CISA Alerts</h6>
+                                            <small class="text-secondary">تنبيهات رسمية</small>
+                                        </div>
+                                    </div>
+                                    <p class="featured-description">تنبيهات الأمن السيبراني من وكالة الأمن السيبراني الأمريكية</p>
+                                    <div class="featured-actions">
+                                        <a href="https://www.cisa.gov/news-events/cybersecurity-advisories" target="_blank" class="btn btn-sm btn-success w-100">
+                                            <i class="fas fa-external-link-alt me-1"></i> زيارة
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- VirusTotal -->
+                            <div class="col-md-6">
+                                <div class="featured-resource-card">
+                                    <div class="featured-header">
+                                        <div class="featured-icon bg-warning-subtle">
+                                            <i class="fas fa-virus text-warning"></i>
+                                        </div>
+                                        <div class="featured-title">
+                                            <h6 class="mb-0">VirusTotal</h6>
+                                            <small class="text-secondary">فحص الملفات</small>
+                                        </div>
+                                    </div>
+                                    <p class="featured-description">فحص الملفات والروابط باستخدام أكثر من 70 محرك مكافحة فيروسات</p>
+                                    <div class="featured-actions">
+                                        <a href="https://www.virustotal.com" target="_blank" class="btn btn-sm btn-warning w-100">
+                                            <i class="fas fa-external-link-alt me-1"></i> زيارة
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="col-lg-3">
+                <div class="content-card quick-links-section">
+                    <div class="card-header quick-links-main-header">
+                        <div class="quick-links-main-icon">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">روابط سريعة</h5>
+                            <p class="mb-0 text-white-50 small">أدوات مهمة</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-links-list">
+                            <a href="https://www.shodan.io" target="_blank" class="quick-link-item">
+                                <div class="quick-link-icon bg-primary-subtle">
+                                    <i class="fas fa-search text-primary"></i>
+                                </div>
+                                <div class="quick-link-content">
+                                    <span class="quick-link-title">Shodan</span>
+                                    <small class="quick-link-desc">محرك بحث IoT</small>
+                                </div>
+                                <i class="fas fa-chevron-left text-secondary"></i>
+                            </a>
+                            <a href="https://haveibeenpwned.com" target="_blank" class="quick-link-item">
+                                <div class="quick-link-icon bg-danger-subtle">
+                                    <i class="fas fa-user-lock text-danger"></i>
+                                </div>
+                                <div class="quick-link-content">
+                                    <span class="quick-link-title">Have I Been Pwned</span>
+                                    <small class="quick-link-desc">فحص التسريبات</small>
+                                </div>
+                                <i class="fas fa-chevron-left text-secondary"></i>
+                            </a>
+                            <a href="https://otx.alienvault.com" target="_blank" class="quick-link-item">
+                                <div class="quick-link-icon bg-success-subtle">
+                                    <i class="fas fa-satellite text-success"></i>
+                                </div>
+                                <div class="quick-link-content">
+                                    <span class="quick-link-title">AlienVault OTX</span>
+                                    <small class="quick-link-desc">تبادل التهديدات</small>
+                                </div>
+                                <i class="fas fa-chevron-left text-secondary"></i>
+                            </a>
+                            <a href="https://www.exploit-db.com" target="_blank" class="quick-link-item">
+                                <div class="quick-link-icon bg-warning-subtle">
+                                    <i class="fas fa-bug text-warning"></i>
+                                </div>
+                                <div class="quick-link-content">
+                                    <span class="quick-link-title">Exploit Database</span>
+                                    <small class="quick-link-desc">قاعدة الثغرات</small>
+                                </div>
+                                <i class="fas fa-chevron-left text-secondary"></i>
+                            </a>
+                            <a href="https://cve.mitre.org" target="_blank" class="quick-link-item">
+                                <div class="quick-link-icon bg-info-subtle">
+                                    <i class="fas fa-shield-virus text-info"></i>
+                                </div>
+                                <div class="quick-link-content">
+                                    <span class="quick-link-title">CVE Database</span>
+                                    <small class="quick-link-desc">قاعدة CVE</small>
+                                </div>
+                                <i class="fas fa-chevron-left text-secondary"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories Grid -->
+        <div class="row g-4">
+            <!-- News Sources -->
+            <div class="col-lg-6">
+                <div class="content-card category-card">
+                    <div class="card-header category-header">
+                        <div class="category-icon-wrapper">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1">مصادر الأخبار</h4>
+                            <p class="mb-0 text-secondary small">آخر أخبار الأمن السيبراني والثغرات</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="resource-list">
+                            <a href="https://www.bleepingcomputer.com" target="_blank" class="resource-item">
+                                <i class="fas fa-laptop-code text-info me-2"></i>
+                                <span>Bleeping Computer</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.darkreading.com" target="_blank" class="resource-item">
+                                <i class="fas fa-user-secret text-warning me-2"></i>
+                                <span>Dark Reading</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.securityweek.com" target="_blank" class="resource-item">
+                                <i class="fas fa-globe text-success me-2"></i>
+                                <span>SecurityWeek</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://threatpost.com" target="_blank" class="resource-item">
+                                <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                                <span>Threatpost</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OSINT Tools -->
+            <div class="col-lg-6">
+                <div class="content-card category-card">
+                    <div class="card-header category-header">
+                        <div class="category-icon-wrapper">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1">أدوات OSINT</h4>
+                            <p class="mb-0 text-secondary small">أدوات احترافية لجمع المعلومات</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="resource-list">
+                            <a href="https://www.maltego.com" target="_blank" class="resource-item">
+                                <i class="fas fa-project-diagram text-primary me-2"></i>
+                                <span>Maltego</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.spiderfoot.net" target="_blank" class="resource-item">
+                                <i class="fas fa-spider text-danger me-2"></i>
+                                <span>SpiderFoot</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://github.com/laramies/theHarvester" target="_blank" class="resource-item">
+                                <i class="fas fa-envelope text-warning me-2"></i>
+                                <span>theHarvester</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://github.com/lanmaster53/recon-ng" target="_blank" class="resource-item">
+                                <i class="fas fa-terminal text-info me-2"></i>
+                                <span>Recon-ng</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Resources -->
+            <div class="col-lg-6">
+                <div class="content-card category-card">
+                    <div class="card-header category-header">
+                        <div class="category-icon-wrapper">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1">مصادر تعليمية</h4>
+                            <p class="mb-0 text-secondary small">دورات ومواد تعليمية مجانية</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="resource-list">
+                            <a href="https://www.sans.org/reading-room" target="_blank" class="resource-item">
+                                <i class="fas fa-book text-primary me-2"></i>
+                                <span>SANS Reading Room</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://owasp.org" target="_blank" class="resource-item">
+                                <i class="fas fa-code text-danger me-2"></i>
+                                <span>OWASP</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.cybrary.it" target="_blank" class="resource-item">
+                                <i class="fas fa-video text-success me-2"></i>
+                                <span>Cybrary</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://academy.hackthebox.com" target="_blank" class="resource-item">
+                                <i class="fas fa-cube text-warning me-2"></i>
+                                <span>HackTheBox Academy</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Arabic Resources -->
+            <div class="col-lg-6">
+                <div class="content-card category-card">
+                    <div class="card-header category-header">
+                        <div class="category-icon-wrapper">
+                            <i class="fas fa-language"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1">مصادر عربية</h4>
+                            <p class="mb-0 text-secondary small">محتوى عربي متخصص في الأمن السيبراني</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="resource-list">
+                            <a href="https://www.security4arabs.com" target="_blank" class="resource-item">
+                                <i class="fas fa-shield-alt text-primary me-2"></i>
+                                <span>الأمن المعلوماتي</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.tech-wd.com" target="_blank" class="resource-item">
+                                <i class="fas fa-book text-success me-2"></i>
+                                <span>عالم التقنية</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://academy.hsoub.com" target="_blank" class="resource-item">
+                                <i class="fas fa-graduation-cap text-info me-2"></i>
+                                <span>أكاديمية حسوب</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.arageek.com/tech" target="_blank" class="resource-item">
+                                <i class="fas fa-newspaper text-warning me-2"></i>
+                                <span>أراجيك تك</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- News Tab -->
+    <div class="tab-pane fade" id="news" role="tabpanel">
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="content-card category-card">
+                    <div class="card-header category-header">
+                        <div class="category-icon-wrapper">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1">مصادر الأخبار الأمنية</h4>
+                            <p class="mb-0 text-secondary small">آخر أخبار الأمن السيبراني والثغرات والاختراقات</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="resource-list">
+                                    <h6 class="text-primary mb-3">مصادر عالمية</h6>
+                                    <a href="https://krebsonsecurity.com" target="_blank" class="resource-item">
+                                        <i class="fas fa-shield-alt text-primary me-2"></i>
+                                        <span>Krebs on Security</span>
+                                        <i class="fas fa-external-link-alt ms-auto"></i>
+                                    </a>
+                                    <a href="https://thehackernews.com" target="_blank" class="resource-item">
+                                        <i class="fas fa-newspaper text-danger me-2"></i>
+                                        <span>The Hacker News</span>
+                                        <i class="fas fa-external-link-alt ms-auto"></i>
+                                    </a>
+                                    <a href="https://www.bleepingcomputer.com" target="_blank" class="resource-item">
+                                        <i class="fas fa-laptop-code text-info me-2"></i>
+                                        <span>Bleeping Computer</span>
+                                        <i class="fas fa-external-link-alt ms-auto"></i>
+                                    </a>
+                                    <a href="https://www.darkreading.com" target="_blank" class="resource-item">
+                                        <i class="fas fa-user-secret text-warning me-2"></i>
+                                        <span>Dark Reading</span>
+                                        <i class="fas fa-external-link-alt ms-auto"></i>
+                                    </a>
+                                    <a href="https://www.securityweek.com" target="_blank" class="resource-item">
+                                        <i class="fas fa-globe text-success me-2"></i>
+                                        <span>SecurityWeek</span>
+                                        <i class="fas fa-external-link-alt ms-auto"></i>
+                                    </a>
+                                    <a href="https://threatpost.com" target="_blank" class="resource-item">
+                                        <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                                        <span>Threatpost</span>
+                                        <i class="fas fa-external-link-alt ms-auto"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="resource-list">
+                                    <h6 class="text-primary mb-3">مصادر عربية</h6>
+                                    <a href="https://www.security4arabs.com" target="_blank" class="resource-item">
+                                        <i class="fas fa-shield-alt text-primary me-2"></i>
+                                        <span>الأمن المعلوماتي</span>
+                                        <i class="fas fa-external-link-alt ms-auto"></i>
+                                    </a>
+                                    <a href="https://www.tech-wd.com" target="_blank" class="resource-item">
+                                        <i class="fas fa-book text-success me-2"></i>
+                                        <span>عالم التقنية</span>
+                                        <i class="fas fa-external-link-alt ms-auto"></i>
+                                    </a>
+                                    <a href="https://www.arageek.com/tech" target="_blank" class="resource-item">
+                                        <i class="fas fa-newspaper text-warning me-2"></i>
+                                        <span>أراجيك تك</span>
+                                        <i class="fas fa-external-link-alt ms-auto"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Threat Intelligence Tab -->
+    <div class="tab-pane fade" id="threat" role="tabpanel">
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="content-card category-card">
+                    <div class="card-header category-header">
+                        <div class="category-icon-wrapper">
+                            <i class="fas fa-bug"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1">مصادر استخبارات التهديدات</h4>
+                            <p class="mb-0 text-secondary small">تنبيهات أمنية وتحليلات التهديدات السيبرانية</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="resource-list">
+                            <a href="https://www.cisa.gov/news-events/cybersecurity-advisories" target="_blank" class="resource-item">
+                                <i class="fas fa-flag-usa text-primary me-2"></i>
+                                <span>CISA Cybersecurity Advisories</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://otx.alienvault.com" target="_blank" class="resource-item">
+                                <i class="fas fa-satellite text-success me-2"></i>
+                                <span>AlienVault OTX - Open Threat Exchange</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.virustotal.com" target="_blank" class="resource-item">
+                                <i class="fas fa-virus text-warning me-2"></i>
+                                <span>VirusTotal - فحص الملفات والروابط</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://cve.mitre.org" target="_blank" class="resource-item">
+                                <i class="fas fa-shield-virus text-danger me-2"></i>
+                                <span>CVE Database - قاعدة الثغرات</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.exploit-db.com" target="_blank" class="resource-item">
+                                <i class="fas fa-bug text-info me-2"></i>
+                                <span>Exploit Database</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://nvd.nist.gov" target="_blank" class="resource-item">
+                                <i class="fas fa-database text-primary me-2"></i>
+                                <span>National Vulnerability Database</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tools Tab -->
+    <div class="tab-pane fade" id="tools" role="tabpanel">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="content-card category-card">
+                    <div class="card-header category-header">
+                        <div class="category-icon-wrapper">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1">أدوات OSINT</h4>
+                            <p class="mb-0 text-secondary small">أدوات جمع المعلومات الاستخباراتية</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="resource-list">
+                            <a href="https://www.maltego.com" target="_blank" class="resource-item">
+                                <i class="fas fa-project-diagram text-primary me-2"></i>
+                                <span>Maltego</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.spiderfoot.net" target="_blank" class="resource-item">
+                                <i class="fas fa-spider text-danger me-2"></i>
+                                <span>SpiderFoot</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://github.com/laramies/theHarvester" target="_blank" class="resource-item">
+                                <i class="fas fa-envelope text-warning me-2"></i>
+                                <span>theHarvester</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://github.com/lanmaster53/recon-ng" target="_blank" class="resource-item">
+                                <i class="fas fa-terminal text-info me-2"></i>
+                                <span>Recon-ng</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.shodan.io" target="_blank" class="resource-item">
+                                <i class="fas fa-search text-success me-2"></i>
+                                <span>Shodan - محرك بحث IoT</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="content-card category-card">
+                    <div class="card-header category-header">
+                        <div class="category-icon-wrapper">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1">أدوات الأمن السيبراني</h4>
+                            <p class="mb-0 text-secondary small">أدوات الفحص والحماية</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="resource-list">
+                            <a href="https://nmap.org" target="_blank" class="resource-item">
+                                <i class="fas fa-network-wired text-primary me-2"></i>
+                                <span>Nmap - فحص الشبكات</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.wireshark.org" target="_blank" class="resource-item">
+                                <i class="fas fa-fish text-info me-2"></i>
+                                <span>Wireshark - تحليل الحزم</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://portswigger.net/burp" target="_blank" class="resource-item">
+                                <i class="fas fa-bug text-warning me-2"></i>
+                                <span>Burp Suite</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.metasploit.com" target="_blank" class="resource-item">
+                                <i class="fas fa-rocket text-danger me-2"></i>
+                                <span>Metasploit Framework</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://haveibeenpwned.com" target="_blank" class="resource-item">
+                                <i class="fas fa-user-lock text-success me-2"></i>
+                                <span>Have I Been Pwned</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Learning Tab -->
+    <div class="tab-pane fade" id="learning" role="tabpanel">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="content-card category-card">
+                    <div class="card-header category-header">
+                        <div class="category-icon-wrapper">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1">منصات تعليمية</h4>
+                            <p class="mb-0 text-secondary small">دورات ومواد تعليمية مجانية</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="resource-list">
+                            <a href="https://www.sans.org/reading-room" target="_blank" class="resource-item">
+                                <i class="fas fa-book text-primary me-2"></i>
+                                <span>SANS Reading Room</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://owasp.org" target="_blank" class="resource-item">
+                                <i class="fas fa-code text-danger me-2"></i>
+                                <span>OWASP - أمن تطبيقات الويب</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.cybrary.it" target="_blank" class="resource-item">
+                                <i class="fas fa-video text-success me-2"></i>
+                                <span>Cybrary - دورات مجانية</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://academy.hackthebox.com" target="_blank" class="resource-item">
+                                <i class="fas fa-cube text-warning me-2"></i>
+                                <span>HackTheBox Academy</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://tryhackme.com" target="_blank" class="resource-item">
+                                <i class="fas fa-gamepad text-info me-2"></i>
+                                <span>TryHackMe</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="content-card category-card">
+                    <div class="card-header category-header">
+                        <div class="category-icon-wrapper">
+                            <i class="fas fa-language"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1">مصادر تعليمية عربية</h4>
+                            <p class="mb-0 text-secondary small">محتوى عربي متخصص</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="resource-list">
+                            <a href="https://academy.hsoub.com" target="_blank" class="resource-item">
+                                <i class="fas fa-graduation-cap text-info me-2"></i>
+                                <span>أكاديمية حسوب</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.edraak.org" target="_blank" class="resource-item">
+                                <i class="fas fa-book-open text-primary me-2"></i>
+                                <span>إدراك</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.rwaq.org" target="_blank" class="resource-item">
+                                <i class="fas fa-chalkboard-teacher text-success me-2"></i>
+                                <span>رواق</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                            <a href="https://www.youtube.com/@ArabianCyberSecurity" target="_blank" class="resource-item">
+                                <i class="fab fa-youtube text-danger me-2"></i>
+                                <span>قناة الأمن السيبراني العربي</span>
+                                <i class="fas fa-external-link-alt ms-auto"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Resources Page Specific Styles */
+
+/* Tabs Container */
+.resources-tabs-container {
+    background: linear-gradient(135deg, rgba(26, 31, 46, 0.8) 0%, rgba(22, 27, 40, 0.9) 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 2px solid var(--border-color);
+}
+
+.resources-tabs {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.resources-tabs .nav-link {
+    color: #cbd5e0;
+    background: rgba(0,0,0,0.4);
+    border: 2px solid #2d3748;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 600;
+    font-size: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.resources-tabs .nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+}
+
+.resources-tabs .nav-link:hover {
+    border-color: #667eea;
+    color: #ffffff;
+    transform: translateY(-3px) scale(1.05);
+}
+
+.resources-tabs .nav-link:hover::before {
+    opacity: 0.2;
+}
+
+.resources-tabs .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: #ffffff;
+    transform: scale(1.05);
+}
+
+.resources-tabs .nav-link i {
+    font-size: 1.1rem;
+}
+
+/* Stats Cards */
+.resources-stat-card {
+    background: linear-gradient(135deg, rgba(26, 31, 46, 0.8) 0%, rgba(22, 27, 40, 0.9) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.resources-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.resources-stat-card:hover {
+    border-color: #667eea;
+    transform: translateY(-5px) scale(1.03);
+}
+
+.resources-stat-card:hover::before {
+    opacity: 1;
+}
+
+.stat-icon-wrapper {
+    width: 70px;
+    height: 70px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    transition: all 0.3s ease;
+}
+
+.resources-stat-card:hover .stat-icon-wrapper {
+    transform: scale(1.1) rotate(-5deg);
+}
+
+.bg-primary-subtle {
+    background: rgba(102, 126, 234, 0.15) !important;
+}
+
+.bg-danger-subtle {
+    background: rgba(220, 53, 69, 0.15) !important;
+}
+
+.bg-success-subtle {
+    background: rgba(16, 185, 129, 0.15) !important;
+}
+
+.bg-warning-subtle {
+    background: rgba(245, 158, 11, 0.15) !important;
+}
+
+.bg-info-subtle {
+    background: rgba(59, 130, 246, 0.15) !important;
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1;
+}
+
+.stat-label {
+    color: #cbd5e0;
+    margin: 0.5rem 0 0 0;
+    font-size: 0.9rem;
+}
+
+/* Featured Resource Cards */
+.featured-resource-card {
+    background: linear-gradient(135deg, rgba(26, 31, 46, 0.8) 0%, rgba(22, 27, 40, 0.9) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.featured-resource-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.featured-resource-card:hover {
+    border-color: #667eea;
+    transform: translateY(-8px) scale(1.02);
+}
+
+.featured-resource-card:hover::before {
+    opacity: 1;
+}
+
+.featured-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.featured-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    transition: all 0.3s ease;
+}
+
+.featured-resource-card:hover .featured-icon {
+    transform: scale(1.15) rotate(5deg);
+}
+
+.featured-title h6 {
+    color: #e2e8f0;
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.featured-title small {
+    color: #a0aec0;
+    font-size: 0.85rem;
+}
+
+.featured-description {
+    color: #cbd5e0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+    flex-grow: 1;
+}
+
+.featured-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.featured-actions .btn {
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+}
+
+/* Quick Links */
+.quick-links-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.quick-link-item {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, rgba(26, 31, 46, 0.6) 0%, rgba(22, 27, 40, 0.8) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-link-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.quick-link-item:hover {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.08);
+    transform: translateX(-8px) scale(1.02);
+}
+
+.quick-link-item:hover::before {
+    opacity: 1;
+}
+
+.quick-link-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.quick-link-item:hover .quick-link-icon {
+    transform: scale(1.15) rotate(-5deg);
+}
+
+.quick-link-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.quick-link-title {
+    color: #e2e8f0;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.quick-link-desc {
+    color: #a0aec0;
+    font-size: 0.8rem;
+}
+
+.quick-link-item .fa-chevron-left {
+    transition: all 0.3s ease;
+    opacity: 0.5;
+}
+
+.quick-link-item:hover .fa-chevron-left {
+    transform: translateX(-5px);
+    opacity: 1;
+}
+
+/* Resource Lists */
+.resource-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.resource-item {
+    display: flex;
+    align-items: center;
+    padding: 1.125rem 1.25rem;
+    background: linear-gradient(135deg, rgba(26, 31, 46, 0.4) 0%, rgba(22, 27, 40, 0.6) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    text-decoration: none;
+    color: #e2e8f0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.resource-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.resource-item:hover {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.08);
+    transform: translateX(-8px) scale(1.02);
+    color: #667eea;
+}
+
+.resource-item:hover::before {
+    opacity: 1;
+}
+
+.resource-item i:first-child {
+    font-size: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.resource-item:hover i:first-child {
+    transform: scale(1.2) rotate(-5deg);
+}
+
+.resource-item span {
+    flex: 1;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.resource-item .fa-external-link-alt {
+    font-size: 0.9rem;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.resource-item:hover .fa-external-link-alt {
+    opacity: 1;
+    transform: translateX(-3px);
+}
+
+/* Category Cards - Larger Headers */
+.category-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+}
+
+.category-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    padding: 1.75rem 1.5rem !important;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border: none !important;
+}
+
+.category-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.category-card:hover .category-icon-wrapper {
+    transform: scale(1.1) rotate(-5deg);
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.category-header h4 {
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 1.35rem;
+    margin: 0;
+}
+
+.category-header p {
+    color: rgba(255, 255, 255, 0.85) !important;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Featured Section - Main Header */
+.featured-section {
+    border: 2px solid var(--border-color);
+}
+
+.featured-main-header {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    padding: 2rem 1.75rem !important;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    border: none !important;
+}
+
+.featured-main-icon {
+    width: 70px;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.featured-section:hover .featured-main-icon {
+    transform: scale(1.1) rotate(-5deg);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.featured-main-header h3 {
+    color: #ffffff !important;
+    font-weight: 800;
+    font-size: 1.75rem;
+    margin: 0;
+}
+
+.featured-main-header p {
+    color: rgba(255, 255, 255, 0.9) !important;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* Quick Links Section - Main Header */
+.quick-links-section {
+    border: 2px solid var(--border-color);
+}
+
+.quick-links-main-header {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    padding: 2rem 1.5rem !important;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: none !important;
+}
+
+.quick-links-main-icon {
+    width: 55px;
+    height: 55px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.quick-links-section:hover .quick-links-main-icon {
+    transform: scale(1.1) rotate(-5deg);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.quick-links-main-header h5 {
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.quick-links-main-header p {
+    color: rgba(255, 255, 255, 0.85) !important;
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+/* Empty States */
+.tab-pane .text-center {
+    padding: 4rem 2rem;
+}
+
+.tab-pane .text-center i {
+    opacity: 0.3;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .resources-tabs {
+        flex-direction: column;
+    }
+    
+    .resources-tabs .nav-link {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .resources-stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .stat-icon-wrapper {
+        margin-bottom: 0.5rem;
+    }
+    
+    .featured-header {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+</style>
+
+<script>
+// تفعيل Bootstrap Tabs
+document.addEventListener('DOMContentLoaded', function() {
+    // التأكد من تحميل Bootstrap
+    if (typeof bootstrap !== 'undefined') {
+        // تفعيل جميع التبويبات
+        const triggerTabList = document.querySelectorAll('#resourceTabs button[data-bs-toggle="pill"]');
+        triggerTabList.forEach(triggerEl => {
+            const tabTrigger = new bootstrap.Tab(triggerEl);
+            
+            triggerEl.addEventListener('click', event => {
+                event.preventDefault();
+                tabTrigger.show();
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

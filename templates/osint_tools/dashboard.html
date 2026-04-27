@@ -8,10 +8,7 @@
 {% block content %}
 <!-- Override the main content -->
 <div class="content-header">
-    <div class="d-flex align-items-center mb-3">
-        <button class="btn btn-outline-primary me-3 sidebar-toggle" id="sidebarToggle" aria-label="تبديل الشريط الجانبي">
-            <i class="fas fa-bars"></i>
-        </button>
+    <div class="mb-3">
         <h1 class="fw-bold mb-0 cyber-text typewriter">
             <i class="fas fa-tools me-3"></i>أدوات OSINT المتقدمة
         </h1>
@@ -35,7 +32,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-lg-3 col-md-6">
         <div class="stat-card cyber-border">
             <div class="stat-icon">
@@ -47,7 +44,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-lg-3 col-md-6">
         <div class="stat-card cyber-border">
             <div class="stat-icon">
@@ -59,7 +56,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-lg-3 col-md-6">
         <div class="stat-card cyber-border">
             <div class="stat-icon">
@@ -110,176 +107,181 @@
         </div>
     </div>
 
-<!-- Recent Sessions -->
-{% if recent_sessions %}
-<section class="py-4">
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-clock me-2"></i>الجلسات الأخيرة
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>الأداة</th>
-                                        <th>الهدف</th>
-                                        <th>الحالة</th>
-                                        <th>النتائج</th>
-                                        <th>التاريخ</th>
-                                        <th>الإجراءات</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for session in recent_sessions %}
-                                    <tr>
-                                        <td>
-                                            <span class="badge bg-primary-subtle text-primary fw-semibold">
-                                                <i class="{{ session.tool.icon }} me-1"></i>
-                                                {{ session.tool.name }}
-                                            </span>
-                                        </td>
-                                        <td>{{ session.target }}</td>
-                                        <td>
-                                            {% if session.status == 'completed' %}
+    <!-- Recent Sessions -->
+    {% if recent_sessions %}
+    <section class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-clock me-2"></i>الجلسات الأخيرة
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>الأداة</th>
+                                            <th>الهدف</th>
+                                            <th>الحالة</th>
+                                            <th>النتائج</th>
+                                            <th>التاريخ</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for session in recent_sessions %}
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-primary-subtle text-primary fw-semibold">
+                                                    <i class="{{ session.tool.icon }} me-1"></i>
+                                                    {{ session.tool.name }}
+                                                </span>
+                                            </td>
+                                            <td>{{ session.target }}</td>
+                                            <td>
+                                                {% if session.status == 'completed' %}
                                                 <span class="badge bg-success">مكتملة</span>
-                                            {% elif session.status == 'running' %}
+                                                {% elif session.status == 'running' %}
                                                 <span class="badge bg-warning">قيد التشغيل</span>
-                                            {% elif session.status == 'failed' %}
+                                                {% elif session.status == 'failed' %}
                                                 <span class="badge bg-danger">فشلت</span>
-                                            {% else %}
+                                                {% else %}
                                                 <span class="badge bg-secondary">{{ session.get_status_display }}</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info">{{ session.results_count }}</span>
-                                        </td>
-                                        <td>{{ session.created_at|date:"Y-m-d H:i" }}</td>
-                                        <td>
-                                            <a href="{% url 'osint_tools:session_detail' session.id %}" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ session.results_count }}</span>
+                                            </td>
+                                            <td>{{ session.created_at|date:"Y-m-d H:i" }}</td>
+                                            <td>
+                                                <a href="{% url 'osint_tools:session_detail' session.id %}"
+                                                    class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
-{% endif %}
+    </section>
+    {% endif %}
 
-<!-- Popular Tools -->
-{% if popular_tools %}
-<section class="py-4">
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-star me-2"></i>الأدوات الأكثر استخداماً
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            {% for tool in popular_tools %}
-                            <div class="col-md-4">
-                                <div class="card h-100 border-0 shadow-sm">
-                                    <div class="card-body text-center">
-                                        <div class="mb-3">
-                                            <i class="{{ tool.icon }} fa-3x text-primary"></i>
-                                        </div>
-                                        <h6 class="fw-bold">{{ tool.name }}</h6>
-                                        <p class="text-muted small">{{ tool.description|truncatewords:10 }}</p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span class="badge bg-primary">{{ tool.user_usage_count }} استخدام</span>
-                                            <a href="{% url 'osint_tools:tool_detail' tool.slug %}" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-play"></i> تشغيل
-                                            </a>
+    <!-- Popular Tools -->
+    {% if popular_tools %}
+    <section class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-star me-2"></i>الأدوات الأكثر استخداماً
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                {% for tool in popular_tools %}
+                                <div class="col-md-4">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                <i class="{{ tool.icon }} fa-3x text-primary"></i>
+                                            </div>
+                                            <h6 class="fw-bold">{{ tool.name }}</h6>
+                                            <p class="text-muted small">{{ tool.description|truncatewords:10 }}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-primary">{{ tool.user_usage_count }}
+                                                    استخدام</span>
+                                                <a href="{% url 'osint_tools:tool_detail' tool.slug %}"
+                                                    class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-play"></i> تشغيل
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
-{% endif %}
+    </section>
+    {% endif %}
 
-<!-- Recent Results -->
-{% if recent_results %}
-<section class="py-4">
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0">
-                            <i class="fas fa-search me-2"></i>النتائج الأخيرة
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            {% for result in recent_results %}
-                            <div class="col-md-6">
-                                <div class="card h-100 border-0 shadow-sm">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <h6 class="fw-bold mb-0">{{ result.title }}</h6>
-                                            {% if result.confidence == 'high' %}
+    <!-- Recent Results -->
+    {% if recent_results %}
+    <section class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="fas fa-search me-2"></i>النتائج الأخيرة
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                {% for result in recent_results %}
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h6 class="fw-bold mb-0">{{ result.title }}</h6>
+                                                {% if result.confidence == 'high' %}
                                                 <span class="badge bg-success">ثقة عالية</span>
-                                            {% elif result.confidence == 'medium' %}
+                                                {% elif result.confidence == 'medium' %}
                                                 <span class="badge bg-warning">ثقة متوسطة</span>
-                                            {% else %}
+                                                {% else %}
                                                 <span class="badge bg-secondary">ثقة منخفضة</span>
-                                            {% endif %}
-                                        </div>
-                                        <p class="text-muted small mb-2">{{ result.description|truncatewords:15 }}</p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <small class="text-muted">
-                                                <i class="fas fa-tag me-1"></i>{{ result.result_type }}
-                                            </small>
-                                            <small class="text-muted">
-                                                <i class="fas fa-clock me-1"></i>{{ result.discovered_at|date:"Y-m-d" }}
-                                            </small>
+                                                {% endif %}
+                                            </div>
+                                            <p class="text-muted small mb-2">{{ result.description|truncatewords:15 }}
+                                            </p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-tag me-1"></i>{{ result.result_type }}
+                                                </small>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>{{
+                                                    result.discovered_at|date:"Y-m-d" }}
+                                                </small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
-{% endif %}
+    </section>
+    {% endif %}
 
-<!-- JavaScript for Real-time Updates -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // تحديث حالة الجلسات النشطة كل 5 ثوان
-    setInterval(function() {
-        // يمكن إضافة AJAX هنا لتحديث حالة الجلسات النشطة
-    }, 5000);
-});
-</script>
+    <!-- JavaScript for Real-time Updates -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // تحديث حالة الجلسات النشطة كل 5 ثوان
+            setInterval(function () {
+                // يمكن إضافة AJAX هنا لتحديث حالة الجلسات النشطة
+            }, 5000);
+        });
+    </script>
 
-{% endblock content %}
+    {% endblock content %}
 
-{% block extra_css %}{% endblock extra_css %}
+    {% block extra_css %}{% endblock extra_css %}

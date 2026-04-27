@@ -1,16 +1,89 @@
-﻿venv/
+﻿# Python
+venv/
 .venv/
+env/
+ENV/
 __pycache__/
-*.pyc
-.env
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Django
+*.log
 db.sqlite3
+db.sqlite3-journal
 media/
 staticfiles/
-logs/
-open_tool/
-*.log
-# OS/IDE
-.DS_Store
-Thumbs.db
+static_root/
+/static/
+local_settings.py
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Redis
+dump.rdb
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+.nox/
+
+# IDEs
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Project specific
+open_tool/
+logs/
+*.zip
+*.tar.gz
+*.rar
+
+# Temporary files
+*.tmp
+*.bak
+*.orig
+
+# Documentation (optional - remove if you want to include)
+# *.md files are usually included

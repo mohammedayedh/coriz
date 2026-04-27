@@ -3,6 +3,7 @@ import json
 import os
 import logging
 import time
+import shlex
 from datetime import datetime
 from django.conf import settings
 from django.utils import timezone
@@ -131,62 +132,44 @@ class OSINTToolRunner:
     
     def _build_command(self):
         """بناء أمر تشغيل الأداة"""
-        tool_path = os.path.join(settings.BASE_DIR, 'open_tool', self.tool.tool_path)
-        executable = os.path.join(tool_path, self.tool.executable_name)
-        
         # استبدال المتغيرات في قالب الأمر
         command_template = self.tool.command_template
-        command = command_template.format(
-            target=self.target,
-            tool_path=tool_path,
-            executable=executable,
-            **self.config
-        )
         
-        return command.split()
+        # تجهيز المتغيرات الديناميكية للمسارات
+        # نستخدم os.path.join لضمان التوافق مع أنظمة التشغيل
+        tool_path = self.tool.tool_path or ''
+        executable_name = self.tool.executable_name or ''
+        full_executable_path = os.path.join(tool_path, executable_name)
+        
+        # دمج المتغيرات الأساسية مع متغيرات الإعدادات
+        format_kwargs = {
+            'target': self.target,
+            'tool_path': tool_path,
+            'executable_name': executable_name,
+            'executable': full_executable_path,
+            **self.config
+        }
+        
+        try:
+            command_str = command_template.format(**format_kwargs)
+            # استخدام shlex لتقسيم الأمر بشكل احترافي مع مراعاة النصوص المقتبسة
+            return shlex.split(command_str)
+        except KeyError as e:
+            logger.error(f"متغير مفقود في قالب الأداة {self.tool.slug}: {e}")
+            raise Exception(f"خطأ في قالب الأداة: المتغير {e} غير معرف")
     
     def _execute_command(self, command):
         """تنفيذ الأمر"""
         try:
-            # تغيير المجلد إلى مجلد الأداة
-            tool_path = os.path.join(settings.BASE_DIR, 'open_tool', self.tool.tool_path)
-            
-            # إضافة معالجة خاصة لأدوات Python 2
-            if self.tool.tool_type in ['email', 'username'] and 'python' in command[0]:
-                # استخدام Python 2 إذا كان متوفراً، وإلا استخدام Python 3 مع معالجة الأخطاء
-                try:
-                    result = subprocess.run(
-                        command,
-                        cwd=tool_path,
-                        capture_output=True,
-                        text=True,
-                        timeout=self.tool.timeout,
-                        encoding='utf-8',
-                        errors='ignore'
-                    )
-                except Exception as py3_error:
-                    # إذا فشل Python 3، جرب مع Python 2
-                    if 'python' in command[0]:
-                        command[0] = 'python2'
-                    result = subprocess.run(
-                        command,
-                        cwd=tool_path,
-                        capture_output=True,
-                        text=True,
-                        timeout=self.tool.timeout,
-                        encoding='utf-8',
-                        errors='ignore'
-                    )
-            else:
-                result = subprocess.run(
-                    command,
-                    cwd=tool_path,
-                    capture_output=True,
-                    text=True,
-                    timeout=self.tool.timeout,
-                    encoding='utf-8',
-                    errors='ignore'
-                )
+            # تشغيل الأمر من المجلد الحالي (للأدوات المثبتة عالمياً)
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                timeout=self.tool.timeout,
+                encoding='utf-8',
+                errors='ignore'
+            )
             
             return {
                 'returncode': result.returncode,
@@ -204,7 +187,7 @@ class OSINTToolRunner:
         if result['returncode'] != 0:
             # حتى لو فشل الأمر، نحاول معالجة النتائج المتاحة
             if result['stdout']:
-                self._process_general_results(result['stdout'])
+                logger.warning(f"الأمر فشل لكن يوجد مخرجات: {result['stdout'][:200]}")
             else:
                 raise Exception(f"فشل في تشغيل الأداة: {result['stderr']}")
         
@@ -219,7 +202,42 @@ class OSINTToolRunner:
             self._process_ip_results(result['stdout'])
         else:
             self._process_general_results(result['stdout'])
+        
+        # تحديث عدد النتائج
+        from .models import OSINTResult
+        self.session.results_count = OSINTResult.objects.filter(session=self.session).count()
+        self.session.save(update_fields=['results_count'])
     
+    def _generate_summary(self, data):
+        """توليد وصف تلقائي من بيانات الـ JSON"""
+        if not isinstance(data, dict):
+            return "تم جمع المعلومات بنجاح."
+            
+        summary_parts = []
+        # التحقق من وجود مفاتيح معينة شائعة
+        if 'total_found' in data:
+            summary_parts.append(f"تم العثور على {data['total_found']} نتيجة")
+        if 'breaches' in data and isinstance(data['breaches'], list):
+            summary_parts.append(f"يوجد {len(data['breaches'])} تسريب")
+        if 'status' in data:
+            if isinstance(data['status'], str):
+                summary_parts.append(f"الحالة: {data['status']}")
+            elif isinstance(data['status'], dict) and 'status' in data['status']:
+                summary_parts.append(f"الحالة: {data['status']['status']}")
+                
+        # إذا لم نجد مفاتيح شائعة، نستخرج أول 3 مفاتيح
+        if not summary_parts:
+            keys = [k for k in data.keys() if k not in ['target', 'domain', 'email', 'ip', 'status', 'error', 'success', 'data']][:3]
+            if keys:
+                summary_parts.append(f"تم تحليل: {', '.join(keys)}")
+                
+        # التعامل مع حالة القوائم داخل البيانات
+        list_keys = [k for k, v in data.items() if isinstance(v, list)]
+        if list_keys and not 'breaches' in data:
+            summary_parts.append(f"يحتوي على قوائم بيانات: {', '.join(list_keys[:2])}")
+            
+        return " | ".join(summary_parts) if summary_parts else "تمت عملية الفحص وجمع البيانات الخام بنجاح."
+
     def _process_email_results(self, output):
         """معالجة نتائج البريد الإلكتروني"""
         try:
@@ -229,11 +247,12 @@ class OSINTToolRunner:
                 
                 if isinstance(data, dict):
                     # إنشاء نتيجة واحدة
+                    desc = data.get('message') or data.get('description') or self._generate_summary(data)
                     OSINTResult.objects.create(
                         session=self.session,
                         result_type='email',
                         title=f"معلومات البريد الإلكتروني: {self.target}",
-                        description=data.get('message', 'تم جمع معلومات البريد الإلكتروني'),
+                        description=desc,
                         url=data.get('url', ''),
                         raw_data=data,
                         confidence='high' if data.get('success', False) else 'medium',
@@ -390,39 +409,71 @@ class OSINTToolRunner:
                 )
                     
         except json.JSONDecodeError:
-            # معالجة النص العادي
-            if output and output.strip():
-                lines = output.strip().split('\n')
-                for line in lines:
-                    if line.strip() and ':' in line:
-                        platform, url = line.split(':', 1)
-                        OSINTResult.objects.create(
-                            session=self.session,
-                            result_type='social_media',
-                            title=f"حساب {platform.strip()}: {self.target}",
-                            description=f"تم العثور على حساب في {platform.strip()}",
-                            url=url.strip(),
-                            raw_data={'raw_output': line.strip()},
-                            confidence='medium',
-                            confidence_score=0.6,
-                            source=self.tool.name,
-                            tags=['username', 'social_media', platform.strip()],
-                            metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
-                        )
-            else:
-                # إنشاء نتيجة افتراضية
+            # معالجة النص العادي من Sherlock
+            if not output or not output.strip():
+                logger.info("لا توجد مخرجات من Sherlock")
                 OSINTResult.objects.create(
                     session=self.session,
                     result_type='username',
                     title=f"فحص اسم المستخدم: {self.target}",
-                    description="تم فحص اسم المستخدم",
-                    raw_data={'raw_output': 'No output'},
+                    description="تم فحص اسم المستخدم ولكن لم يتم العثور على نتائج",
+                    raw_data={'message': 'No output'},
                     confidence='low',
                     confidence_score=0.3,
                     source=self.tool.name,
-                    tags=['username', 'default'],
+                    tags=['username', 'no_results'],
                     metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
                 )
+                return
+                
+            output_clean = output.strip()
+            lines = output_clean.split('\n')
+            found_profiles = []
+            
+            for line in lines:
+                line = line.strip()
+                # البحث عن السطور التي تحتوي على [+] (حسابات موجودة)
+                if line.startswith('[+]'):
+                    # تحليل السطر: [+] Platform: URL
+                    parts = line[3:].split(':', 1)
+                    if len(parts) == 2:
+                        platform = parts[0].strip()
+                        url = parts[1].strip()
+                        found_profiles.append({'platform': platform, 'url': url})
+            
+            # إنشاء نتيجة لكل حساب موجود
+            for profile in found_profiles:
+                OSINTResult.objects.create(
+                    session=self.session,
+                    result_type='social_media',
+                    title=f"{profile['platform']}: {self.target}",
+                    description=f"تم العثور على حساب في {profile['platform']}",
+                    url=profile['url'],
+                    raw_data={'platform': profile['platform'], 'url': profile['url'], 'username': self.target},
+                    confidence='high',
+                    confidence_score=0.8,
+                    source=self.tool.name,
+                    tags=['username', 'social_media', profile['platform'].lower().replace(' ', '_')],
+                    metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
+                )
+            
+            # إذا لم نجد أي حسابات
+            if not found_profiles:
+                logger.info(f"لم يتم العثور على حسابات لـ {self.target}")
+                OSINTResult.objects.create(
+                    session=self.session,
+                    result_type='username',
+                    title=f"فحص اسم المستخدم: {self.target}",
+                    description="تم فحص اسم المستخدم في مئات المواقع ولكن لم يتم العثور على حسابات",
+                    raw_data={'raw_output': output_clean[:1000]},
+                    confidence='low',
+                    confidence_score=0.3,
+                    source=self.tool.name,
+                    tags=['username', 'no_results'],
+                    metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
+                )
+            else:
+                logger.info(f"تم العثور على {len(found_profiles)} حساب لـ {self.target}")
     
     def _process_domain_results(self, output):
         """معالجة نتائج النطاق"""
@@ -430,11 +481,12 @@ class OSINTToolRunner:
             data = json.loads(output)
             
             if isinstance(data, dict):
+                desc = data.get('description') or data.get('message') or self._generate_summary(data)
                 OSINTResult.objects.create(
                     session=self.session,
                     result_type='domain',
                     title=f"معلومات النطاق: {self.target}",
-                    description=data.get('description', ''),
+                    description=desc,
                     url=data.get('url', ''),
                     raw_data=data,
                     confidence='high',
@@ -445,19 +497,128 @@ class OSINTToolRunner:
                 )
                 
         except json.JSONDecodeError:
-            # معالجة النص العادي
-            OSINTResult.objects.create(
-                session=self.session,
-                result_type='domain',
-                title=f"معلومات النطاق: {self.target}",
-                description=output.strip(),
-                raw_data={'raw_output': output.strip()},
-                confidence='medium',
-                confidence_score=0.5,
-                source=self.tool.name,
-                tags=['domain', 'raw'],
-                metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
-            )
+            # معالجة النص العادي من theHarvester
+            if not output or not output.strip():
+                logger.info("لا توجد مخرجات للمعالجة")
+                # إنشاء نتيجة تفيد بعدم وجود معلومات
+                OSINTResult.objects.create(
+                    session=self.session,
+                    result_type='domain',
+                    title=f"فحص النطاق: {self.target}",
+                    description="تم فحص النطاق ولكن لم يتم العثور على معلومات متاحة",
+                    raw_data={'message': 'No data found', 'target': self.target},
+                    confidence='low',
+                    confidence_score=0.3,
+                    source=self.tool.name,
+                    tags=['domain', 'no_results'],
+                    metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
+                )
+                return
+                
+            output_clean = output.strip()
+            
+            # تجاهل رسائل الإعدادات
+            ignore_patterns = ['Created default', 'proxies.yaml', 'config.yaml']
+            if any(pattern in output_clean for pattern in ignore_patterns):
+                logger.info(f"تجاهل رسالة إعدادات: {output_clean[:100]}")
+                # لكن لا نتوقف - نستمر في البحث عن نتائج
+            
+            # تحليل مخرجات theHarvester
+            emails = []
+            hosts = []
+            ips = []
+            
+            lines = output_clean.split('\n')
+            current_section = None
+            
+            for line in lines:
+                line = line.strip()
+                if not line or line.startswith('*') or line.startswith('['):
+                    continue
+                    
+                # تحديد القسم الحالي
+                if 'email' in line.lower() or 'بريد' in line.lower():
+                    current_section = 'emails'
+                    continue
+                elif 'host' in line.lower() or 'مضيف' in line.lower():
+                    current_section = 'hosts'
+                    continue
+                elif 'ip' in line.lower() and 'address' in line.lower():
+                    current_section = 'ips'
+                    continue
+                elif 'No emails found' in line or 'No hosts found' in line or 'No IPs found' in line:
+                    continue
+                    
+                # جمع البيانات
+                if '@' in line and current_section == 'emails':
+                    emails.append(line)
+                elif current_section == 'hosts' and '.' in line and not line.startswith('Read'):
+                    hosts.append(line)
+                elif current_section == 'ips' and any(c.isdigit() for c in line):
+                    ips.append(line)
+            
+            # إنشاء نتائج للإيميلات
+            for email in emails:
+                OSINTResult.objects.create(
+                    session=self.session,
+                    result_type='email',
+                    title=f"بريد إلكتروني: {email}",
+                    description=f"تم اكتشاف البريد الإلكتروني من النطاق {self.target}",
+                    raw_data={'email': email, 'domain': self.target},
+                    confidence='high',
+                    confidence_score=0.8,
+                    source=self.tool.name,
+                    tags=['domain', 'email', 'harvester'],
+                    metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
+                )
+            
+            # إنشاء نتائج للمضيفين
+            for host in hosts:
+                OSINTResult.objects.create(
+                    session=self.session,
+                    result_type='domain',
+                    title=f"مضيف: {host}",
+                    description=f"تم اكتشاف المضيف من النطاق {self.target}",
+                    raw_data={'host': host, 'domain': self.target},
+                    confidence='high',
+                    confidence_score=0.8,
+                    source=self.tool.name,
+                    tags=['domain', 'subdomain', 'harvester'],
+                    metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
+                )
+            
+            # إنشاء نتائج لعناوين IP
+            for ip in ips:
+                OSINTResult.objects.create(
+                    session=self.session,
+                    result_type='ip',
+                    title=f"عنوان IP: {ip}",
+                    description=f"تم اكتشاف عنوان IP من النطاق {self.target}",
+                    raw_data={'ip': ip, 'domain': self.target},
+                    confidence='high',
+                    confidence_score=0.8,
+                    source=self.tool.name,
+                    tags=['domain', 'ip', 'harvester'],
+                    metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
+                )
+            
+            # إذا لم نجد أي نتائج، أنشئ نتيجة تفيد بذلك
+            if not emails and not hosts and not ips:
+                logger.info(f"لم يتم العثور على نتائج في المخرجات: {output_clean[:200]}")
+                OSINTResult.objects.create(
+                    session=self.session,
+                    result_type='domain',
+                    title=f"فحص النطاق: {self.target}",
+                    description="تم فحص النطاق ولكن لم يتم العثور على معلومات (emails, hosts, IPs)",
+                    raw_data={'raw_output': output_clean[:1000], 'target': self.target},
+                    confidence='low',
+                    confidence_score=0.3,
+                    source=self.tool.name,
+                    tags=['domain', 'no_results'],
+                    metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
+                )
+            else:
+                logger.info(f"تم العثور على: {len(emails)} emails, {len(hosts)} hosts, {len(ips)} IPs")
     
     def _process_ip_results(self, output):
         """معالجة نتائج عنوان IP"""
@@ -465,11 +626,12 @@ class OSINTToolRunner:
             data = json.loads(output)
             
             if isinstance(data, dict):
+                desc = data.get('description') or data.get('message') or self._generate_summary(data)
                 OSINTResult.objects.create(
                     session=self.session,
                     result_type='ip',
                     title=f"معلومات IP: {self.target}",
-                    description=data.get('description', ''),
+                    description=desc,
                     url=data.get('url', ''),
                     raw_data=data,
                     confidence='high',
@@ -496,12 +658,54 @@ class OSINTToolRunner:
     
     def _process_general_results(self, output):
         """معالجة النتائج العامة"""
+        # تجاهل رسائل الإعدادات والرسائل غير المفيدة
+        ignore_patterns = [
+            'Created default',
+            'proxies.yaml',
+            'config.yaml',
+            'No results found',
+            'لم يتم العثور على نتائج',
+            'Usage:',
+            'usage:',
+        ]
+        
+        output_clean = output.strip()
+        
+        # تحقق إذا كانت الرسالة يجب تجاهلها
+        should_ignore = any(pattern in output_clean for pattern in ignore_patterns)
+        
+        if should_ignore or len(output_clean) < 10:
+            # لا تنشئ نتيجة للرسائل غير المفيدة
+            logger.info(f"تجاهل رسالة غير مفيدة: {output_clean[:100]}")
+            return
+        
+        # محاولة تحليل JSON أولاً
+        try:
+            data = json.loads(output_clean)
+            if isinstance(data, dict):
+                desc = data.get('description') or data.get('message') or self._generate_summary(data)
+                OSINTResult.objects.create(
+                    session=self.session,
+                    result_type='other',
+                    title=f"نتيجة من {self.tool.name}",
+                    description=desc,
+                    raw_data=data,
+                    confidence='high' if data.get('success', True) else 'medium',
+                    confidence_score=0.8,
+                    source=self.tool.name,
+                    tags=['general', 'json'],
+                    metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
+                )
+                return
+        except json.JSONDecodeError:
+            pass
+
         OSINTResult.objects.create(
             session=self.session,
             result_type='other',
             title=f"نتيجة من {self.tool.name}",
-            description=output.strip(),
-            raw_data={'raw_output': output.strip()},
+            description=output_clean[:200] + ('...' if len(output_clean) > 200 else ''),
+            raw_data={'raw_output': output_clean},
             confidence='medium',
             confidence_score=0.5,
             source=self.tool.name,

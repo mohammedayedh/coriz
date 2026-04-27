@@ -1,13 +1,13 @@
 {% extends 'base/base.html' %}
 {% load static %}
 
-{% block title %}كوريزا OSINT - الواجهة الرئيسية المتقدمة{% endblock %}
+{% block title %}كوريزا OSINT - منصة الاستخبارات مفتوحة المصدر المتقدمة{% endblock %}
 
-{% block meta_description %}الواجهة الرئيسية لكوريزا OSINT تقدم تجربة سيبرانية بصرية متكاملة مع وحدات استخبارات وأدوات تفاعلية{% endblock %}
+{% block meta_description %}منصة كوريزا OSINT المتكاملة - 17 أداة متخصصة، مصادر أمن سيبراني، أدوات تشفير، ونظام إدارة قضايا احترافي{% endblock %}
 
 {% block content %}
 <div class="home-wrap">
-    <!-- aurora hero -->
+    <!-- Hero Section -->
     <section class="hero aurora">
         <div class="hero-background">
             <span class="glow glow-one"></span>
@@ -19,41 +19,39 @@
             <div class="row gy-5 align-items-center">
                 <div class="col-xl-7 col-lg-6">
                     <div class="hero-intro">
-                        <div class="hero-label">CORIZA // OSINT OPERATIONS PLATFORM</div>
+                        <div class="hero-label">CORIZA // ADVANCED OSINT PLATFORM</div>
                         <h1 class="hero-heading">
-                            حوّل البيانات المفتوحة إلى قرارات سريعة
-                            <span>مع محرك كوريزا الذكي</span>
+                            منصة استخبارات متكاملة
+                            <span>لجمع وتحليل المعلومات المفتوحة</span>
                         </h1>
                         <p class="hero-text">
-                            يجمع كوريزا بين الرصد اللحظي، تحليل الشبكات، ولوحات الاستجابة في تجربة واحدة تساعد فرق التحقيق على الوصول إلى الرؤى الدقيقة بدون ضوضاء أو تكرار.
+                            كوريزا توفر مجموعة شاملة من أدوات OSINT المتخصصة، مصادر الأمن السيبراني، وأدوات التشفير في منصة واحدة احترافية مع نظام إدارة قضايا متقدم.
                         </p>
                         <div class="hero-actions">
-                            <a class="btn btn-primary btn-lg" href="{% url 'osint_tools:dashboard' %}">
-                                <i class="fas fa-satellite-dish me-2"></i>تشغيل حزمة الأدوات
+                            <a class="btn btn-primary btn-lg" href="{% url 'osint_tools:simple_search' %}">
+                                <i class="fas fa-search me-2"></i>بحث مبسط
                             </a>
-                            <a class="btn btn-outline-primary btn-lg" href="{% url 'dashboard:index' %}">
-                                <i class="fas fa-layer-group me-2"></i>استعرض لوحة التحكم
+                            <a class="btn btn-outline-primary btn-lg" href="{% url 'osint_tools:dashboard' %}">
+                                <i class="fas fa-tools me-2"></i>جميع الأدوات
                             </a>
-                            <a class="btn btn-outline-secondary btn-lg" href="{% url 'main:posts_list' %}">
-                                <i class="fas fa-newspaper me-2"></i>تصفح التحليلات المنشورة
+                            <a class="btn btn-outline-secondary btn-lg" href="{% url 'dashboard:index' %}">
+                                <i class="fas fa-tachometer-alt me-2"></i>لوحة التحكم
                             </a>
                         </div>
-                        {% with featured_count=featured_posts|length latest_count=latest_posts|length category_count=categories|length %}
                         <div class="hero-counters">
                             <div class="counter">
-                                <span class="counter-value">{{ featured_count|default:0 }}+</span>
-                                <span class="counter-caption">مصادر تم التحقق منها</span>
+                                <span class="counter-value">17</span>
+                                <span class="counter-caption">أداة OSINT متخصصة</span>
                             </div>
                             <div class="counter">
-                                <span class="counter-value">{{ latest_count|default:0 }}</span>
-                                <span class="counter-caption">تقارير خلال آخر 48 ساعة</span>
+                                <span class="counter-value">50+</span>
+                                <span class="counter-caption">مصدر أمن سيبراني</span>
                             </div>
                             <div class="counter">
-                                <span class="counter-value">{{ category_count|default:0 }}</span>
-                                <span class="counter-caption">قطاعات استخبارات مدعومة</span>
+                                <span class="counter-value">6</span>
+                                <span class="counter-caption">أداة تشفير وتحليل</span>
                             </div>
                         </div>
-                        {% endwith %}
                     </div>
                 </div>
                 <div class="col-xl-5 col-lg-6">
@@ -65,19 +63,19 @@
                             <div class="orbit-ring ring-tertiary"></div>
                         </div>
                         <div class="orbit-card card-primary">
-                            <span class="card-title">STREAM MONITOR</span>
-                            <span class="card-value">{{ latest_posts|length|default:0 }} تدفق نشط</span>
-                            <span class="card-meta">تحديثات زمن-حقيقي من مصادر مفتوحة</span>
+                            <span class="card-title">OSINT TOOLS</span>
+                            <span class="card-value">17 ACTIVE</span>
+                            <span class="card-meta">أدوات متخصصة للبحث والتحليل</span>
                         </div>
                         <div class="orbit-card card-secondary">
-                            <span class="card-title">INSIGHT QUEUE</span>
-                            <span class="card-value">{% if featured_posts %}{{ featured_posts.0.title|truncatewords:4 }}{% else %}بانتظار الإشارة التالية{% endif %}</span>
-                            <span class="card-meta">ملخص القصص الأكثر تأثيراً</span>
+                            <span class="card-title">CYBER RESOURCES</span>
+                            <span class="card-value">50+ SOURCES</span>
+                            <span class="card-meta">مصادر أخبار وأدوات أمنية</span>
                         </div>
                         <div class="orbit-card card-tertiary">
-                            <span class="card-title">TEAM SYNC</span>
-                            <span class="card-value">READY</span>
-                            <span class="card-meta">تكامل مع تدفقات عمل الفريق</span>
+                            <span class="card-title">CASE MANAGEMENT</span>
+                            <span class="card-value">INTEGRATED</span>
+                            <span class="card-meta">نظام إدارة قضايا متقدم</span>
                         </div>
                     </div>
                 </div>
@@ -85,123 +83,88 @@
         </div>
     </section>
 
-    <!-- modular lanes -->
-    <section class="lanes py-5">
+    <!-- OSINT Tools Categories -->
+    <section class="tools-categories py-5">
         <div class="container">
             <div class="section-head">
-                <h2 class="section-title">مسارات العمل داخل كوريزا</h2>
-                <p class="section-lead">استكشف أبرز الفئات التي يعمل عليها فريقك وابدأ من المسار الأنسب لحاجتك الحالية.</p>
+                <h2 class="section-title">أدوات OSINT المتخصصة</h2>
+                <p class="section-lead">17 أداة احترافية مصنفة حسب نوع البحث - من البريد الإلكتروني إلى الثغرات الأمنية</p>
             </div>
-            {% if categories %}
             <div class="row g-4">
-                {% for category in categories|slice:":4" %}
-                <div class="col-xl-3 col-md-6">
-                    <article class="lane-card">
-                        <div class="lane-icon"><i class="{{ category.icon|default:'fas fa-layer-group' }}"></i></div>
-                        <h5>{{ category.name }}</h5>
-                        <p>{{ category.description|default:"لم تُضف وصفًا بعد لهذه الفئة، لكن يمكنك استعراض محتواها مباشرة." }}</p>
-                        <a href="{% url 'main:posts_list' %}?category={{ category.slug }}" class="lane-link">استعراض المنشورات</a>
-                    </article>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="row g-4">
-                <div class="col-xl-4 col-md-6">
-                    <article class="lane-card">
-                        <div class="lane-icon"><i class="fas fa-search"></i></div>
-                        <h5>استكشاف المصادر المفتوحة</h5>
-                        <p>ابدأ بجمع البيانات الخام من الشبكات الاجتماعية ومحركات البحث المتخصصة.</p>
-                        <a href="{% url 'osint_tools:dashboard' %}" class="lane-link">تشغيل الحزمة</a>
-                    </article>
-                </div>
-                <div class="col-xl-4 col-md-6">
-                    <article class="lane-card">
-                        <div class="lane-icon"><i class="fas fa-project-diagram"></i></div>
-                        <h5>تحليل الشبكات</h5>
-                        <p>حوّل البيانات إلى خرائط علاقات واكتشف الروابط المؤثرة بين الكيانات.</p>
-                        <a href="{% url 'main:posts_list' %}" class="lane-link">استعراض التحليلات</a>
-                    </article>
-                </div>
-                <div class="col-xl-4 col-md-6">
-                    <article class="lane-card">
-                        <div class="lane-icon"><i class="fas fa-flask"></i></div>
-                        <h5>إعداد الملفات الاستخباراتية</h5>
-                        <p>صمّم تقارير قابلة للمشاركة مع الفرق الميدانية وحدّثها باستمرار.</p>
-                        <a href="{% url 'dashboard:index' %}" class="lane-link">فتح لوحة التحكم</a>
-                    </article>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-    </section>
-
-    <!-- intelligence ticker -->
-    {% if latest_posts %}
-    <section class="ticker py-5">
-        <div class="container">
-            <header class="section-head d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h2 class="section-title mb-1">آخر ما نشره محللو كوريزا</h2>
-                    <p class="section-lead mb-0">تحديثات مركزة تبقيك على اطلاع بأبرز التحليلات والملخصات الموثوقة.</p>
-                </div>
-                <a class="btn btn-outline-primary" href="{% url 'main:posts_list' %}">
-                    <i class="fas fa-stream me-2"></i>عرض النطاق الكامل
-                </a>
-            </header>
-            <div class="row g-4">
-                {% for post in latest_posts|slice:":6" %}
-                <div class="col-xl-4 col-md-6">
-                    <article class="ticker-card">
-                        <div class="ticker-header">
-                            <span class="ticker-category">{{ post.category.name }}</span>
-                            <time class="ticker-time"><i class="fas fa-clock me-1"></i>{{ post.published_at|date:"Y/m/d H:i" }}</time>
+                <!-- Email Tools -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-envelope"></i>
                         </div>
-                        <h5 class="ticker-title"><a href="{% url 'main:post_detail' post.slug %}">{{ post.title }}</a></h5>
-                        <p class="ticker-body">{{ post.excerpt|truncatewords:20 }}</p>
-                        <div class="ticker-meta">
-                            <span><i class="fas fa-eye me-1"></i>{{ post.views_count }}</span>
-                            <span><i class="fas fa-comment-alt me-1"></i>{{ post.comments_count }}</span>
-                            <span><i class="fas fa-user-secret me-1"></i>{{ post.author.first_name|default:post.author.username }}</span>
-                        </div>
-                    </article>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </section>
-    {% endif %}
-
-    <!-- holo grid -->
-    <section class="holo-grid py-5">
-        <div class="container">
-            <div class="row gy-4 align-items-center">
-                <div class="col-lg-6">
-                    <div class="holo-diagram">
-                        <div class="holo-core">CORE</div>
-                        <div class="holo-node node-one">SOC</div>
-                        <div class="holo-node node-two">CTI</div>
-                        <div class="holo-node node-three">DFIR</div>
-                        <div class="holo-node node-four">RED TEAM</div>
-                        <svg class="holo-lines" viewBox="0 0 400 400">
-                            <line x1="200" y1="200" x2="90" y2="130"></line>
-                            <line x1="200" y1="200" x2="310" y2="140"></line>
-                            <line x1="200" y1="200" x2="320" y2="280"></line>
-                            <line x1="200" y1="200" x2="90" y2="280"></line>
-                        </svg>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="holo-copy">
-                        <h2 class="section-title">لوحة تحليلات مترابطة</h2>
-                        <p class="section-lead">تابع كل ما يحدث عبر لوحات مترابطة تربط بين البيانات الخام، المؤشرات، والاستجابة التشغيلية في مكان واحد.</p>
-                        <ul class="holo-list">
-                            <li><i class="fas fa-check-circle"></i> تنبيهات سياقية تعتمد على أولويات فريقك.</li>
-                            <li><i class="fas fa-check-circle"></i> دمج مصادر مفتوحة ومحلية عبر واجهة واحدة.</li>
-                            <li><i class="fas fa-check-circle"></i> دعم مهام DFIR وإثراء التقارير فوراً.</li>
+                        <h5>أدوات البريد الإلكتروني</h5>
+                        <p class="category-count">6 أدوات</p>
+                        <ul class="tool-list">
+                            <li><i class="fas fa-check"></i> GHunt (Gmail)</li>
+                            <li><i class="fas fa-check"></i> Holehe</li>
+                            <li><i class="fas fa-check"></i> EmailRep</li>
+                            <li><i class="fas fa-check"></i> HudsonRock</li>
                         </ul>
-                        <a href="{% url 'dashboard:index' %}" class="btn btn-primary">
-                            <i class="fas fa-layer-group me-2"></i>فتح اللوحة التفاعلية
+                        <a href="{% url 'osint_tools:dashboard' %}" class="btn btn-sm btn-outline-primary w-100 mt-3">
+                            استكشف الأدوات
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Username Tools -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h5>أدوات اسم المستخدم</h5>
+                        <p class="category-count">3 أدوات</p>
+                        <ul class="tool-list">
+                            <li><i class="fas fa-check"></i> Sherlock (300+ موقع)</li>
+                            <li><i class="fas fa-check"></i> Maigret (2500+ موقع)</li>
+                            <li><i class="fas fa-check"></i> CheckNames</li>
+                        </ul>
+                        <a href="{% url 'osint_tools:dashboard' %}" class="btn btn-sm btn-outline-primary w-100 mt-3">
+                            استكشف الأدوات
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Domain Tools -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h5>أدوات النطاق والـ DNS</h5>
+                        <p class="category-count">5 أدوات</p>
+                        <ul class="tool-list">
+                            <li><i class="fas fa-check"></i> Harvester</li>
+                            <li><i class="fas fa-check"></i> Subdomain Enum</li>
+                            <li><i class="fas fa-check"></i> MxToolbox</li>
+                            <li><i class="fas fa-check"></i> ViewDNS</li>
+                        </ul>
+                        <a href="{% url 'osint_tools:dashboard' %}" class="btn btn-sm btn-outline-primary w-100 mt-3">
+                            استكشف الأدوات
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Special Tools -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h5>أدوات متخصصة</h5>
+                        <p class="category-count">3 أدوات</p>
+                        <ul class="tool-list">
+                            <li><i class="fas fa-check"></i> CVE-Stalker</li>
+                            <li><i class="fas fa-check"></i> Phone Analyzer</li>
+                            <li><i class="fas fa-check"></i> OverpassMap</li>
+                        </ul>
+                        <a href="{% url 'osint_tools:dashboard' %}" class="btn btn-sm btn-outline-primary w-100 mt-3">
+                            استكشف الأدوات
                         </a>
                     </div>
                 </div>
@@ -209,103 +172,194 @@
         </div>
     </section>
 
-    <!-- featured lab -->
-    {% if featured_posts %}
-    <section class="lab py-5">
+    <!-- Platform Features -->
+    <section class="platform-features py-5">
         <div class="container">
-            <div class="section-head text-center">
-                <h2 class="section-title">أحدث الوحدات المميزة</h2>
-                <p class="section-lead">نماذج مختارة من المقالات والأدلة التي تضيف عمقاً عملياً لعمليات OSINT اليومية.</p>
+            <div class="section-head">
+                <h2 class="section-title">ميزات المنصة المتقدمة</h2>
+                <p class="section-lead">نظام متكامل لإدارة عمليات الاستخبارات مفتوحة المصدر</p>
             </div>
             <div class="row g-4">
-                {% for post in featured_posts|slice:":3" %}
-                <div class="col-lg-4">
-                    <article class="lab-card">
-                        <div class="lab-status">
-                            <span class="lab-signal"></span>
-                            <span class="lab-label">READY</span>
-                            <span class="lab-category">{{ post.category.name }}</span>
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-folder-open"></i>
                         </div>
-                        <h3 class="lab-title">{{ post.title }}</h3>
-                        <p class="lab-desc">{{ post.excerpt|truncatewords:22 }}</p>
-                        <div class="lab-meta">
-                            <span><i class="fas fa-eye me-1"></i>{{ post.views_count }}</span>
-                            <span><i class="fas fa-clock me-1"></i>{{ post.published_at|date:"Y/m/d" }}</span>
-                        </div>
-                        <a href="{% url 'main:post_detail' post.slug %}" class="btn btn-outline-primary">
-                            <i class="fas fa-vial me-2"></i>الدخول إلى المختبر
+                        <h5>إدارة القضايا</h5>
+                        <p>نظام متقدم لإدارة القضايا الاستخباراتية مع ربط الجلسات والنتائج</p>
+                        <a href="{% url 'osint_tools:cases_list' %}" class="feature-link">
+                            <i class="fas fa-arrow-left me-2"></i>استكشف
                         </a>
-                    </article>
+                    </div>
                 </div>
-                {% endfor %}
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h5>تقارير احترافية</h5>
+                        <p>إنشاء تقارير مفصلة بصيغ متعددة (PDF, HTML, JSON, CSV)</p>
+                        <a href="{% url 'osint_tools:reports_list' %}" class="feature-link">
+                            <i class="fas fa-arrow-left me-2"></i>استكشف
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h5>تحليلات متقدمة</h5>
+                        <p>لوحات تحكم تفاعلية لتحليل النتائج وتتبع الأنماط</p>
+                        <a href="{% url 'osint_tools:analytics' %}" class="feature-link">
+                            <i class="fas fa-arrow-left me-2"></i>استكشف
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-toolbox"></i>
+                        </div>
+                        <h5>أدوات التشفير</h5>
+                        <p>6 أدوات احترافية: Hash, Password Gen, JWT, Timestamp, JSON, Text Diff</p>
+                        <a href="{% url 'osint_tools:utilities_dashboard' %}" class="feature-link">
+                            <i class="fas fa-arrow-left me-2"></i>استكشف
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <h5>مصادر الأمن السيبراني</h5>
+                        <p>50+ مصدر للأخبار، الأدوات، والموارد التعليمية</p>
+                        <a href="{% url 'osint_tools:cybersecurity_resources' %}" class="feature-link">
+                            <i class="fas fa-arrow-left me-2"></i>استكشف
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h5>بحث مبسط</h5>
+                        <p>واجهة بحث سريعة وسهلة للمبتدئين</p>
+                        <a href="{% url 'osint_tools:simple_search' %}" class="feature-link">
+                            <i class="fas fa-arrow-left me-2"></i>استكشف
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
-    {% endif %}
 
-    <!-- control console -->
-    <section class="console py-5">
+    <!-- How It Works -->
+    <section class="how-it-works py-5">
         <div class="container">
-            <div class="row gy-4 align-items-center">
-                <div class="col-lg-7">
-                    <div class="console-screen">
-                        <div class="console-header">
-                            <span class="dot dot-red"></span>
-                            <span class="dot dot-yellow"></span>
-                            <span class="dot dot-green"></span>
-                            <span class="console-title">console://threat-monitor</span>
-                        </div>
-                        <div class="console-body">
-                            <code>
-                                $ activate threat-hunter --tier=advanced<br>
-                                initializing modules...<br>
-                                ▸ osint_recon       [ready]<br>
-                                ▸ dark_trace        [ready]<br>
-                                ▸ intel_aggregator  [ready]<br>
-                                <span class="console-highlight">awaiting commands...</span>
-                            </code>
-                        </div>
+            <div class="section-head">
+                <h2 class="section-title">كيف تعمل المنصة</h2>
+                <p class="section-lead">عملية بسيطة من 4 خطوات للحصول على نتائج احترافية</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h5>اختر الأداة</h5>
+                        <p>اختر من بين 17 أداة متخصصة حسب نوع البحث</p>
                     </div>
                 </div>
-                <div class="col-lg-5">
-                    <div class="control-panel">
-                        <h3 class="cyber-text">مركز التحكم الميداني</h3>
-                        <p class="text-secondary mb-4">
-                            اعمل مع فريقك على تنفيذ مهام الرصد الآلي، متابعة التنبيهات، وجدولة التحليلات الدورية عبر لوحة واحدة.
-                        </p>
-                        <div class="d-grid gap-3">
-                            <a href="{% url 'dashboard:index' %}" class="btn btn-primary">
-                                <i class="fas fa-play me-2"></i>بدء مهمة تلقائية
-                            </a>
-                            <a href="{% url 'main:contact' %}" class="btn btn-outline-primary">
-                                <i class="fas fa-headset me-2"></i>تواصل مع خبير أمني
-                            </a>
-                        </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h5>أدخل الهدف</h5>
+                        <p>أدخل البريد، اسم المستخدم، النطاق، أو أي هدف آخر</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h5>شغّل الأداة</h5>
+                        <p>راقب التقدم في الوقت الفعلي مع تحديثات مباشرة</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="step-card">
+                        <div class="step-number">4</div>
+                        <h5>احصل على النتائج</h5>
+                        <p>استعرض، حلل، وصدّر النتائج بصيغ متعددة</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- newsletter -->
-    <section class="intel-newsletter py-5">
+    <!-- Stats Section -->
+    <section class="stats-section py-5">
         <div class="container">
-            <div class="newsletter-box">
+            <div class="row g-4 text-center">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-box">
+                        <div class="stat-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <h3 class="stat-number">17</h3>
+                        <p class="stat-label">أداة OSINT</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-box">
+                        <div class="stat-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h3 class="stat-number">2500+</h3>
+                        <p class="stat-label">موقع مدعوم</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-box">
+                        <div class="stat-icon">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <h3 class="stat-number">50+</h3>
+                        <p class="stat-label">مصدر أمني</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-box">
+                        <div class="stat-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3 class="stat-number">4</h3>
+                        <p class="stat-label">مستوى أمان</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section py-5">
+        <div class="container">
+            <div class="cta-box">
                 <div class="row align-items-center g-4">
-                    <div class="col-lg-7">
-                        <h3 class="cyber-text mb-3">احصل على تحديثات OSINT المركزة</h3>
-                        <p class="text-secondary mb-0">
-                            سنرسل لك أبرز المؤشرات العملية، تنبيهات الثغرات، والملخصات التي تحتاجها لاتخاذ القرار بسرعة.
+                    <div class="col-lg-8">
+                        <h3 class="cta-title">جاهز لبدء عمليات الاستخبارات؟</h3>
+                        <p class="cta-text">
+                            ابدأ الآن مع منصة كوريزا واستفد من أدوات OSINT المتقدمة، مصادر الأمن السيبراني، ونظام إدارة القضايا الاحترافي.
                         </p>
                     </div>
-                    <div class="col-lg-5">
-                        <form action="{% url 'main:newsletter_subscribe' %}" method="POST" class="newsletter-form">
-                            {% csrf_token %}
-                            <div class="input-group">
-                                <input type="email" class="form-control" name="email" placeholder="أدخل بريدك الإلكتروني" required>
-                                <button class="btn btn-primary" type="submit"><i class="fas fa-signal me-2"></i>اشترك الآن</button>
-                            </div>
-                        </form>
+                    <div class="col-lg-4 text-lg-end">
+                        <a href="{% url 'osint_tools:dashboard' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-rocket me-2"></i>ابدأ الآن
+                        </a>
                     </div>
                 </div>
             </div>
@@ -324,7 +378,7 @@
     flex-direction: column;
 }
 
-/* Aurora hero */
+/* Hero Section */
 .hero.aurora {
     position: relative;
     padding: 140px 0 100px;
@@ -344,8 +398,8 @@
     filter: blur(110px);
     opacity: 0.45;
 }
-.hero .glow-one { top: -120px; right: -80px; background: rgba(0,139,139,0.6); }
-.hero .glow-two { bottom: -150px; left: -120px; background: rgba(75,0,130,0.55); }
+.hero .glow-one { top: -120px; right: -80px; background: rgba(102,126,234,0.6); }
+.hero .glow-two { bottom: -150px; left: -120px; background: rgba(118,75,162,0.55); }
 .hero .glow-three { top: 40%; left: 30%; background: rgba(22,33,62,0.6); opacity: 0.35; }
 .hero .grid-lines {
     position: absolute;
@@ -363,9 +417,9 @@
     display: inline-block;
     padding: 0.45rem 1.5rem;
     border-radius: 999px;
-    border: 1px solid rgba(0,139,139,0.4);
-    background: rgba(0,139,139,0.15);
-    color: var(--primary-color);
+    border: 1px solid rgba(102,126,234,0.4);
+    background: rgba(102,126,234,0.15);
+    color: #667eea;
     letter-spacing: 3px;
     font-size: 0.75rem;
     margin-bottom: 1.5rem;
@@ -375,10 +429,9 @@
     line-height: 1.2;
     margin-bottom: 1.25rem;
     font-family: var(--font-display);
-    text-shadow: 0 0 25px rgba(0,0,0,0.35);
 }
 .hero .hero-heading span {
-    color: var(--primary-color);
+    color: #667eea;
     display: inline-block;
 }
 .hero .hero-text {
@@ -404,14 +457,14 @@
     padding: 0.85rem 1.1rem;
     border-radius: 16px;
     background: rgba(5,12,26,0.75);
-    border: 1px solid rgba(0,139,139,0.25);
+    border: 1px solid rgba(102,126,234,0.25);
     backdrop-filter: blur(10px);
     text-align: center;
 }
 .hero .counter-value {
     display: block;
     font-size: 1.6rem;
-    color: var(--primary-color);
+    color: #667eea;
     font-family: var(--font-display);
 }
 .hero .counter-caption {
@@ -419,7 +472,7 @@
     color: var(--text-secondary);
 }
 
-/* Orbit visuals */
+/* Orbit */
 .hero .hero-orbit {
     position: relative;
     width: min(420px, 100%);
@@ -430,34 +483,33 @@
     width: 100%;
     aspect-ratio: 1 / 1;
     border-radius: 50%;
-    background: radial-gradient(circle at center, rgba(20,240,218,0.18), transparent 70%);
+    background: radial-gradient(circle at center, rgba(102,126,234,0.18), transparent 70%);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 .hero .orbit-logo {
     height: 160px;
-    filter: drop-shadow(0 0 40px rgba(0,139,139,0.7));
+    filter: drop-shadow(0 0 40px rgba(102,126,234,0.7));
     animation: heroPulse 3.5s ease-in-out infinite;
 }
 .hero .orbit-ring {
     position: absolute;
     border-radius: 50%;
-    border: 1px solid rgba(0,139,139,0.3);
+    border: 1px solid rgba(102,126,234,0.3);
 }
 .hero .ring-primary { width: 85%; height: 85%; animation: orbitSpin 12s linear infinite; }
 .hero .ring-secondary { width: 60%; height: 60%; animation: orbitSpinReverse 10s linear infinite; }
-.hero .ring-tertiary { width: 40%; height: 40%; border-color: rgba(75,0,130,0.35); animation: orbitSpin 14s linear infinite; }
+.hero .ring-tertiary { width: 40%; height: 40%; border-color: rgba(118,75,162,0.35); animation: orbitSpin 14s linear infinite; }
 .hero .orbit-card {
     position: absolute;
     width: 200px;
     padding: 1.15rem 1.3rem;
     border-radius: 18px;
     background: rgba(5,10,22,0.82);
-    border: 1px solid rgba(0,139,139,0.35);
+    border: 1px solid rgba(102,126,234,0.35);
     backdrop-filter: blur(12px);
     color: var(--text-light);
-    box-shadow: 0 20px 50px rgba(3,8,20,0.35);
 }
 .hero .card-primary { top: -40px; left: -40px; }
 .hero .card-secondary { top: 20px; right: -50px; }
@@ -471,290 +523,197 @@
     display: block;
     font-size: 1.4rem;
     margin: 0.5rem 0;
-    color: var(--primary-color);
+    color: #667eea;
 }
 .hero .orbit-card .card-meta {
     font-size: 0.8rem;
     color: rgba(255,255,255,0.65);
 }
 
-/* Shared sections */
+/* Sections */
 .section-head {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
 }
 .section-title {
     font-family: var(--font-display);
-    font-size: clamp(1.6rem, 2.7vw, 2.2rem);
+    font-size: clamp(1.8rem, 2.7vw, 2.4rem);
     color: var(--text-light);
     margin-bottom: 0.75rem;
 }
 .section-lead {
     color: var(--text-secondary);
-    max-width: 600px;
+    max-width: 700px;
     margin-inline: auto;
+    font-size: 1.1rem;
 }
-.lanes { background: rgba(11,12,16,0.4); }
-.lane-card {
-    background: rgba(22,33,62,0.6);
-    border: 1px solid rgba(0,139,139,0.4);
-    border-radius: 18px;
-    padding: 1.75rem 1.5rem;
+
+/* Tools Categories */
+.tools-categories {
+    background: rgba(11,12,16,0.6);
+}
+.category-card {
+    background: linear-gradient(135deg, #1a1f2e 0%, #161b28 100%);
+    border: 2px solid #2d3748;
+    border-radius: 20px;
+    padding: 2rem 1.5rem;
     height: 100%;
     text-align: center;
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(8px);
+    transition: all 0.4s ease;
 }
-.lane-icon {
-    font-size: 2.1rem;
-    color: var(--primary-color);
-    margin-bottom: 1.25rem;
+.category-card:hover {
+    border-color: #667eea;
+    transform: translateY(-8px);
 }
-.lane-link {
-    display: inline-block;
-    margin-top: 1rem;
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 600;
-}
-.ticker { background: rgba(15,52,96,0.35); }
-.ticker-card {
-    position: relative;
-    background: rgba(11,12,16,0.8);
-    border: 1px solid rgba(0,139,139,0.35);
-    border-radius: 16px;
-    padding: 1.5rem;
-    height: 100%;
-    overflow: hidden;
-}
-.ticker-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(120deg, transparent, rgba(0,139,139,0.1), transparent);
-    opacity: 0;
-    transition: opacity .3s;
-}
-.ticker-card:hover::after { opacity: 1; }
-.ticker-header {
+.category-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: #ffffff;
+}
+.category-count {
+    color: #667eea;
+    font-weight: 600;
     margin-bottom: 1rem;
 }
-.ticker-category {
-    background: rgba(0,139,139,0.2);
-    border: 1px solid rgba(0,139,139,0.5);
-    border-radius: 999px;
-    padding: 0.3rem 0.9rem;
-    font-size: 0.75rem;
+.tool-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+    text-align: right;
 }
-.ticker-time {
-    font-size: 0.85rem;
+.tool-list li {
+    padding: 0.5rem 0;
     color: var(--text-secondary);
+    font-size: 0.95rem;
 }
-.ticker-title {
-    font-size: 1.15rem;
-    margin-bottom: 0.45rem;
+.tool-list li i {
+    color: #667eea;
+    margin-left: 0.5rem;
 }
-.ticker-title a {
-    color: var(--text-light);
-    text-decoration: none;
+
+/* Platform Features */
+.platform-features {
+    background: rgba(15,52,96,0.25);
 }
-.ticker-title a:hover {
-    color: var(--primary-color);
-    text-decoration: underline;
+.feature-card {
+    background: linear-gradient(135deg, #1a1f2e 0%, #161b28 100%);
+    border: 2px solid #2d3748;
+    border-radius: 18px;
+    padding: 2rem;
+    height: 100%;
+    transition: all 0.4s ease;
 }
-.ticker-body {
-    font-size: 0.88rem;
-    color: var(--text-secondary);
-    line-height: 1.55;
-    height: 4.5em; /* Show ~3 lines */
-    overflow: hidden;
-    margin-bottom: 0.9rem;
+.feature-card:hover {
+    border-color: #667eea;
+    transform: translateY(-5px);
 }
-.ticker-meta {
+.feature-icon {
+    width: 70px;
+    height: 70px;
+    background: rgba(102,126,234,0.15);
+    border-radius: 16px;
     display: flex;
-    gap: 1.5rem;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #667eea;
+    margin-bottom: 1.5rem;
 }
-.holo-grid { background: rgba(11,12,16,0.6); }
-.holo-diagram {
-    position: relative;
-    background: radial-gradient(circle at center, rgba(0,139,139,0.22), rgba(11,12,16,0.9));
-    border-radius: 22px;
-    padding: 2.5rem;
-    border: 1px solid rgba(0,139,139,0.3);
-    overflow: hidden;
-    min-height: 260px;
+.feature-link {
+    display: inline-block;
+    margin-top: 1rem;
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
-.holo-core {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    text-shadow: 0 0 15px rgba(0,139,139,0.6);
+.feature-link:hover {
+    color: #764ba2;
+    transform: translateX(-5px);
 }
-.holo-node {
-    position: absolute;
-    width: 82px;
-    height: 82px;
+
+/* How It Works */
+.how-it-works {
+    background: rgba(11,12,16,0.4);
+}
+.step-card {
+    background: linear-gradient(135deg, #1a1f2e 0%, #161b28 100%);
+    border: 2px solid #2d3748;
+    border-radius: 18px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    height: 100%;
+    transition: all 0.4s ease;
+}
+.step-card:hover {
+    border-color: #667eea;
+    transform: translateY(-5px);
+}
+.step-number {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(11,12,16,0.85);
-    border: 1px solid rgba(0,139,139,0.5);
-    font-weight: 600;
-    font-size: 0.8rem;
-    letter-spacing: 1px;
-}
-.holo-node.node-one { top: 22%; left: 18%; }
-.holo-node.node-two { top: 20%; right: 15%; }
-.holo-node.node-three { bottom: 18%; right: 18%; }
-.holo-node.node-four { bottom: 20%; left: 20%; }
-.holo-lines {
-    position: absolute;
-    inset: 0;
-    stroke: rgba(0,139,139,0.45);
-    stroke-width: 1.5;
-}
-.holo-copy {
-    padding-left: 2.25rem;
-    border-left: 1px solid rgba(0,139,139,0.2);
-}
-.holo-list {
-    list-style: none;
-    padding: 0;
-    margin-top: 1.5rem;
-}
-.holo-list li {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    margin-bottom: 0.75rem;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-.holo-list li i {
-    margin-right: 0.75rem;
-    color: var(--primary-color);
-}
-.lab { background: rgba(15,52,96,0.3); }
-.lab-card {
-    background: rgba(11,12,16,0.82);
-    border: 1px solid rgba(0,139,139,0.25);
-    border-radius: 16px;
-    padding: 1.75rem 1.6rem;
-    height: 100%;
-    position: relative;
-}
-.lab-status {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-.lab-signal {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: #39ff14;
-    box-shadow: 0 0 12px rgba(57,255,20,0.8);
-    display: inline-block;
-    animation: blink 1.5s infinite;
-}
-.lab-label {
-    background: rgba(75,0,130,0.2);
-    border: 1px solid rgba(75,0,130,0.4);
-    border-radius: 999px;
-    padding: 0.25rem 0.9rem;
-    font-size: 0.8rem;
-}
-.lab-category {
-    background: rgba(75,0,130,0.2);
-    border: 1px solid rgba(75,0,130,0.4);
-    border-radius: 999px;
-    padding: 0.25rem 0.9rem;
-    font-size: 0.8rem;
-}
-.lab-title {
-    font-size: 1.18rem;
-    margin-bottom: 0.65rem;
-}
-.lab-desc {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-bottom: 1.1rem;
-    height: 3.6em; /* Show 2 lines of text */
-    overflow: hidden;
-    margin-bottom: 1rem;
-}
-.lab-meta {
-    display: flex;
-    gap: 1.25rem;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin: 1.25rem 0;
-}
-.console { background: rgba(11,12,16,0.5); }
-.console-screen {
-    background: rgba(0,0,0,0.65);
-    border: 1px solid rgba(0,139,139,0.4);
-    border-radius: 20px;
-    overflow: hidden;
-    min-height: 200px;
-}
-.console-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.8rem 1.2rem;
-    background: rgba(0,139,139,0.12);
-    border-bottom: 1px solid rgba(0,139,139,0.3);
-}
-.console-header .dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-}
-.dot-red { background: #ff4d4f; }
-.dot-yellow { background: #ffc53d; }
-.dot-green { background: #73d13d; }
-.console-title { color: var(--text-secondary); font-size: 0.85rem; }
-.console-body {
-    padding: 1.5rem;
-    font-family: var(--font-mono);
-    color: var(--neon-cyan);
-    font-size: 0.95rem;
-}
-.console-highlight { color: #39ff14; }
-.control-panel {
-    padding-left: 2.4rem;
-    border-left: 1px solid rgba(0,139,139,0.18);
-}
-.intel-newsletter { background: rgba(15,52,96,0.25); }
-.newsletter-box {
-    background: rgba(11,12,16,0.82);
-    border: 1px solid rgba(0,139,139,0.28);
-    border-radius: 18px;
-    padding: 2rem;
-    box-shadow: 0 16px 48px rgba(0,0,0,0.32);
-}
-.newsletter-form .form-control {
-    border-radius: 14px 0 0 14px;
-    padding: 0.75rem 1.25rem;
-    border: 1px solid rgba(0,139,139,0.38);
-    background: rgba(11,12,16,0.88);
-}
-.newsletter-form .btn {
-    border-radius: 0 14px 14px 0;
-    padding: 0.75rem 1rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffffff;
 }
 
+/* Stats Section */
+.stats-section {
+    background: rgba(15,52,96,0.3);
+}
+.stat-box {
+    padding: 2rem;
+}
+.stat-icon {
+    font-size: 3rem;
+    color: #667eea;
+    margin-bottom: 1rem;
+}
+.stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+}
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* CTA Section */
+.cta-section {
+    background: rgba(11,12,16,0.5);
+}
+.cta-box {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+}
+.cta-title {
+    color: #ffffff;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+.cta-text {
+    color: rgba(255,255,255,0.9);
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+/* Animations */
 @keyframes heroPulse {
     0%, 100% { transform: scale(1); opacity: 0.85; }
     50% { transform: scale(1.04); opacity: 1; }
@@ -768,19 +727,21 @@
     to { transform: rotate(0deg); }
 }
 
+/* Responsive */
 @media (max-width: 992px) {
     .hero .hero-actions .btn { width: 100%; }
     .hero .hero-counters { justify-content: center; }
-    .hero .card-primary, .hero .card-secondary, .hero .card-tertiary { position: static; margin-top: 1rem; }
-    .hero .orbit-card { width: 100%; }
+    .hero .card-primary, .hero .card-secondary, .hero .card-tertiary { 
+        position: static; 
+        margin-top: 1rem; 
+        width: 100%;
+    }
 }
 
 @media (max-width: 576px) {
     .hero.aurora { padding: 120px 0 80px; }
     .hero .hero-heading { font-size: 2.2rem; }
-    .hero .hero-counters { gap: 1rem; }
     .hero .counter { flex: 1 1 calc(50% - 1rem); }
 }
 </style>
 {% endblock %}
-

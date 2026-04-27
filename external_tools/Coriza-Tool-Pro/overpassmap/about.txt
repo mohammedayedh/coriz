@@ -1,0 +1,55 @@
+قال Gemini
+
+أداة Overpass (Geo-OSINT) هي سكربت متقدم للبحث الجغرافي والاستخبارات مفتوحة المصدر. تعتمد الأداة على التخاطب المباشر مع خوادم الخرائط المفتوحة (OpenStreetMap) عبر واجهة Overpass API، لاستخراج بيانات دقيقة للمواقع الجغرافية بناءً على تصنيفات محددة (مثل المستشفيات، كاميرات المراقبة، أو القواعد العسكرية) داخل مدينة معينة.
+كيف تعمل الأداة برمجياً؟
+
+    الاستعلام (Querying): تقوم الأداة بتكوين استعلام بلغة Overpass QL وترسله إلى الخادم. هذا الاستعلام يحدد "نطاق البحث" (اسم المدينة) و"الهدف" (المفتاح والقيمة، مثل amenity=hospital).
+
+    استخراج البيانات الوصفية (Metadata Extraction): لا تكتفي الأداة بجلب خطوط الطول والعرض (Latitude & Longitude) فقط، بل تسحب كل البيانات المرفقة بالمكان (الاسم، رقم الهاتف، الموقع الإلكتروني، المشغل، إلخ).
+
+    التصدير الديناميكي (Dynamic Export): تقوم بإنشاء أعمدة ملف الـ CSV ديناميكياً بناءً على البيانات التي وجدتها، لتضمن عدم ضياع أي تفصيلة مهما كانت صغيرة.
+
+كيف يتم استدعاؤها من ملف آخر؟
+
+لنفترض أنك تقوم ببناء سكربت شامل وتود استخدام هذه الأداة كجزء منه للبحث في الخلفية دون ظهور القوائم التفاعلية. قم بإنشاء ملف بايثون جديد (مثلاً auto_scanner.py) في نفس المجلد الذي توجد فيه الأداة، واكتب الكود التالي (لاحظ أن الكود والتعليقات باللغة الإنجليزية كما طلبت):
+Python
+
+# 1. Import the Geo-OSINT module
+import overpass_tool
+
+# 2. Define the search parameters
+target_city = "London"
+tag_key = "amenity"
+tag_value = "hospital"
+
+# Define the output file name
+output_csv = f"results_{tag_value}_{target_city}.csv"
+
+print(f"[*] Starting background Geo-OSINT scan for {tag_value} in {target_city}...")
+
+# 3. Call the main function directly
+# This skips the interactive menu and runs the search automatically
+results = overpass_tool.run_overpass(
+    city=target_city,
+    tag_key=tag_key,
+    tag_value=tag_value,
+    output_file=output_csv
+)
+
+# 4. Handle the results programmatically
+if results:
+    print(f"[+] Scan complete! Found {len(results)} locations.")
+    
+    # Print the names of the first 3 locations found
+    print("[*] Top 3 results:")
+    for index, location in enumerate(results[:3], start=1):
+        name = location.get("Name", "Unknown")
+        print(f"  {index}. {name}")
+else:
+    print("[-] No data found for this query.")
+
+فوائد هذه الطريقة:
+
+بهذه الهيكلة، تصبح الأداة "محركاً مستقلاً". يمكنك برمجتها للبحث عن 10 أهداف مختلفة في 5 مدن مختلفة عبر عمل For Loop بسيط في كودك الخارجي، وستقوم هي بإنجاز العمل كاملاً بصمت وحفظ جميع الملفات.
+
+هل الشرح واضح لك؟ وما هي الأداة القادمة التي تود إضافتها إلى ترسانتك؟

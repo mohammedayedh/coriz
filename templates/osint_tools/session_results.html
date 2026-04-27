@@ -1,0 +1,677 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}نتائج الجلسة - {{ session.tool.name }} - كوريزا{% endblock %}
+
+{% block meta_description %}نتائج جلسة {{ session.tool.name }} للهدف {{ session.target }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/osint-dark-theme.css' %}">
+<style>
+    @media print {
+        body {
+            background: white !important;
+            color: black !important;
+        }
+        .card {
+            border: 1px solid #ddd !important;
+            box-shadow: none !important;
+            page-break-inside: avoid;
+        }
+        .btn, .breadcrumb, nav, .dropdown, .btn-group {
+            display: none !important;
+        }
+        table {
+            page-break-inside: auto;
+        }
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        thead {
+            display: table-header-group;
+        }
+        .badge {
+            border: 1px solid #333;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="display-5 fw-bold mb-3">
+                    <i class="fas fa-chart-bar me-3"></i>نتائج الجلسة
+                </h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'osint_tools:dashboard' %}">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'osint_tools:sessions_list' %}">الجلسات</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'osint_tools:session_detail' session.id %}">جلسة #{{ session.id }}</a></li>
+                        <li class="breadcrumb-item active">النتائج</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Session Summary -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="mb-2">
+                            <i class="{{ session.tool.icon }} me-2 text-primary"></i>{{ session.tool.name }}
+                        </h5>
+                        <p class="mb-0">
+                            <strong>الهدف:</strong> <code class="text-primary">{{ session.target }}</code>
+                        </p>
+                        <p class="mb-0">
+                            <strong>التاريخ:</strong> {{ session.created_at|date:"Y-m-d H:i:s" }}
+                        </p>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex gap-2 justify-content-center">
+                            <div class="text-center p-3 bg-dark rounded">
+                                <h4 class="text-primary mb-0">{{ page_obj.paginator.count }}</h4>
+                                <small class="text-muted">نتيجة</small>
+                            </div>
+                            <div class="text-center p-3 bg-dark rounded">
+                                <h4 class="text-success mb-0">{{ session.progress }}%</h4>
+                                <small class="text-muted">التقدم</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <button class="btn btn-outline-primary btn-sm mb-2 w-100" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>طباعة الصفحة
+                        </button>
+                        <button class="btn btn-outline-info btn-sm w-100" onclick="copyResultsToClipboard()">
+                            <i class="fas fa-copy me-2"></i>نسخ النتائج
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-filter me-2"></i>فلترة النتائج
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="type" class="form-label">نوع النتيجة</label>
+                        <select name="type" id="type" class="form-select">
+                            <option value="">جميع الأنواع</option>
+                            {% for value, label in result_types %}
+                                <option value="{{ value }}" {% if result_type == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="confidence" class="form-label">مستوى الثقة</label>
+                        <select name="confidence" id="confidence" class="form-select">
+                            <option value="">جميع المستويات</option>
+                            {% for value, label in confidence_levels %}
+                                <option value="{{ value }}" {% if confidence == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fas fa-search me-2"></i>فلترة
+                        </button>
+                        <a href="{% url 'osint_tools:session_results' session.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-times me-2"></i>مسح
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>النتائج المكتشفة
+                    <span class="badge bg-primary ms-2">{{ page_obj.paginator.count }}</span>
+                </h5>
+                <div class="d-flex gap-2">
+                    <!-- أزرار التصدير -->
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-download me-1"></i> تصدير النتائج
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'osint_tools:export_results' session.id %}?format=json" target="_blank">
+                                    <i class="fas fa-file-code me-2"></i> JSON
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'osint_tools:export_results' session.id %}?format=csv" target="_blank">
+                                    <i class="fas fa-file-csv me-2"></i> CSV
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="exportHTML(); return false;">
+                                    <i class="fas fa-file-code me-2"></i> HTML
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="generateReport(); return false;">
+                                    <i class="fas fa-file-pdf me-2"></i> إنشاء تقرير PDF
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- أزرار العرض -->
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewMode('grid')" title="عرض شبكي">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary active" onclick="viewMode('list')" title="عرض قائمة">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if page_obj %}
+                    <!-- List View -->
+                    <div id="list-view">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th width="10%">النوع</th>
+                                        <th width="25%">العنوان</th>
+                                        <th width="25%">الوصف</th>
+                                        <th width="10%">الثقة</th>
+                                        <th width="10%">المصدر</th>
+                                        <th width="10%">التاريخ</th>
+                                        <th width="10%">إجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in page_obj %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-info">{{ result.get_result_type_display }}</span>
+                                        </td>
+                                        <td>
+                                            {% if result.url %}
+                                                <a href="{{ result.url }}" target="_blank" class="text-primary text-decoration-none fw-bold">
+                                                    {{ result.title }}
+                                                    <i class="fas fa-external-link-alt ms-1 small"></i>
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'osint_tools:result_detail' result.id %}" class="text-primary text-decoration-none fw-bold">
+                                                    {{ result.title }}
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ result.description|truncatewords:20 }}</small>
+                                        </td>
+                                        <td>
+                                            {% if result.confidence == 'high' %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check-circle me-1"></i>عالي
+                                                </span>
+                                            {% elif result.confidence == 'medium' %}
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-exclamation-circle me-1"></i>متوسط
+                                                </span>
+                                            {% elif result.confidence == 'low' %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times-circle me-1"></i>منخفض
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-question-circle me-1"></i>غير معروف
+                                                </span>
+                                            {% endif %}
+                                            <small class="d-block text-muted mt-1">{{ result.confidence_score|floatformat:2 }}</small>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ result.source }}</small>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ result.discovered_at|date:"Y-m-d H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'osint_tools:result_detail' result.id %}" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-eye"></i> التفاصيل
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Grid View (Hidden by default) -->
+                    <div id="grid-view" style="display: none;">
+                        <div class="row g-3">
+                            {% for result in page_obj %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card bg-dark border-primary h-100">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-info">{{ result.get_result_type_display }}</span>
+                                        {% if result.confidence == 'high' %}
+                                            <span class="badge bg-success">عالي</span>
+                                        {% elif result.confidence == 'medium' %}
+                                            <span class="badge bg-warning">متوسط</span>
+                                        {% elif result.confidence == 'low' %}
+                                            <span class="badge bg-danger">منخفض</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">غير معروف</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-title text-primary">
+                                            {% if result.url %}
+                                                <a href="{{ result.url }}" target="_blank" class="text-primary text-decoration-none">
+                                                    {{ result.title }}
+                                                    <i class="fas fa-external-link-alt ms-1 small"></i>
+                                                </a>
+                                            {% else %}
+                                                {{ result.title }}
+                                            {% endif %}
+                                        </h6>
+                                        <p class="card-text small text-muted">{{ result.description|truncatewords:15 }}</p>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <small class="text-muted">{{ result.source }}</small>
+                                            <small class="text-muted">{{ result.discovered_at|date:"Y-m-d" }}</small>
+                                        </div>
+                                        <div class="mt-3 text-center border-top border-secondary pt-3">
+                                            <a href="{% url 'osint_tools:result_detail' result.id %}" class="btn btn-sm btn-outline-info w-100">
+                                                <i class="fas fa-eye me-1"></i> عرض التفاصيل الكاملة
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.paginator.num_pages > 1 %}
+                        <nav aria-label="ترقيم الصفحات" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1{% if result_type %}&type={{ result_type }}{% endif %}{% if confidence %}&confidence={{ confidence }}{% endif %}">الأولى</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if result_type %}&type={{ result_type }}{% endif %}{% if confidence %}&confidence={{ confidence }}{% endif %}">السابقة</a>
+                                    </li>
+                                {% endif %}
+
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        صفحة {{ page_obj.number }} من {{ page_obj.paginator.num_pages }}
+                                    </span>
+                                </li>
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if result_type %}&type={{ result_type }}{% endif %}{% if confidence %}&confidence={{ confidence }}{% endif %}">التالية</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if result_type %}&type={{ result_type }}{% endif %}{% if confidence %}&confidence={{ confidence }}{% endif %}">الأخيرة</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="empty-state text-center py-5">
+                        <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+                        <h4>لا توجد نتائج</h4>
+                        <p class="text-muted">لم يتم العثور على نتائج لهذه الجلسة.</p>
+                        <a href="{% url 'osint_tools:session_detail' session.id %}" class="btn btn-primary">
+                            <i class="fas fa-arrow-right me-2"></i>العودة لتفاصيل الجلسة
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back Button -->
+<div class="row mt-4">
+    <div class="col-12">
+        <a href="{% url 'osint_tools:session_detail' session.id %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-right me-2"></i>العودة لتفاصيل الجلسة
+        </a>
+    </div>
+</div>
+
+<script>
+function viewMode(mode) {
+    const listView = document.getElementById('list-view');
+    const gridView = document.getElementById('grid-view');
+    const buttons = document.querySelectorAll('.btn-group .btn');
+    
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    if (mode === 'grid') {
+        listView.style.display = 'none';
+        gridView.style.display = 'block';
+        buttons[0].classList.add('active');
+    } else {
+        listView.style.display = 'block';
+        gridView.style.display = 'none';
+        buttons[1].classList.add('active');
+    }
+}
+
+// دالة تصدير HTML
+function exportHTML() {
+    const sessionId = {{ session.id }};
+    const toolName = "{{ session.tool.name|escapejs }}";
+    const target = "{{ session.target|escapejs }}";
+    const resultsCount = {{ page_obj.paginator.count }};
+    
+    // إنشاء محتوى HTML منسق
+    let htmlContent = `
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير OSINT - ${toolName} - ${target}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            border-bottom: 3px solid #6366f1;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #6366f1;
+            margin: 0 0 10px 0;
+        }
+        .meta {
+            color: #666;
+            font-size: 14px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-right: 4px solid #6366f1;
+        }
+        .stat-box h3 {
+            margin: 0;
+            color: #6366f1;
+            font-size: 24px;
+        }
+        .stat-box p {
+            margin: 5px 0 0 0;
+            color: #666;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #6366f1;
+            color: white;
+            font-weight: bold;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-high { background: #10b981; color: white; }
+        .badge-medium { background: #f59e0b; color: white; }
+        .badge-low { background: #ef4444; color: white; }
+        .badge-unknown { background: #6b7280; color: white; }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 تقرير OSINT - ${toolName}</h1>
+            <div class="meta">
+                <p><strong>الهدف:</strong> ${target}</p>
+                <p><strong>التاريخ:</strong> {{ session.created_at|date:"Y-m-d H:i:s" }}</p>
+                <p><strong>معرف الجلسة:</strong> #${sessionId}</p>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <h3>${resultsCount}</h3>
+                <p>إجمالي النتائج</p>
+            </div>
+            <div class="stat-box">
+                <h3>{{ session.progress }}%</h3>
+                <p>نسبة الإكمال</p>
+            </div>
+            <div class="stat-box">
+                <h3>{{ session.get_status_display }}</h3>
+                <p>حالة الجلسة</p>
+            </div>
+        </div>
+        
+        <h2>📊 النتائج المكتشفة</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>العنوان</th>
+                    <th>النوع</th>
+                    <th>الوصف</th>
+                    <th>مستوى الثقة</th>
+                    <th>المصدر</th>
+                    <th>التاريخ</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    // إضافة النتائج
+    {% for result in page_obj %}
+    htmlContent += `
+                <tr>
+                    <td><strong>{{ result.title|escapejs }}</strong></td>
+                    <td>{{ result.get_result_type_display|escapejs }}</td>
+                    <td>{{ result.description|truncatewords:20|escapejs }}</td>
+                    <td>
+                        <span class="badge badge-{{ result.confidence }}">
+                            {{ result.get_confidence_display|escapejs }} ({{ result.confidence_score|floatformat:2 }})
+                        </span>
+                    </td>
+                    <td>{{ result.source|escapejs }}</td>
+                    <td>{{ result.discovered_at|date:"Y-m-d H:i"|escapejs }}</td>
+                </tr>
+    `;
+    {% endfor %}
+    
+    htmlContent += `
+            </tbody>
+        </table>
+        
+        <div class="footer">
+            <p>تم إنشاء هذا التقرير بواسطة نظام Coriza OSINT</p>
+            <p>تاريخ التصدير: ${new Date().toLocaleString('ar-EG')}</p>
+        </div>
+    </div>
+</body>
+</html>
+    `;
+    
+    // تحميل الملف
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `osint_report_${sessionId}_${Date.now()}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+// دالة إنشاء تقرير PDF
+function generateReport() {
+    const sessionId = {{ session.id }};
+    
+    // إظهار رسالة تحميل
+    const btn = event.target.closest('.dropdown-item');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جاري الإنشاء...';
+    btn.style.pointerEvents = 'none';
+    
+    // إرسال طلب لإنشاء التقرير
+    fetch(`/osint/sessions/${sessionId}/generate-report/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+            report_type: 'detailed',
+            format: 'pdf',
+            include_raw_data: false,
+            include_metadata: true,
+            include_charts: true
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // إعادة الزر لحالته الأصلية
+            btn.innerHTML = originalHTML;
+            btn.style.pointerEvents = 'auto';
+            
+            // إظهار رسالة نجاح
+            alert('✅ تم جدولة إنشاء التقرير بنجاح!\n\nيمكنك متابعة حالة التقرير من صفحة التقارير.');
+            
+            // الانتقال لصفحة التقارير
+            window.location.href = '/osint/reports/';
+        } else {
+            throw new Error(data.message || 'فشل إنشاء التقرير');
+        }
+    })
+    .catch(error => {
+        btn.innerHTML = originalHTML;
+        btn.style.pointerEvents = 'auto';
+        alert('❌ حدث خطأ: ' + error.message);
+    });
+}
+
+// دالة للحصول على CSRF Token
+function getCsrfToken() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') {
+            return value;
+        }
+    }
+    return '';
+}
+
+// دالة نسخ النتائج إلى الحافظة
+function copyResultsToClipboard() {
+    let text = `تقرير OSINT - {{ session.tool.name|escapejs }}\n`;
+    text += `الهدف: {{ session.target|escapejs }}\n`;
+    text += `التاريخ: {{ session.created_at|date:"Y-m-d H:i:s" }}\n`;
+    text += `عدد النتائج: {{ page_obj.paginator.count }}\n`;
+    text += `\n${'='.repeat(60)}\n\n`;
+    
+    {% for result in page_obj %}
+    text += `📌 {{ result.title|escapejs }}\n`;
+    text += `   النوع: {{ result.get_result_type_display|escapejs }}\n`;
+    text += `   الوصف: {{ result.description|truncatewords:30|escapejs }}\n`;
+    text += `   الثقة: {{ result.get_confidence_display|escapejs }} ({{ result.confidence_score|floatformat:2 }})\n`;
+    text += `   المصدر: {{ result.source|escapejs }}\n`;
+    {% if result.url %}
+    text += `   الرابط: {{ result.url|escapejs }}\n`;
+    {% endif %}
+    text += `\n`;
+    {% endfor %}
+    
+    text += `${'='.repeat(60)}\n`;
+    text += `تم إنشاء هذا التقرير بواسطة Coriza OSINT\n`;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        alert('✅ تم نسخ النتائج إلى الحافظة بنجاح!');
+    }).catch(err => {
+        alert('❌ فشل النسخ: ' + err);
+    });
+}
+</script>
+
+{% endblock content %}

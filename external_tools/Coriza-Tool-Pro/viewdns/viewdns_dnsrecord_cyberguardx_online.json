@@ -1,0 +1,96 @@
+{
+    "query": {
+        "tool": "dnsrecord_PRO",
+        "domain": "cyberguardx.online",
+        "recordtype": "ANY"
+    },
+    "response": {
+        "records": [
+            {
+                "name": "cyberguardx.online.",
+                "ttl": "1800",
+                "class": "IN",
+                "type": "SOA",
+                "data": "moura.ns.cloudflare.com. dns.cloudflare.com. 2398540710 10000 2400 604800 1800"
+            },
+            {
+                "name": "cyberguardx.online.",
+                "ttl": "21600",
+                "class": "IN",
+                "type": "NS",
+                "data": "moura.ns.cloudflare.com."
+            },
+            {
+                "name": "cyberguardx.online.",
+                "ttl": "21600",
+                "class": "IN",
+                "type": "NS",
+                "data": "wren.ns.cloudflare.com."
+            },
+            {
+                "name": "cyberguardx.online.",
+                "ttl": "300",
+                "class": "IN",
+                "type": "A",
+                "data": "172.67.215.202"
+            },
+            {
+                "name": "cyberguardx.online.",
+                "ttl": "300",
+                "class": "IN",
+                "type": "A",
+                "data": "104.21.69.240"
+            },
+            {
+                "name": "cyberguardx.online.",
+                "ttl": "300",
+                "class": "IN",
+                "type": "AAAA",
+                "data": "2606:4700:3034::ac43:d7ca"
+            },
+            {
+                "name": "cyberguardx.online.",
+                "ttl": "300",
+                "class": "IN",
+                "type": "AAAA",
+                "data": "2606:4700:3035::6815:45f0"
+            },
+            {
+                "name": "cyberguardx.online.",
+                "ttl": "21600",
+                "class": "IN",
+                "type": "TXT",
+                "data": "\"v=spf1 ip4:84.46.240.67 a:panel.cyberxhosting.online include:cyberguardx.online -all\""
+            },
+            {
+                "name": "cyberguardx.online.",
+                "ttl": "21600",
+                "class": "IN",
+                "type": "MX",
+                "priority": "10",
+                "data": "panel.cyberxhosting.online."
+            },
+            {
+                "name": "cyberguardx.online.",
+                "ttl": "3600",
+                "class": "IN",
+                "type": "DNSKEY",
+                "data": "257 3 13 mdsswUyr3DPW132mOi8V9xESWE8jTo0dxCjjnopKl+GqJxpVXckHAeF+ KkxLbxILfDLUT0rAK9iUzy1L53eKGQ=="
+            },
+            {
+                "name": "cyberguardx.online.",
+                "ttl": "3600",
+                "class": "IN",
+                "type": "DNSKEY",
+                "data": "256 3 13 oJMRESz5E4gYzS/q6XDrvU1qMPYIjCWzJaOau8XNEZeqCYKD5ar0IRd8 KqXXFJkqmVfRvMGPmM1x8fGAa2XhSA=="
+            },
+            {
+                "name": "cyberguardx.online.",
+                "ttl": "1800",
+                "class": "IN",
+                "type": "NSEC",
+                "data": "\\000.cyberguardx.online. A NS SOA HINFO MX TXT AAAA LOC SRV NAPTR CERT SSHFP RRSIG NSEC DNSKEY TLSA TYPE53 HIP CDS CDNSKEY OPENPGPKEY TYPE64 TYPE65 URI CAA"
+            }
+        ]
+    }
+}

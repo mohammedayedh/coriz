@@ -1,0 +1,131 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}مُولّد الهاش المتقدم - كوريزا OSINT{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center mb-3">
+        <a href="{% url 'osint_tools:utilities_dashboard' %}" class="btn btn-outline-secondary me-3">
+            <i class="fas fa-arrow-right"></i> عودة
+        </a>
+        <h1 class="fw-bold mb-0 cyber-text typewriter">
+            <i class="fas fa-fingerprint me-3"></i>مُولّد بصمات الهاش (Hash Generator)
+        </h1>
+    </div>
+    <p class="text-secondary">تتيح لك هذه الأداة توليد أكثر التشفيرات شيوعاً (MD5, SHA-1, SHA-256) بصورة لحظية وسرية بالكامل داخل متصفحك.</p>
+</div>
+
+<div class="row g-4 mt-2">
+    <!-- Input Section -->
+    <div class="col-lg-12">
+        <div class="content-card">
+            <div class="card-header border-bottom border-secondary">
+                <h5 class="mb-0 text-primary"><i class="fas fa-keyboard me-2"></i>النص المدخل (Input)</h5>
+            </div>
+            <div class="card-body p-0">
+                <textarea id="inputText" class="form-control border-0 text-white p-4 font-monospace fs-5" rows="4" 
+                          style="background: rgba(0,0,0,0.3); resize: none; box-shadow: none;" 
+                          placeholder="اكتب النص هنا للبدء في التوليد اللحظي..." onkeyup="generateHashes()"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="col-lg-12">
+        <div class="row g-3">
+            
+            <!-- MD5 -->
+            <div class="col-md-6">
+                <div class="content-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-danger fs-6">MD5</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="copyHash('md5Output', this)"><i class="fas fa-copy"></i> نسخ</button>
+                        </div>
+                        <input type="text" id="md5Output" class="form-control text-secondary font-monospace" readonly style="background: rgba(0,0,0,0.5);">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SHA-1 -->
+            <div class="col-md-6">
+                <div class="content-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-warning fs-6">SHA-1</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="copyHash('sha1Output', this)"><i class="fas fa-copy"></i> نسخ</button>
+                        </div>
+                        <input type="text" id="sha1Output" class="form-control text-secondary font-monospace" readonly style="background: rgba(0,0,0,0.5);">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SHA-256 -->
+            <div class="col-md-6">
+                <div class="content-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-success fs-6">SHA-256</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="copyHash('sha256Output', this)"><i class="fas fa-copy"></i> نسخ</button>
+                        </div>
+                        <input type="text" id="sha256Output" class="form-control text-secondary font-monospace" readonly style="background: rgba(0,0,0,0.5);">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SHA-512 -->
+            <div class="col-md-6">
+                <div class="content-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-info fs-6">SHA-512</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="copyHash('sha512Output', this)"><i class="fas fa-copy"></i> نسخ</button>
+                        </div>
+                        <textarea id="sha512Output" class="form-control text-secondary font-monospace" readonly rows="2" style="background: rgba(0,0,0,0.5); resize:none;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- استخدام مكتبة CryptoJS لتوليد الهاش لحظياً في المتصفح -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+    function generateHashes() {
+        const text = document.getElementById('inputText').value;
+        
+        if (!text) {
+            document.getElementById('md5Output').value = '';
+            document.getElementById('sha1Output').value = '';
+            document.getElementById('sha256Output').value = '';
+            document.getElementById('sha512Output').value = '';
+            return;
+        }
+
+        document.getElementById('md5Output').value = CryptoJS.MD5(text).toString();
+        document.getElementById('sha1Output').value = CryptoJS.SHA1(text).toString();
+        document.getElementById('sha256Output').value = CryptoJS.SHA256(text).toString();
+        document.getElementById('sha512Output').value = CryptoJS.SHA512(text).toString();
+    }
+
+    function copyHash(elementId, btnElement) {
+        const hashOutput = document.getElementById(elementId);
+        if(!hashOutput.value) return;
+
+        hashOutput.select();
+        hashOutput.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(hashOutput.value).then(() => {
+            const originalHtml = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fas fa-check text-success"></i> تم النسخ';
+            setTimeout(() => {
+                btnElement.innerHTML = originalHtml;
+            }, 2000);
+        });
+    }
+</script>
+{% endblock %}

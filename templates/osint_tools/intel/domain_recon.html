@@ -1,0 +1,152 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+{% block title %}Domain Recon - استطلاع النطاقات{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center mb-2">
+        <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-outline-secondary me-3"><i class="fas fa-arrow-right"></i></a>
+        <div>
+            <h1 class="fw-bold mb-0 cyber-text"><i class="fas fa-globe me-2"></i>Domain Reconnaissance</h1>
+            <p class="text-secondary mb-0 small">استطلاع شامل للنطاقات — WHOIS، DNS Records، IP Resolution</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-body p-4">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text" style="background:rgba(0,0,0,0.4);border-color:#444;"><i class="fas fa-globe text-primary"></i></span>
+                    <input type="text" id="domainInput" class="form-control text-white font-monospace"
+                           style="background:rgba(0,0,0,0.4);border-color:#444;"
+                           placeholder="أدخل اسم النطاق... مثال: example.com"
+                           onkeydown="if(event.key==='Enter') runRecon()">
+                    <button class="btn btn-primary px-5" onclick="runRecon()">
+                        <i class="fas fa-radar me-2"></i>استطلاع
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 text-center py-5" id="loadingArea" style="display:none;">
+        <div class="spinner-border text-primary mb-3" style="width:3rem;height:3rem;"></div>
+        <p class="text-secondary">جارٍ جمع بيانات النطاق... قد يستغرق حتى 20 ثانية</p>
+    </div>
+
+    <div class="col-12" id="errorArea" style="display:none;">
+        <div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i><span id="errorMsg"></span></div>
+    </div>
+
+    <div id="resultArea" style="display:none;" class="col-12">
+        <div class="row g-4">
+            <!-- Quick Stats -->
+            <div class="col-12">
+                <div class="row g-3" id="quickStats"></div>
+            </div>
+
+            <!-- WHOIS -->
+            <div class="col-12">
+                <div class="content-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-primary"><i class="fas fa-id-card me-2"></i>بيانات WHOIS</h5>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="copyText('whoisOutput', this)"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="card-body p-0">
+                        <pre id="whoisOutput" class="p-4 mb-0 text-info font-monospace" style="background:rgba(0,0,0,0.3);max-height:300px;overflow-y:auto;white-space:pre-wrap;font-size:0.8rem;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DNS Records -->
+            <div class="col-md-6">
+                <div class="content-card h-100">
+                    <div class="card-header"><h5 class="mb-0 text-primary"><i class="fas fa-list me-2"></i>سجلات DNS - النوع A</h5></div>
+                    <div class="card-body p-0">
+                        <pre id="dnsAOutput" class="p-4 mb-0 text-warning font-monospace" style="background:rgba(0,0,0,0.3);max-height:200px;overflow-y:auto;white-space:pre-wrap;font-size:0.8rem;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="content-card h-100">
+                    <div class="card-header"><h5 class="mb-0 text-primary"><i class="fas fa-envelope me-2"></i>سجلات DNS - النوع MX</h5></div>
+                    <div class="card-body p-0">
+                        <pre id="dnsMXOutput" class="p-4 mb-0 text-success font-monospace" style="background:rgba(0,0,0,0.3);max-height:200px;overflow-y:auto;white-space:pre-wrap;font-size:0.8rem;"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function runRecon() {
+    const domain = document.getElementById('domainInput').value.trim();
+    if (!domain) return;
+
+    document.getElementById('loadingArea').style.display = 'block';
+    document.getElementById('resultArea').style.display = 'none';
+    document.getElementById('errorArea').style.display = 'none';
+
+    fetch('{% url "osint_tools:api_domain_recon" %}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
+        body: JSON.stringify({domain})
+    })
+    .then(r => r.json())
+    .then(res => {
+        document.getElementById('loadingArea').style.display = 'none';
+        if (!res.success) { showError(res.error); return; }
+        renderRecon(res.data);
+    })
+    .catch(() => {
+        document.getElementById('loadingArea').style.display = 'none';
+        showError('فشل الاتصال بالخادم');
+    });
+}
+
+function renderRecon(d) {
+    // Quick stats
+    document.getElementById('quickStats').innerHTML = `
+        <div class="col-md-3"><div class="stat-card cyber-border text-center p-3">
+            <i class="fas fa-globe fa-2x hacker-glow mb-2"></i>
+            <h6 class="text-white mb-0">${d.domain}</h6><small class="text-secondary">النطاق المستعلم</small>
+        </div></div>
+        <div class="col-md-3"><div class="stat-card cyber-border text-center p-3">
+            <i class="fas fa-server fa-2x hacker-glow mb-2"></i>
+            <h6 class="text-primary mb-0 font-monospace">${d.resolved_ip || 'N/A'}</h6><small class="text-secondary">عنوان IP</small>
+        </div></div>
+        <div class="col-md-3"><div class="stat-card cyber-border text-center p-3">
+            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+            <h6 class="text-success mb-0">مكتمل</h6><small class="text-secondary">حالة الاستطلاع</small>
+        </div></div>
+        <div class="col-md-3"><div class="stat-card cyber-border text-center p-3">
+            <i class="fas fa-clock fa-2x hacker-glow mb-2"></i>
+            <h6 class="text-white mb-0">${new Date().toLocaleTimeString('ar-SA')}</h6><small class="text-secondary">وقت الاستطلاع</small>
+        </div></div>`;
+
+    document.getElementById('whoisOutput').textContent = d.whois || 'لا توجد بيانات';
+    document.getElementById('dnsAOutput').textContent = d.dns?.A || 'لا توجد سجلات A';
+    document.getElementById('dnsMXOutput').textContent = d.dns?.MX || 'لا توجد سجلات MX';
+
+    document.getElementById('resultArea').style.display = 'block';
+}
+
+function showError(msg) {
+    document.getElementById('errorMsg').textContent = msg;
+    document.getElementById('errorArea').style.display = 'block';
+}
+function copyText(id, btn) {
+    navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+        const og = btn.innerHTML; btn.innerHTML = '<i class="fas fa-check text-success"></i>';
+        setTimeout(() => btn.innerHTML = og, 2000);
+    });
+}
+function getCsrf() { return document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''; }
+</script>
+{% endblock %}

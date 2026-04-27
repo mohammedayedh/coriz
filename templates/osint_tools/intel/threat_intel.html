@@ -1,0 +1,201 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+{% block title %}Threat Intelligence - استخبارات التهديدات{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center mb-2">
+        <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-outline-secondary me-3"><i class="fas fa-arrow-right"></i></a>
+        <div>
+            <h1 class="fw-bold mb-0 cyber-text"><i class="fas fa-satellite me-2"></i>Threat Intelligence Feed</h1>
+            <p class="text-secondary mb-0 small">تغذية حية بأحدث التهديدات السيبرانية مصنّفة حسب الخطورة</p>
+        </div>
+        <div class="ms-auto">
+            <button class="btn btn-outline-primary" onclick="loadFeed()" id="refreshBtn">
+                <i class="fas fa-sync-alt me-2"></i>تحديث
+            </button>
+        </div>
+    </div>
+    <div class="matrix-text mt-2"><small id="lastUpdated">THREAT INTEL FEED — LOADING...</small></div>
+</div>
+
+<!-- Live Ticker -->
+<div class="alert alert-dark border-start border-danger border-3 mb-4 py-2 d-flex align-items-center" style="background:rgba(220,53,69,0.08);">
+    <i class="fas fa-circle text-danger fa-xs me-2 blink"></i>
+    <span class="text-secondary small me-3">LIVE FEED:</span>
+    <span id="tickerText" class="text-white small font-monospace">جارٍ التحميل...</span>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4" id="statsRow">
+    <div class="col-6 col-md-3">
+        <div class="stat-card cyber-border text-center p-3">
+            <i class="fas fa-skull-crossbones fa-2x text-danger mb-2"></i>
+            <h3 class="fw-bold text-danger mb-0" id="criticalCount">0</h3>
+            <small class="text-secondary">حرجة</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card cyber-border text-center p-3">
+            <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+            <h3 class="fw-bold text-warning mb-0" id="highCount">0</h3>
+            <small class="text-secondary">عالية</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card cyber-border text-center p-3">
+            <i class="fas fa-info-circle fa-2x text-info mb-2"></i>
+            <h3 class="fw-bold text-info mb-0" id="mediumCount">0</h3>
+            <small class="text-secondary">متوسطة</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card cyber-border text-center p-3">
+            <i class="fas fa-rss fa-2x hacker-glow mb-2"></i>
+            <h3 class="fw-bold mb-0" id="totalCount">0</h3>
+            <small class="text-secondary">إجمالي التهديدات</small>
+        </div>
+    </div>
+</div>
+
+<!-- Loading -->
+<div class="col-12 text-center py-5" id="loadingArea">
+    <div class="spinner-border text-danger mb-3" style="width:3rem;height:3rem;"></div>
+    <p class="text-secondary">جارٍ جلب تغذية التهديدات...</p>
+</div>
+
+<!-- Error -->
+<div id="errorArea" style="display:none;">
+    <div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i><span id="errorMsg"></span></div>
+</div>
+
+<!-- Threat Cards -->
+<div id="threatGrid" class="row g-4"></div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.blink { animation: blink 1s step-start infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+.threat-card {
+    border-left: 4px solid;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.threat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+.threat-card.critical { border-color: #dc3545; }
+.threat-card.high { border-color: #fd7e14; }
+.threat-card.medium { border-color: #ffc107; }
+.threat-card.low { border-color: #6c757d; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let allThreats = [];
+let tickerIndex = 0;
+
+function loadFeed() {
+    document.getElementById('loadingArea').style.display = 'block';
+    document.getElementById('errorArea').style.display = 'none';
+    document.getElementById('threatGrid').innerHTML = '';
+
+    const btn = document.getElementById('refreshBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>جارٍ التحديث...';
+
+    fetch('{% url "osint_tools:api_threat_feed" %}', {
+        headers: {'X-CSRFToken': getCsrf()}
+    })
+    .then(r => r.json())
+    .then(res => {
+        document.getElementById('loadingArea').style.display = 'none';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>تحديث';
+
+        if (!res.success) { showError(res.error); return; }
+        allThreats = res.data;
+        renderThreats(allThreats);
+        updateStats(allThreats);
+        startTicker(allThreats);
+        document.getElementById('lastUpdated').textContent =
+            `THREAT INTEL FEED — LAST UPDATED: ${new Date().toLocaleString('ar-SA')}${res.demo ? ' (DEMO MODE)' : ' (LIVE)'}`;
+    })
+    .catch(() => {
+        document.getElementById('loadingArea').style.display = 'none';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>تحديث';
+        showError('فشل جلب بيانات التهديدات');
+    });
+}
+
+function renderThreats(threats) {
+    const grid = document.getElementById('threatGrid');
+    if (!threats.length) {
+        grid.innerHTML = '<div class="col-12 text-center text-secondary py-5"><i class="fas fa-shield-alt fa-3x mb-3"></i><p>لا توجد تهديدات محددة حالياً</p></div>';
+        return;
+    }
+
+    grid.innerHTML = threats.map((t, i) => {
+        const severity = t.severity || 'medium';
+        const tlpColors = {WHITE: 'secondary', GREEN: 'success', AMBER: 'warning', RED: 'danger'};
+        const sevColors = {critical: 'danger', high: 'warning', medium: 'info', low: 'secondary'};
+        const sevLabels = {critical: 'حرجة', high: 'عالية', medium: 'متوسطة', low: 'منخفضة'};
+        const tags = (t.tags || []).slice(0, 4).map(tag =>
+            `<span class="badge bg-dark border border-secondary me-1">#${tag}</span>`).join('');
+
+        return `
+        <div class="col-lg-6" style="animation: fadeInUp 0.4s ease ${i * 0.08}s both;">
+            <div class="content-card threat-card ${severity}">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-${sevColors[severity] || 'secondary'}">
+                                ${sevLabels[severity] || severity}
+                            </span>
+                            <span class="badge bg-${tlpColors[t.tlp] || 'secondary'}">TLP:${t.tlp || 'WHITE'}</span>
+                        </div>
+                        <small class="text-secondary"><i class="fas fa-calendar me-1"></i>${t.created || '-'}</small>
+                    </div>
+                    <h5 class="fw-bold text-white mb-2">${t.name || 'تهديد غير معنون'}</h5>
+                    <p class="text-secondary small mb-3">${t.description || 'لا يوجد وصف'}</p>
+                    <div>${tags}</div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function updateStats(threats) {
+    const counts = {critical: 0, high: 0, medium: 0};
+    threats.forEach(t => { if (counts[t.severity] !== undefined) counts[t.severity]++; });
+    document.getElementById('criticalCount').textContent = counts.critical;
+    document.getElementById('highCount').textContent = counts.high;
+    document.getElementById('mediumCount').textContent = counts.medium;
+    document.getElementById('totalCount').textContent = threats.length;
+}
+
+function startTicker(threats) {
+    if (!threats.length) return;
+    function tick() {
+        const t = threats[tickerIndex % threats.length];
+        document.getElementById('tickerText').textContent = `[${t.severity?.toUpperCase() || 'INFO'}] ${t.name}`;
+        tickerIndex++;
+        setTimeout(tick, 4000);
+    }
+    tick();
+}
+
+function showError(msg) {
+    document.getElementById('errorMsg').textContent = msg;
+    document.getElementById('errorArea').style.display = 'block';
+}
+function getCsrf() { return document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''; }
+
+// Auto load on page open
+document.addEventListener('DOMContentLoaded', loadFeed);
+// Auto refresh every 5 minutes
+setInterval(loadFeed, 300000);
+</script>
+{% endblock %}

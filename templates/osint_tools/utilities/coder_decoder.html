@@ -1,0 +1,149 @@
+{% extends 'dashboard/index.html' %}
+{% load static %}
+
+{% block title %}أداة التشفير وفك التشفير - كوريزا OSINT{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="d-flex align-items-center mb-3">
+        <a href="{% url 'osint_tools:utilities_dashboard' %}" class="btn btn-outline-secondary me-3">
+            <i class="fas fa-arrow-right"></i> عودة
+        </a>
+        <h1 class="fw-bold mb-0 cyber-text typewriter">
+            <i class="fas fa-random me-3"></i>المُرمّز ومفكك الرموز (Coder / Decoder)
+        </h1>
+    </div>
+    <p class="text-secondary">يقوم بتحويل النصوص بين الصيغ المختلفة كـ Base64 و Hex وترميز الروابط (URL Encoding) بشكل فوري.</p>
+</div>
+
+<div class="row g-4 mt-2">
+    <!-- Main Board -->
+    <div class="col-lg-12">
+        <div class="content-card">
+            <div class="card-body p-4">
+                
+                <!-- Format Selector -->
+                <div class="row mb-4 justify-content-center">
+                    <div class="col-md-6 text-center">
+                        <label class="form-label text-white mb-2">نوع الخوارزمية (Algorithm)</label>
+                        <select id="algoSelect" class="form-select form-select-lg text-center" style="background: rgba(0,0,0,0.5); border-color: var(--primary-color); color: white;" onchange="processText()">
+                            <option value="base64">ترميز Base64</option>
+                            <option value="url">ترميز الروابط (URL Encode)</option>
+                            <option value="hex">ترميز ست عشري (Hexadecimal)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row g-4 align-items-stretch">
+                    <!-- Left: Input -->
+                    <div class="col-md-5">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-primary fw-bold">النص العادي (Plain Text)</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="clearBoxes()"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <textarea id="plainText" class="form-control text-white p-3 font-monospace" rows="10" 
+                                  style="background: rgba(0,0,0,0.3); border: 1px solid #444;" 
+                                  placeholder="اكتب النص العادي هنا ليتم تشفيره..." onkeyup="processText('encode')"></textarea>
+                    </div>
+
+                    <!-- Center: Operations -->
+                    <div class="col-md-2 d-flex flex-column justify-content-center align-items-center gap-3">
+                        <div class="text-secondary small">اتجاه العملية</div>
+                        <button class="btn btn-outline-primary w-100" onclick="processText('encode')" title="تشفير للإتجاه الأيسر">
+                            تشفير <i class="fas fa-arrow-left ms-2"></i>
+                        </button>
+                        <button class="btn btn-outline-warning w-100" onclick="processText('decode')" title="فك تشفير للإتجاه الأيمن">
+                            <i class="fas fa-arrow-right me-2"></i> فك التشفير
+                        </button>
+                    </div>
+
+                    <!-- Right: Encoded -->
+                    <div class="col-md-5">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-warning fw-bold">النص المُشفر (Encoded Data)</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="copyEncoded(this)"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <textarea id="encodedText" class="form-control text-warning p-3 font-monospace" rows="10" 
+                                  style="background: rgba(0,0,0,0.3); border: 1px solid #444;" 
+                                  placeholder="ألصق النص المشفر هنا ليتم فك رموزه..." onkeyup="processText('decode')"></textarea>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function processText(direction = 'encode') {
+        const plainBox = document.getElementById('plainText');
+        const encodedBox = document.getElementById('encodedText');
+        const algo = document.getElementById('algoSelect').value;
+
+        try {
+            if (direction === 'encode') {
+                if (!plainBox.value) { encodedBox.value = ''; return; }
+                
+                if (algo === 'base64') {
+                    encodedBox.value = btoa(unescape(encodeURIComponent(plainBox.value)));
+                } else if (algo === 'url') {
+                    encodedBox.value = encodeURIComponent(plainBox.value);
+                } else if (algo === 'hex') {
+                    encodedBox.value = textToHex(plainBox.value);
+                }
+            } else if (direction === 'decode') {
+                if (!encodedBox.value) { plainBox.value = ''; return; }
+
+                if (algo === 'base64') {
+                    plainBox.value = decodeURIComponent(escape(atob(encodedBox.value)));
+                } else if (algo === 'url') {
+                    plainBox.value = decodeURIComponent(encodedBox.value);
+                } else if (algo === 'hex') {
+                    plainBox.value = hexToText(encodedBox.value);
+                }
+            }
+            // إزالة خطأ التنسيق إن وجد سابقاً
+            encodedBox.style.borderColor = "#444";
+            plainBox.style.borderColor = "#444";
+        } catch (e) {
+            // حالة محاولة فك تشفير نص غير صالح
+            if(direction === 'decode') {
+                plainBox.value = "⚠️ [خطأ]: النص المدخل غير صالح للفك بهذه الخوارزمية.";
+                plainBox.style.borderColor = "red";
+            }
+        }
+    }
+
+    function textToHex(text) {
+        return Array.from(text).map(c => 
+            c.charCodeAt(0).toString(16).padStart(2, '0')
+        ).join(' ');
+    }
+
+    function hexToText(hex) {
+        let cleanHex = hex.replace(/\s/g, '');
+        let str = '';
+        for (let i = 0; i < cleanHex.length; i += 2) {
+            str += String.fromCharCode(parseInt(cleanHex.substr(i, 2), 16));
+        }
+        return str;
+    }
+
+    function clearBoxes() {
+        document.getElementById('plainText').value = '';
+        document.getElementById('encodedText').value = '';
+    }
+
+    function copyEncoded(btn) {
+        const text = document.getElementById('encodedText').value;
+        if(!text) return;
+        navigator.clipboard.writeText(text).then(() => {
+            const og = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check text-success"></i>';
+            setTimeout(() => btn.innerHTML = og, 2000);
+        });
+    }
+</script>
+{% endblock %}

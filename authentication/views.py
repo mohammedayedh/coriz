@@ -98,21 +98,37 @@ def register_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             try:
+                # إصلاح: استخدام transaction.atomic لضمان تناسق البيانات
                 with transaction.atomic():
                     user = form.save(commit=False)
                     user.is_active = False
                     user.save()
 
+                    # إنشاء profile للمستخدم
                     UserProfile.objects.create(user=user)
+                
+                # إرسال البريد خارج transaction (عملية خارجية)
+                try:
                     send_verification_email(user, request)
-
-                    messages.success(
+                except Exception as email_error:
+                    # فشل إرسال البريد لا يجب أن يمنع إنشاء الحساب
+                    logger.error(f"فشل إرسال بريد التحقق للمستخدم {user.email}: {email_error}")
+                    messages.warning(
                         request,
-                        'تم إنشاء حسابك بنجاح! يمكنك تسجيل الدخول الآن، وتم إرسال بريد للتحقق من بريدك الإلكتروني.'
+                        'تم إنشاء حسابك بنجاح! لكن حدث خطأ في إرسال بريد التحقق. '
+                        'يمكنك طلب إعادة الإرسال لاحقاً.'
                     )
                     return redirect('authentication:login')
+
+                messages.success(
+                    request,
+                    'تم إنشاء حسابك بنجاح! يمكنك تسجيل الدخول الآن، وتم إرسال بريد للتحقق من بريدك الإلكتروني.'
+                )
+                return redirect('authentication:login')
+                
             except Exception as e:
-                logger.error(f"خطأ في إنشاء المستخدم: {e}")
+                # إصلاح: معالجة استثناءات محددة
+                logger.exception(f"خطأ غير متوقع في إنشاء المستخدم: {e}")
                 messages.error(request, 'حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.')
     else:
         form = CustomUserCreationForm()
@@ -206,7 +222,10 @@ def send_verification_email(user, request):
         token = secrets.token_urlsafe(32)
         expires_at = timezone.now() + timezone.timedelta(hours=24)
         
+        # إلغاء التوكنات القديمة غير المستخدمة
         EmailVerification.objects.filter(user=user, is_used=False).update(is_used=True)
+        
+        # إنشاء توكن جديد
         EmailVerification.objects.create(
             user=user,
             token=token,
@@ -235,7 +254,9 @@ def send_verification_email(user, request):
         logger.info(f"تم إرسال بريد التحقق للمستخدم: {user.email}")
         
     except Exception as e:
-        logger.error(f"خطأ في إرسال بريد التحقق: {e}")
+        # إصلاح: استخدام logger.exception لتسجيل stack trace كامل
+        logger.exception(f"خطأ في إرسال بريد التحقق للمستخدم {user.email}: {e}")
+        raise  # إعادة رفع الاستثناء ليتم معالجته في المستوى الأعلى
 
 
 def verify_email_view(request, token):
@@ -380,7 +401,7 @@ def check_email_availability(request):
         email = data.get('email')
         
         if not email:
-            return JsonResponse({'available': False, 'message': 'البريد الإلكتروني مطلوب'})
+            return JsonResponse({'available': False, 'message': 'البريد الإلكتروني مطلوب'}, status=400)
         
         # Throttle availability checks
         rl_ident = f"{get_client_ip(request)}:email_avail"
@@ -395,10 +416,14 @@ def check_email_availability(request):
             'available': is_available,
             'message': 'البريد الإلكتروني متاح' if is_available else 'البريد الإلكتروني مستخدم بالفعل'
         })
-        
+    
+    except json.JSONDecodeError:
+        logger.error("خطأ في تحليل JSON في فحص البريد الإلكتروني")
+        return JsonResponse({'available': False, 'message': 'بيانات غير صحيحة'}, status=400)
     except Exception as e:
-        logger.error(f"خطأ في فحص البريد الإلكتروني: {e}")
-        return JsonResponse({'available': False, 'message': 'حدث خطأ في الخادم'})
+        # إصلاح: استخدام logger.exception بدلاً من logger.error
+        logger.exception(f"خطأ غير متوقع في فحص البريد الإلكتروني: {e}")
+        return JsonResponse({'available': False, 'message': 'حدث خطأ في الخادم'}, status=500)
 
 
 @require_http_methods(["POST"])
@@ -409,7 +434,7 @@ def check_username_availability(request):
         username = data.get('username')
         
         if not username:
-            return JsonResponse({'available': False, 'message': 'اسم المستخدم مطلوب'})
+            return JsonResponse({'available': False, 'message': 'اسم المستخدم مطلوب'}, status=400)
         
         # Throttle availability checks
         rl_ident = f"{get_client_ip(request)}:username_avail"
@@ -424,10 +449,14 @@ def check_username_availability(request):
             'available': is_available,
             'message': 'اسم المستخدم متاح' if is_available else 'اسم المستخدم مستخدم بالفعل'
         })
-        
+    
+    except json.JSONDecodeError:
+        logger.error("خطأ في تحليل JSON في فحص اسم المستخدم")
+        return JsonResponse({'available': False, 'message': 'بيانات غير صحيحة'}, status=400)
     except Exception as e:
-        logger.error(f"خطأ في فحص اسم المستخدم: {e}")
-        return JsonResponse({'available': False, 'message': 'حدث خطأ في الخادم'})
+        # إصلاح: استخدام logger.exception بدلاً من logger.error
+        logger.exception(f"خطأ غير متوقع في فحص اسم المستخدم: {e}")
+        return JsonResponse({'available': False, 'message': 'حدث خطأ في الخادم'}, status=500)
 
 
 @login_required
