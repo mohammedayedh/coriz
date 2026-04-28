@@ -52,19 +52,32 @@
                             <i class="fas fa-home me-1"></i>الرئيسية
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'osint_tools:simple_search' %}">
+                            <i class="fas fa-search me-1"></i>البحث السريع
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'osint_tools:sessions_list' %}">
+                            <i class="fas fa-history me-1"></i>الجلسات السابقة
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'osint_tools:reports_list' %}">
+                            <i class="fas fa-file-alt me-1"></i>التقارير
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'osint_tools:analytics' %}">
+                            <i class="fas fa-chart-line me-1"></i>التحليلات
+                        </a>
+                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="osintToolsDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-tools me-1"></i>أدوات OSINT
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="osintToolsDropdown">
-                            <li><a class="dropdown-item interactive-element"
-                                    href="{% url 'osint_tools:simple_search' %}">
-                                    <i class="fas fa-search me-2"></i>بحث مبسط (جديد!)
-                                </a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
                             <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:dashboard' %}">
                                     <i class="fas fa-tachometer-alt me-2"></i>لوحة التحكم
                                 </a></li>
@@ -75,22 +88,8 @@
                                     <i class="fas fa-tools me-2"></i>جميع المصادر والأدوات
                                 </a></li>
                             <li><a class="dropdown-item interactive-element"
-                                    href="{% url 'osint_tools:sessions_list' %}">
-                                    <i class="fas fa-history me-2"></i>الجلسات السابقة
-                                </a></li>
-                            <li><a class="dropdown-item interactive-element"
                                     href="{% url 'osint_tools:results_list' %}">
                                     <i class="fas fa-search me-2"></i>النتائج المكتشفة
-                                </a></li>
-                            <li><a class="dropdown-item interactive-element"
-                                    href="{% url 'osint_tools:reports_list' %}">
-                                    <i class="fas fa-file-alt me-2"></i>التقارير
-                                </a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:analytics' %}">
-                                    <i class="fas fa-chart-line me-2"></i>التحليلات
                                 </a></li>
                             <li>
                                 <hr class="dropdown-divider">
@@ -132,11 +131,6 @@
                                     <i class="fas fa-toolbox me-2"></i>مركز الأدوات
                                 </a></li>
                         </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'main:about' %}">
-                            <i class="fas fa-shield-alt me-1"></i>الأمن السيبراني
-                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link interactive-element" href="{% url 'main:contact' %}">
