@@ -102,35 +102,30 @@
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li>
-                                <h6 class="dropdown-header text-primary"><i class="fas fa-crosshairs me-1"></i> أدوات
-                                    الاستخبارات</h6>
+                            <li class="dropdown-submenu">
+                                <a class="dropdown-item dropdown-toggle" href="#" id="intelligenceToolsDropdown">
+                                    <i class="fas fa-crosshairs me-2"></i>أدوات الاستخبارات
+                                </a>
+                                <ul class="dropdown-menu dropdown-submenu-menu">
+                                    <li><a class="dropdown-item" href="{% url 'osint_tools:ip_lookup' %}">
+                                            <i class="fas fa-map-marker-alt me-2"></i>IP Lookup
+                                        </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'osint_tools:domain_recon' %}">
+                                            <i class="fas fa-globe me-2"></i>Domain Recon
+                                        </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'osint_tools:email_scanner' %}">
+                                            <i class="fas fa-envelope-open-text me-2"></i>Email Scanner
+                                        </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'osint_tools:virustotal_scan' %}">
+                                            <i class="fas fa-shield-virus me-2"></i>VirusTotal Scan
+                                        </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'osint_tools:threat_intel' %}">
+                                            <i class="fas fa-satellite me-2"></i>Threat Intelligence
+                                        </a></li>
+                                </ul>
                             </li>
-                            <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:ip_lookup' %}">
-                                    <i class="fas fa-map-marker-alt me-2"></i>IP Lookup
-                                </a></li>
-                            <li><a class="dropdown-item interactive-element"
-                                    href="{% url 'osint_tools:domain_recon' %}">
-                                    <i class="fas fa-globe me-2"></i>Domain Recon
-                                </a></li>
-                            <li><a class="dropdown-item interactive-element"
-                                    href="{% url 'osint_tools:email_scanner' %}">
-                                    <i class="fas fa-envelope-open-text me-2"></i>Email Scanner
-                                </a></li>
-                            <li><a class="dropdown-item interactive-element"
-                                    href="{% url 'osint_tools:virustotal_scan' %}">
-                                    <i class="fas fa-shield-virus me-2"></i>VirusTotal Scan
-                                </a></li>
-                            <li><a class="dropdown-item interactive-element"
-                                    href="{% url 'osint_tools:threat_intel' %}">
-                                    <i class="fas fa-satellite me-2"></i>Threat Intelligence
-                                </a></li>
                             <li>
                                 <hr class="dropdown-divider">
-                            </li>
-                            <li>
-                                <h6 class="dropdown-header text-warning"><i class="fas fa-toolbox me-1"></i> أدوات
-                                    التشفير</h6>
                             </li>
                             <li><a class="dropdown-item interactive-element"
                                     href="{% url 'osint_tools:utilities_dashboard' %}">
@@ -387,6 +382,77 @@
                 el.remove();
             });
             document.body.classList.remove('loading');
+        });
+    </script>
+
+    <!-- Dropdown Submenu Support -->
+    <style>
+        .dropdown-submenu {
+            position: relative;
+        }
+
+        .dropdown-submenu .dropdown-menu {
+            top: 0;
+            left: 100%;
+            margin-top: -1px;
+            margin-left: 0;
+        }
+
+        .dropdown-submenu:hover > .dropdown-menu {
+            display: block;
+        }
+
+        .dropdown-submenu > .dropdown-toggle::after {
+            transform: rotate(-90deg);
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            margin-top: -3px;
+        }
+
+        .dropdown-submenu-menu {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .dropdown-submenu-menu .dropdown-item {
+            color: var(--text-primary);
+            padding: 8px 20px;
+        }
+
+        .dropdown-submenu-menu .dropdown-item:hover {
+            background: var(--primary-color);
+            color: var(--bg-primary);
+        }
+    </style>
+
+    <script>
+        // Dropdown submenu support
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownSubmenus = document.querySelectorAll('.dropdown-submenu');
+            
+            dropdownSubmenus.forEach(function(submenu) {
+                const toggle = submenu.querySelector('.dropdown-toggle');
+                const menu = submenu.querySelector('.dropdown-menu');
+                
+                if (toggle && menu) {
+                    // Desktop: hover
+                    submenu.addEventListener('mouseenter', function() {
+                        menu.classList.add('show');
+                    });
+                    
+                    submenu.addEventListener('mouseleave', function() {
+                        menu.classList.remove('show');
+                    });
+                    
+                    // Mobile: click
+                    toggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        menu.classList.toggle('show');
+                    });
+                }
+            });
         });
     </script>
 
