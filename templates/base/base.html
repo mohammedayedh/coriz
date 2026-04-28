@@ -46,7 +46,7 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- User Menu - أقصى اليسار -->
+                <!-- User Menu - أقصى اليسار منفرد -->
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
@@ -61,8 +61,7 @@
                                 style="font-size:0.55rem; padding: 2px 5px;">{{ user.profile.clearance_level }}</span>
                             {% endif %}
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark border-0 shadow-lg clean-dropdown" aria-labelledby="userDropdown">
-                            <!-- Clean ID Header -->
+                        <ul class="dropdown-menu dropdown-menu-dark border-0 shadow-lg clean-dropdown" aria-labelledby="userDropdown">
                             <div class="clean-id-header">
                                 <div class="id-label-minimal">AUTHORIZED PERSONNEL</div>
                                 <div class="id-name-minimal">{{ user.first_name|default:user.username }}</div>
@@ -92,31 +91,11 @@
                     {% endif %}
                 </ul>
 
-                <!-- Main Navigation - الوسط/اليمين -->
-                <ul class="navbar-nav ms-auto me-auto">
+                <!-- Main Navigation - في الوسط بترتيب عكسي -->
+                <ul class="navbar-nav mx-auto">
                     <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'main:home' %}">
-                            <i class="fas fa-home me-1"></i>الرئيسية
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'osint_tools:simple_search' %}">
-                            <i class="fas fa-search me-1"></i>البحث السريع
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'osint_tools:sessions_list' %}">
-                            <i class="fas fa-history me-1"></i>الجلسات السابقة
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'osint_tools:reports_list' %}">
-                            <i class="fas fa-file-alt me-1"></i>التقارير
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'osint_tools:analytics' %}">
-                            <i class="fas fa-chart-line me-1"></i>التحليلات
+                        <a class="nav-link interactive-element" href="{% url 'main:contact' %}">
+                            <i class="fas fa-bug me-1"></i>التواصل
                         </a>
                     </li>
                     <li class="nav-item dropdown">
@@ -180,15 +159,35 @@
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'main:contact' %}">
-                            <i class="fas fa-bug me-1"></i>التواصل
+                        <a class="nav-link interactive-element" href="{% url 'osint_tools:analytics' %}">
+                            <i class="fas fa-chart-line me-1"></i>التحليلات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'osint_tools:reports_list' %}">
+                            <i class="fas fa-file-alt me-1"></i>التقارير
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'osint_tools:sessions_list' %}">
+                            <i class="fas fa-history me-1"></i>الجلسات السابقة
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'osint_tools:simple_search' %}">
+                            <i class="fas fa-search me-1"></i>البحث السريع
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'main:home' %}">
+                            <i class="fas fa-home me-1"></i>الرئيسية
                         </a>
                     </li>
                 </ul>
 
-                <!-- Login/Register Buttons - أقصى اليمين (للمستخدمين غير المسجلين) -->
+                <!-- Login/Register - للمستخدمين غير المسجلين -->
                 {% if not user.is_authenticated %}
-                <ul class="navbar-nav">
+                <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a class="nav-link interactive-element" href="{% url 'authentication:login' %}">
                             <i class="fas fa-key me-1"></i>تسجيل الدخول
