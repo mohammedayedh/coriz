@@ -145,15 +145,6 @@
                     </li>
                 </ul>
 
-                <!-- Search Form -->
-                <form class="d-flex me-3" method="GET" action="{% url 'main:search' %}">
-                    <input class="form-control me-2" type="search" name="q" placeholder="البحث في OSINT..."
-                        value="{{ request.GET.q }}">
-                    <button class="btn btn-outline-primary neon-pulse" type="submit">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </form>
-
                 <!-- User Menu -->
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
