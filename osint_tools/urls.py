@@ -74,6 +74,7 @@ urlpatterns = [
     path('ajax/session-results/<int:session_id>/', views.ajax_session_results, name='ajax_session_results'),  # جديد
     path('ajax/tool-progress/<int:session_id>/', views.get_tool_progress, name='get_tool_progress'),
     path('ajax/export-results/<int:session_id>/', views.export_results, name='export_results'),
+    path('ajax/export-results/all/', views.export_all_results, name='export_all_results'),  # جديد - تصدير جميع النتائج
     path('ajax/completed-sessions/', views.ajax_completed_sessions, name='ajax_completed_sessions'),  # جديد
     
     # API URLs

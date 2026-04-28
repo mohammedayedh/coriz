@@ -437,6 +437,89 @@ def export_results(request, session_id):
     return response
 
 
+@login_required
+def export_all_results(request):
+    """تصدير جميع النتائج (مع الفلترة الاختيارية)"""
+    format_type = request.GET.get('format', 'json')
+    
+    # الحصول على جميع النتائج للمستخدم الحالي
+    results = OSINTResult.objects.filter(session__user=request.user)
+    
+    # تطبيق الفلاتر إذا وجدت
+    tool_filter = request.GET.get('tool')
+    status_filter = request.GET.get('status')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    
+    if tool_filter:
+        results = results.filter(session__tool__slug=tool_filter)
+    if status_filter:
+        results = results.filter(session__status=status_filter)
+    if date_from:
+        results = results.filter(discovered_at__gte=date_from)
+    if date_to:
+        results = results.filter(discovered_at__lte=date_to)
+    
+    if format_type == 'json':
+        data = {
+            'export_info': {
+                'exported_at': timezone.now().isoformat(),
+                'total_results': results.count(),
+                'user': request.user.username,
+            },
+            'results': [
+                {
+                    'session_id': result.session.id,
+                    'tool': result.session.tool.name,
+                    'target': result.session.target,
+                    'title': result.title,
+                    'type': result.result_type,
+                    'description': result.description,
+                    'url': result.url,
+                    'confidence': result.confidence,
+                    'source': result.source,
+                    'discovered_at': result.discovered_at.isoformat(),
+                    'raw_data': result.raw_data,
+                }
+                for result in results
+            ]
+        }
+        
+        response = HttpResponse(
+            json.dumps(data, ensure_ascii=False, indent=2),
+            content_type='application/json; charset=utf-8'
+        )
+        response['Content-Disposition'] = f'attachment; filename="osint_all_results_{timezone.now().strftime("%Y%m%d_%H%M%S")}.json"'
+        
+    elif format_type == 'csv':
+        import csv
+        
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = f'attachment; filename="osint_all_results_{timezone.now().strftime("%Y%m%d_%H%M%S")}.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['رقم الجلسة', 'الأداة', 'الهدف', 'العنوان', 'النوع', 'الوصف', 'الرابط', 'الثقة', 'المصدر', 'تاريخ الاكتشاف'])
+        
+        for result in results:
+            writer.writerow([
+                result.session.id,
+                result.session.tool.name,
+                result.session.target,
+                result.title,
+                result.result_type,
+                result.description,
+                result.url,
+                result.confidence,
+                result.source,
+                result.discovered_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+    
+    else:
+        raise Http404("صيغة غير مدعومة")
+    
+    return response
+
+
 # API Endpoints
 @require_http_methods(["GET"])
 def api_stats(request):
