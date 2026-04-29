@@ -46,56 +46,32 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- User Menu - أقصى اليسار منفرد -->
-                <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
-                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <div class="user-avatar-container me-2">
-                                <i class="fas fa-user-secret"></i>
-                            </div>
-                            <span class="user-nav-name me-1">{{ user.first_name|default:user.username }}</span>
-                            {% if user.profile.clearance_level %}
-                            <span class="badge clr-badge-{{ user.profile.clearance_level|lower }} ms-1"
-                                style="font-size:0.55rem; padding: 2px 5px;">{{ user.profile.clearance_level }}</span>
-                            {% endif %}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark border-0 shadow-lg clean-dropdown" aria-labelledby="userDropdown">
-                            <div class="clean-id-header">
-                                <div class="id-label-minimal">AUTHORIZED PERSONNEL</div>
-                                <div class="id-name-minimal">{{ user.first_name|default:user.username }}</div>
-                                <div class="d-flex align-items-center gap-2 mt-2">
-                                    <span class="badge clr-badge-{{ user.profile.clearance_level|lower }} badge-minimal">LEVEL {{ user.profile.clearance_level }}</span>
-                                    <span class="id-status-minimal"><i class="fas fa-check-circle me-1"></i>VERIFIED</span>
-                                </div>
-                            </div>
-                            <div class="dropdown-divider-minimal"></div>
-                            <li><a class="dropdown-item clean-item" href="{% url 'dashboard:index' %}">
-                                    <i class="fas fa-terminal me-2"></i>لوحة التحكم
-                                </a></li>
-                            <li><a class="dropdown-item clean-item" href="{% url 'osint_tools:dashboard' %}">
-                                    <i class="fas fa-tools me-2"></i>أدوات OSINT
-                                </a></li>
-                            <li><a class="dropdown-item clean-item" href="{% url 'authentication:profile' %}">
-                                    <i class="fas fa-user-secret me-2"></i>الملف الشخصي
-                                </a></li>
-                            <li>
-                                <div class="dropdown-divider-minimal my-1"></div>
-                            </li>
-                            <li><a class="dropdown-item clean-item text-danger" href="{% url 'authentication:logout' %}">
-                                    <i class="fas fa-power-off me-2"></i>تسجيل الخروج
-                                </a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
-                </ul>
 
                 <!-- Main Navigation - في الوسط بترتيب عكسي -->
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'main:contact' %}">
-                            <i class="fas fa-bug me-1"></i>التواصل
+                        <a class="nav-link interactive-element" href="{% url 'main:home' %}">
+                            <i class="fas fa-home me-1"></i>الرئيسية
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'osint_tools:simple_search' %}">
+                            <i class="fas fa-search me-1"></i>البحث السريع
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'osint_tools:sessions_list' %}">
+                            <i class="fas fa-history me-1"></i>الجلسات السابقة
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'osint_tools:reports_list' %}">
+                            <i class="fas fa-file-alt me-1"></i>التقارير
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link interactive-element" href="{% url 'osint_tools:analytics' %}">
+                            <i class="fas fa-chart-line me-1"></i>التحليلات
                         </a>
                     </li>
                     <li class="nav-item dropdown">
@@ -159,34 +135,57 @@
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'osint_tools:analytics' %}">
-                            <i class="fas fa-chart-line me-1"></i>التحليلات
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'osint_tools:reports_list' %}">
-                            <i class="fas fa-file-alt me-1"></i>التقارير
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'osint_tools:sessions_list' %}">
-                            <i class="fas fa-history me-1"></i>الجلسات السابقة
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'osint_tools:simple_search' %}">
-                            <i class="fas fa-search me-1"></i>البحث السريع
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'main:home' %}">
-                            <i class="fas fa-home me-1"></i>الرئيسية
+                        <a class="nav-link interactive-element" href="{% url 'main:contact' %}">
+                            <i class="fas fa-bug me-1"></i>التواصل
                         </a>
                     </li>
                 </ul>
 
+                <!-- User Profile - منفرد في أقصى اليسار -->
+                {% if user.is_authenticated %}
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
+                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar-container me-2">
+                                <i class="fas fa-user-secret"></i>
+                            </div>
+                            <span class="user-nav-name me-1">{{ user.first_name|default:user.username }}</span>
+                            {% if user.profile.clearance_level %}
+                            <span class="badge clr-badge-{{ user.profile.clearance_level|lower }} ms-1"
+                                style="font-size:0.55rem; padding: 2px 5px;">{{ user.profile.clearance_level }}</span>
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark border-0 shadow-lg clean-dropdown" aria-labelledby="userDropdown">
+                            <div class="clean-id-header">
+                                <div class="id-label-minimal">AUTHORIZED PERSONNEL</div>
+                                <div class="id-name-minimal">{{ user.first_name|default:user.username }}</div>
+                                <div class="d-flex align-items-center gap-2 mt-2">
+                                    <span class="badge clr-badge-{{ user.profile.clearance_level|lower }} badge-minimal">LEVEL {{ user.profile.clearance_level }}</span>
+                                    <span class="id-status-minimal"><i class="fas fa-check-circle me-1"></i>VERIFIED</span>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider-minimal"></div>
+                            <li><a class="dropdown-item clean-item" href="{% url 'dashboard:index' %}">
+                                    <i class="fas fa-terminal me-2"></i>لوحة التحكم
+                                </a></li>
+                            <li><a class="dropdown-item clean-item" href="{% url 'osint_tools:dashboard' %}">
+                                    <i class="fas fa-tools me-2"></i>أدوات OSINT
+                                </a></li>
+                            <li><a class="dropdown-item clean-item" href="{% url 'authentication:profile' %}">
+                                    <i class="fas fa-user-secret me-2"></i>الملف الشخصي
+                                </a></li>
+                            <li>
+                                <div class="dropdown-divider-minimal my-1"></div>
+                            </li>
+                            <li><a class="dropdown-item clean-item text-danger" href="{% url 'authentication:logout' %}">
+                                    <i class="fas fa-power-off me-2"></i>تسجيل الخروج
+                                </a></li>
+                        </ul>
+                    </li>
+                </ul>
+                {% else %}
                 <!-- Login/Register - للمستخدمين غير المسجلين -->
-                {% if not user.is_authenticated %}
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a class="nav-link interactive-element" href="{% url 'authentication:login' %}">

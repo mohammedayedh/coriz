@@ -1,731 +1,571 @@
 {% extends 'base/base.html' %}
 {% load static %}
 
-{% block title %}بحث OSINT المبسط - كوريزا{% endblock %}
+{% block title %}مركز العمليات الاستخباراتية - كوريزا{% endblock %}
 
 {% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* واجهة بحث مبسطة وجذابة - ثيم داكن */
-.simple-search-container {
-    min-height: 100vh;
-    background: #0f1419;
-    padding: 80px 0 40px;
+:root {
+    --cyber-primary: #00f2ff;
+    --cyber-secondary: #7000ff;
+    --cyber-dark: #050a14;
+    --glass-bg: rgba(10, 20, 40, 0.7);
+    --glass-border: rgba(0, 242, 255, 0.2);
+    --neon-glow: 0 0 15px rgba(0, 242, 255, 0.4);
 }
 
-.search-card {
-    background: linear-gradient(135deg, #1a1f2e 0%, #161b28 100%);
-    border-radius: 20px;
-    border: 2px solid #2d3748;
-    padding: 40px;
-    max-width: 900px;
+body {
+    background: var(--cyber-dark);
+    font-family: 'Outfit', sans-serif;
+    color: #e2e8f0;
+    overflow-x: hidden;
+}
+
+/* الخلفية المتحركة */
+.cyber-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: radial-gradient(circle at 50% 50%, #0a192f 0%, #050a14 100%);
+}
+
+.cyber-grid {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background-image: 
+        linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    transform: perspective(500px) rotateX(60deg);
+    animation: grid-move 20s linear infinite;
+}
+
+@keyframes grid-move {
+    0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+    100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+}
+
+/* الهيكل الرئيسي */
+.command-center {
+    padding-top: 100px;
+    padding-bottom: 50px;
+}
+
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.glass-panel:hover {
+    border-color: var(--cyber-primary);
+    box-shadow: var(--neon-glow);
+}
+
+/* قسم البحث المركزي */
+.search-core {
+    padding: 60px 40px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.core-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 15px;
+    background: linear-gradient(90deg, #fff, var(--cyber-primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: var(--neon-glow);
+}
+
+.core-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--cyber-primary);
+    margin-bottom: 40px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--cyber-primary);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--cyber-primary);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* صندوق البحث المطور */
+.search-mega-box {
+    position: relative;
+    max-width: 800px;
     margin: 0 auto;
 }
 
-.search-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 10px;
-    text-align: center;
-}
-
-.search-subtitle {
-    color: #cbd5e0;
-    text-align: center;
-    margin-bottom: 40px;
-    font-size: 1.1rem;
-}
-
-.search-input-group {
-    position: relative;
-    margin-bottom: 30px;
-}
-
-.search-input {
+.search-field {
     width: 100%;
-    padding: 20px 60px 20px 20px;
-    font-size: 1.2rem;
-    border: 2px solid #2d3748;
-    border-radius: 15px;
+    height: 70px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 0 120px 0 30px;
+    font-size: 1.3rem;
+    color: #fff;
     transition: all 0.3s;
-    background: #1e2433;
-    color: #e2e8f0;
+    font-family: 'Outfit', sans-serif;
 }
 
-.search-input:focus {
+.search-field:focus {
     outline: none;
-    border-color: #667eea;
-    background: #252b3b;
+    border-color: var(--cyber-primary);
+    box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
+    background: rgba(0, 0, 0, 0.6);
 }
 
-.search-input::placeholder {
-    color: #718096;
-}
-
-.search-btn {
+.search-trigger {
     position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    padding: 12px 25px;
-    border-radius: 10px;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.search-btn:hover {
-    transform: translateY(-50%) scale(1.05);
-}
-
-.search-type-selector {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-    margin-bottom: 30px;
-}
-
-.type-option {
-    background: rgba(0,0,0,0.3);
-    border: 2px solid #2d3748;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.type-option:hover {
-    border-color: #667eea;
-    background: rgba(102, 126, 234, 0.1);
-    transform: translateY(-2px);
-}
-
-.type-option.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
-    color: white;
-}
-
-.type-option i {
-    font-size: 2rem;
-    margin-bottom: 10px;
-    display: block;
-    color: inherit;
-}
-
-.type-option span {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: inherit;
-}
-
-.quick-examples {
-    background: rgba(0,0,0,0.3);
-    border-radius: 12px;
-    padding: 20px;
-    margin-top: 30px;
-    border: 1px solid #2d3748;
-}
-
-.quick-examples h6 {
-    color: #e2e8f0;
-    font-weight: 600;
-    margin-bottom: 15px;
-}
-
-.example-tag {
-    display: inline-block;
-    background: #1e2433;
-    border: 2px solid #2d3748;
-    padding: 8px 15px;
-    border-radius: 20px;
-    margin: 5px;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 0.9rem;
-    color: #cbd5e0;
-}
-
-.example-tag:hover {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-color: #667eea;
-}
-
-.results-container {
-    margin-top: 40px;
-    display: none;
-}
-
-.result-card {
-    background: linear-gradient(135deg, rgba(26, 31, 46, 0.8) 0%, rgba(22, 27, 40, 0.9) 100%);
-    border: 2px solid #2d3748;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 15px;
-    transition: all 0.3s;
-}
-
-.result-card:hover {
-    border-color: #667eea;
-    transform: translateY(-2px);
-}
-
-.result-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: 10px;
-}
-
-.result-title {
-    font-weight: 600;
-    color: #e2e8f0;
-    font-size: 1.1rem;
-}
-
-.result-source {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-}
-
-.result-description {
-    color: #cbd5e0;
-    margin-bottom: 10px;
-}
-
-.result-meta {
-    display: flex;
-    gap: 15px;
-    font-size: 0.85rem;
-    color: #a0aec0;
-}
-
-.result-meta a {
-    color: #667eea !important;
-}
-
-.loading-spinner {
-    text-align: center;
-    padding: 40px;
-    display: none;
-}
-
-.spinner {
-    border: 4px solid #2d3748;
-    border-top: 4px solid #667eea;
-    border-radius: 50%;
-    width: 50px;
+    right: 10px;
+    top: 10px;
     height: 50px;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.stats-bar {
+    padding: 0 30px;
+    background: linear-gradient(45deg, var(--cyber-secondary), var(--cyber-primary));
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
     display: flex;
-    justify-content: space-around;
-    background: rgba(0,0,0,0.3);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 30px;
-    border: 1px solid #2d3748;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s;
 }
 
-.stat-item {
+.search-trigger:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px var(--cyber-secondary);
+}
+
+/* أنواع البحث بشكل كروت نيون */
+.search-modes {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+
+.mode-chip {
+    padding: 12px 25px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.mode-chip:hover, .mode-chip.active {
+    background: rgba(0, 242, 255, 0.1);
+    border-color: var(--cyber-primary);
+    color: var(--cyber-primary);
+    transform: translateY(-3px);
+}
+
+/* الجوانب */
+.stats-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.mini-stat-card {
+    padding: 20px;
     text-align: center;
 }
 
-.stat-number {
-    font-size: 2rem;
+.mini-stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.8rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--cyber-primary);
 }
 
-.stat-label {
-    color: #cbd5e0;
-    font-size: 0.9rem;
+.mini-stat-lbl {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.tools-running {
-    background: rgba(0,0,0,0.3);
-    border-radius: 12px;
-    padding: 15px;
-    margin-top: 20px;
-    display: none;
-    border: 1px solid #2d3748;
+/* قسم النتائج المطور */
+.results-orchestrator {
+    margin-top: 50px;
 }
 
-.tool-progress {
-    background: linear-gradient(135deg, rgba(26, 31, 46, 0.8) 0%, rgba(22, 27, 40, 0.9) 100%);
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 10px;
-    border: 1px solid #2d3748;
-}
-
-.tool-name {
-    font-weight: 600;
-    color: #e2e8f0;
-    margin-bottom: 8px;
-}
-
-.progress-bar-container {
-    background: #1e2433;
-    height: 8px;
-    border-radius: 4px;
+.intel-card {
+    background: rgba(10, 20, 40, 0.5);
+    border-left: 4px solid var(--cyber-primary);
+    margin-bottom: 20px;
+    padding: 25px;
+    position: relative;
     overflow: hidden;
-    border: 1px solid #2d3748;
 }
 
-.progress-bar-fill {
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+.intel-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
     height: 100%;
-    transition: width 0.3s;
+    background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.03));
 }
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+
+.intel-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: rgba(0, 242, 255, 0.1);
+    color: var(--cyber-primary);
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+/* Feed الأيسر */
+.live-feed {
+    max-height: 600px;
+    overflow-y: auto;
+    padding: 15px;
+}
+
+.feed-item {
+    font-size: 0.85rem;
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    gap: 12px;
+}
+
+.feed-time { color: var(--cyber-primary); font-family: 'JetBrains Mono', monospace; }
+
+/* شريط التقدم النيوني */
+.cyber-progress {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.cyber-progress-fill {
+    height: 100%;
+    background: var(--cyber-primary);
+    box-shadow: var(--neon-glow);
+    width: 0%;
+    transition: width 0.5s ease;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .core-title { font-size: 2rem; }
+    .side-panel { margin-top: 20px; }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="simple-search-container">
-    <div class="container">
-        <div class="search-card">
-            <!-- العنوان -->
-            <h1 class="search-title">
-                <i class="fas fa-search"></i>
-                ابحث عن أي شيء
-            </h1>
-            <p class="search-subtitle">
-                أدخل البريد الإلكتروني، اسم المستخدم، رقم الهاتف، أو أي معلومة تريد البحث عنها
-            </p>
+<div class="cyber-bg"><div class="cyber-grid"></div></div>
 
-            <!-- إحصائيات سريعة -->
-            <div class="stats-bar">
-                <div class="stat-item">
-                    <div class="stat-number">{{ total_tools }}</div>
-                    <div class="stat-label">أداة متاحة</div>
+<div class="command-center container-fluid px-lg-5">
+    <div class="row">
+        <!-- الجانب الأيمن: إحصائيات سريعة -->
+        <div class="col-lg-2 stats-column d-none d-lg-flex">
+            <div class="glass-panel mini-stat-card">
+                <div class="mini-stat-val">{{ total_tools }}</div>
+                <div class="mini-stat-lbl">الأنظمة النشطة</div>
+            </div>
+            <div class="glass-panel mini-stat-card">
+                <div class="mini-stat-val">{{ total_sources }}</div>
+                <div class="mini-stat-lbl">قواعد البيانات</div>
+            </div>
+            <div class="glass-panel mini-stat-card">
+                <div class="mini-stat-val">{{ total_searches }}</div>
+                <div class="mini-stat-lbl">عمليات ناجحة</div>
+            </div>
+        </div>
+
+        <!-- المنتصف: منطقة العمليات -->
+        <div class="col-lg-7">
+            <div class="glass-panel search-core">
+                <div class="core-status">
+                    <span class="status-dot"></span>
+                    CORIZA INTELLIGENCE HUB :: SYSTEM ONLINE
                 </div>
-                <div class="stat-item">
-                    <div class="stat-number">{{ total_sources }}</div>
-                    <div class="stat-label">مصدر بيانات</div>
+                
+                <h1 class="core-title">SCAN THE WORLD</h1>
+                
+                <!-- أوضاع البحث -->
+                <div class="search-modes" id="modeSelector">
+                    <div class="mode-chip active" data-mode="auto"><i class="fas fa-brain"></i> Auto-Detect</div>
+                    <div class="mode-chip" data-mode="email"><i class="fas fa-envelope"></i> Email</div>
+                    <div class="mode-chip" data-mode="username"><i class="fas fa-user-tag"></i> Username</div>
+                    <div class="mode-chip" data-mode="phone"><i class="fas fa-mobile-alt"></i> Phone</div>
+                    <div class="mode-chip" data-mode="domain"><i class="fas fa-shield-alt"></i> Domain</div>
+                    <div class="mode-chip" data-mode="ip"><i class="fas fa-network-wired"></i> IP Address</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-number">{{ total_searches }}</div>
-                    <div class="stat-label">عملية بحث</div>
+
+                <!-- صندوق البحث -->
+                <div class="search-mega-box">
+                    <input type="text" id="masterSearch" class="search-field" 
+                           placeholder="Enter target identifier..." autocomplete="off">
+                    <button id="executeScan" class="search-trigger">
+                        <i class="fas fa-satellite-dish"></i>
+                        EXECUTE SCAN
+                    </button>
+                </div>
+
+                <!-- أمثلة ذكية -->
+                <div class="mt-4 opacity-50 small" style="font-family: 'JetBrains Mono', monospace;">
+                    HINT: USE <span class="text-info">@email</span> | <span class="text-info">+phone</span> | <span class="text-info">domain.com</span>
                 </div>
             </div>
 
-            <!-- نوع البحث -->
-            <div class="search-type-selector">
-                <div class="type-option active" data-type="auto">
-                    <i class="fas fa-magic"></i>
-                    <span>تلقائي</span>
-                </div>
-                <div class="type-option" data-type="email">
-                    <i class="fas fa-envelope"></i>
-                    <span>بريد إلكتروني</span>
-                </div>
-                <div class="type-option" data-type="username">
-                    <i class="fas fa-user"></i>
-                    <span>اسم مستخدم</span>
-                </div>
-                <div class="type-option" data-type="phone">
-                    <i class="fas fa-phone"></i>
-                    <span>رقم هاتف</span>
-                </div>
-                <div class="type-option" data-type="domain">
-                    <i class="fas fa-globe"></i>
-                    <span>موقع/نطاق</span>
-                </div>
-                <div class="type-option" data-type="ip">
-                    <i class="fas fa-network-wired"></i>
-                    <span>عنوان IP</span>
-                </div>
+            <!-- جاري التحميل / التقدم -->
+            <div id="activeMonitors" style="display: none;">
+                <h6 class="text-uppercase mb-4" style="letter-spacing: 2px;"><i class="fas fa-sync fa-spin me-2"></i> Active Intelligence Gathering</h6>
+                <div id="monitorGrid" class="row g-3"></div>
             </div>
 
-            <!-- حقل البحث -->
-            <div class="search-input-group">
-                <input 
-                    type="text" 
-                    class="search-input" 
-                    id="searchInput"
-                    placeholder="مثال: user@example.com أو john_doe أو +967123456789"
-                    autocomplete="off"
-                >
-                <button class="search-btn" id="searchBtn">
-                    <i class="fas fa-search me-2"></i>
-                    ابحث الآن
-                </button>
+            <!-- حاوية النتائج المكتشفة -->
+            <div id="resultsHub" class="results-orchestrator" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="text-uppercase m-0" style="letter-spacing: 2px;">
+                        <i class="fas fa-database me-2"></i> Discovered Data Points
+                    </h4>
+                    <span class="badge bg-primary rounded-pill px-3" id="mainCount">0</span>
+                </div>
+                <div id="intelResults"></div>
             </div>
+        </div>
 
-            <!-- أمثلة سريعة -->
-            <div class="quick-examples">
-                <h6><i class="fas fa-lightbulb me-2"></i>أمثلة للبحث:</h6>
-                <span class="example-tag" data-example="test@example.com">test@example.com</span>
-                <span class="example-tag" data-example="john_doe">john_doe</span>
-                <span class="example-tag" data-example="+1234567890">+1234567890</span>
-                <span class="example-tag" data-example="example.com">example.com</span>
-                <span class="example-tag" data-example="192.168.1.1">192.168.1.1</span>
-            </div>
-
-            <!-- الأدوات قيد التشغيل -->
-            <div class="tools-running" id="toolsRunning">
-                <h6 style="color: #e2e8f0; margin-bottom: 15px;">
-                    <i class="fas fa-cog fa-spin me-2"></i>
-                    جاري البحث في المصادر...
-                </h6>
-                <div id="toolsProgress"></div>
-            </div>
-
-            <!-- مؤشر التحميل -->
-            <div class="loading-spinner" id="loadingSpinner">
-                <div class="spinner"></div>
-                <p style="color: #cbd5e0;">جاري البحث في جميع المصادر المتاحة...</p>
-            </div>
-
-            <!-- النتائج -->
-            <div class="results-container" id="resultsContainer">
-                <h5 style="color: #e2e8f0; margin-bottom: 20px;">
-                    <i class="fas fa-check-circle me-2" style="color: #10b981;"></i>
-                    النتائج المكتشفة (<span id="resultsCount">0</span>)
-                </h5>
-                <div id="resultsContent"></div>
+        <!-- الجانب الأيسر: Live Intelligence Feed -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="glass-panel" style="height: 100%;">
+                <div class="p-4 border-bottom border-secondary">
+                    <h6 class="text-uppercase m-0"><i class="fas fa-stream me-2"></i> Global Threat Feed</h6>
+                </div>
+                <div class="live-feed" id="liveFeed">
+                    <!-- سيتم تعبئته برمجياً -->
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal تفاصيل النتيجة -->
+<div class="modal fade" id="resultModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content glass-panel" style="background: rgba(5, 10, 20, 0.95);">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="modalTitle">Intelligence Report</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+</div>
+
 <script>
-// دالة للحصول على CSRF Token
 function getCsrfToken() {
-    const name = 'csrftoken';
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
+    return document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-    const typeOptions = document.querySelectorAll('.type-option');
-    const exampleTags = document.querySelectorAll('.example-tag');
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    const resultsContainer = document.getElementById('resultsContainer');
-    const resultsContent = document.getElementById('resultsContent');
-    const resultsCount = document.getElementById('resultsCount');
-    const toolsRunning = document.getElementById('toolsRunning');
-    const toolsProgress = document.getElementById('toolsProgress');
+    const masterSearch = document.getElementById('masterSearch');
+    const executeBtn = document.getElementById('executeScan');
+    const monitorGrid = document.getElementById('monitorGrid');
+    const intelResults = document.getElementById('intelResults');
+    const activeMonitors = document.getElementById('activeMonitors');
+    const resultsHub = document.getElementById('resultsHub');
+    const liveFeed = document.getElementById('liveFeed');
     
-    let selectedType = 'auto';
-    let activeSearches = [];
+    let currentMode = 'auto';
+    const displayedIds = new Set();
 
-    // اختيار نوع البحث
-    typeOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            typeOptions.forEach(opt => opt.classList.remove('active'));
+    // تبديل الأنماط
+    document.querySelectorAll('.mode-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+            document.querySelectorAll('.mode-chip').forEach(c => c.classList.remove('active'));
             this.classList.add('active');
-            selectedType = this.dataset.type;
+            currentMode = this.dataset.mode;
         });
     });
 
-    // الأمثلة السريعة
-    exampleTags.forEach(tag => {
-        tag.addEventListener('click', function() {
-            searchInput.value = this.dataset.example;
-            searchInput.focus();
-        });
-    });
+    // تنفيذ البحث
+    executeBtn.addEventListener('click', startScan);
+    masterSearch.addEventListener('keypress', e => e.key === 'Enter' && startScan());
 
-    // البحث
-    searchBtn.addEventListener('click', performSearch);
-    searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            performSearch();
-        }
-    });
+    function startScan() {
+        const query = masterSearch.value.trim();
+        if (!query) return alert('Target missing. Enter a query.');
 
-    function performSearch() {
-        const query = searchInput.value.trim();
-        
-        if (!query) {
-            alert('الرجاء إدخال شيء للبحث عنه');
-            return;
-        }
+        // إعادة ضبط الواجهة
+        intelResults.innerHTML = '';
+        monitorGrid.innerHTML = '';
+        displayedIds.clear();
+        resultsHub.style.display = 'none';
+        activeMonitors.style.display = 'block';
 
-        // إخفاء النتائج السابقة
-        resultsContainer.style.display = 'none';
-        resultsContent.innerHTML = '';
-        
-        // إظهار التحميل
-        loadingSpinner.style.display = 'block';
-        toolsRunning.style.display = 'block';
-        
-        // تحديد الأدوات المناسبة
-        const tools = determineTools(query, selectedType);
-        
-        // تشغيل الأدوات
-        runTools(query, tools);
+        const tools = determineTools(query, currentMode);
+        tools.forEach(tool => launchTool(tool, query));
     }
 
-    function determineTools(query, type) {
-        // تحديد تلقائي لنوع البحث
-        if (type === 'auto') {
-            if (query.includes('@')) {
-                type = 'email';
-            } else if (query.match(/^\+?\d+$/)) {
-                type = 'phone';
-            } else if (query.match(/^(\d{1,3}\.){3}\d{1,3}$/)) {
-                type = 'ip';
-            } else if (query.includes('.')) {
-                type = 'domain';
-            } else {
-                type = 'username';
-            }
+    function determineTools(query, mode) {
+        if (mode === 'auto') {
+            if (query.includes('@')) mode = 'email';
+            else if (query.match(/^\+?\d+$/)) mode = 'phone';
+            else if (query.includes('.')) mode = 'domain';
+            else mode = 'username';
         }
-
-        // قائمة الأدوات حسب النوع - محدثة بالأدوات الجديدة
-        const toolsMap = {
-            'email': ['email-osint', 'breach-detector', 'infoga', 'hudsonrock-pro', 'holehe-pro'],
+        const map = {
+            'email': ['email-osint', 'breach-detector', 'hudsonrock-pro', 'holehe-pro'],
             'username': ['sherlock', 'github-osint', 'social-investigator'],
             'phone': ['phone-analyzer'],
-            'domain': ['wayback-machine', 'cert-transparency', 'subdomain-enum', 'google-dorks', 'cvestalker-pro', 'mxtoolbox-pro', 'viewdns-pro'],
-            'ip': ['ip-geolocation'],
+            'domain': ['wayback-machine', 'cert-transparency', 'cvestalker-pro', 'mxtoolbox-pro'],
+            'ip': ['ip-geolocation']
         };
-
-        return toolsMap[type] || [];
+        return map[mode] || [];
     }
 
-    function runTools(query, tools) {
-        activeSearches = [];
-        toolsProgress.innerHTML = '';
-        
-        tools.forEach(toolSlug => {
-            // إنشاء شريط تقدم للأداة
-            const progressHtml = `
-                <div class="tool-progress" id="progress-${toolSlug}">
-                    <div class="tool-name">
-                        <i class="fas fa-cog fa-spin me-2"></i>
-                        ${getToolName(toolSlug)}
+    function launchTool(slug, target) {
+        // إضافة مراقب (Monitor) للأداة
+        const monitorHtml = `
+            <div class="col-md-6" id="mon-${slug}">
+                <div class="glass-panel p-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-uppercase">${slug.replace('-', ' ')}</span>
+                        <span class="status-text text-info">INITIATING...</span>
                     </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill" style="width: 0%"></div>
-                    </div>
+                    <div class="cyber-progress"><div class="cyber-progress-fill" id="fill-${slug}"></div></div>
                 </div>
-            `;
-            toolsProgress.insertAdjacentHTML('beforeend', progressHtml);
-            
-            // تشغيل الأداة
-            fetch(`/osint/tools/${toolSlug}/run/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCsrfToken()
-                },
-                body: JSON.stringify({
-                    target: query,
-                    options: {
-                        save_results: true
-                    }
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    activeSearches.push({
-                        tool: toolSlug,
-                        sessionId: data.session_id
-                    });
-                    
-                    // مراقبة التقدم
-                    monitorProgress(toolSlug, data.session_id);
-                } else {
-                    updateToolProgress(toolSlug, 100, 'failed');
-                }
-            })
-            .catch(error => {
-                console.error(`Error running ${toolSlug}:`, error);
-                updateToolProgress(toolSlug, 100, 'failed');
-            });
-        });
-    }
+            </div>
+        `;
+        monitorGrid.insertAdjacentHTML('beforeend', monitorHtml);
 
-    function monitorProgress(toolSlug, sessionId) {
-        let lastResultCount = 0;
-        const interval = setInterval(() => {
-            fetch(`/osint/ajax/session-status/${sessionId}/`)
-            .then(response => response.json())
-            .then(data => {
-                updateToolProgress(toolSlug, data.progress, data.status);
-                
-                // جلب النتائج دورياً حتى لو لم تكتمل الأداة
-                if (data.results_count > lastResultCount) {
-                    fetchResults(sessionId);
-                    lastResultCount = data.results_count;
-                }
-
-                if (data.status === 'completed' || data.status === 'failed') {
-                    clearInterval(interval);
-                    fetchResults(sessionId); // جلب نهائي للنتائج
-                }
-                
-                // التحقق من اكتمال جميع الأدوات
-                checkAllCompleted();
-            })
-            .catch(error => {
-                console.error('Error monitoring progress:', error);
-                clearInterval(interval);
-            });
-        }, 3000);
-    }
-
-    function updateToolProgress(toolSlug, progress, status) {
-        const progressEl = document.querySelector(`#progress-${toolSlug} .progress-bar-fill`);
-        const toolNameEl = document.querySelector(`#progress-${toolSlug} .tool-name`);
-        
-        if (progressEl) {
-            progressEl.style.width = progress + '%';
-        }
-        
-        if (toolNameEl && status === 'completed') {
-            toolNameEl.innerHTML = `
-                <i class="fas fa-check-circle me-2" style="color: #48bb78;"></i>
-                ${getToolName(toolSlug)}
-            `;
-        } else if (toolNameEl && status === 'failed') {
-            toolNameEl.innerHTML = `
-                <i class="fas fa-times-circle me-2" style="color: #f56565;"></i>
-                ${getToolName(toolSlug)}
-            `;
-        }
-    }
-
-    function fetchResults(sessionId) {
-        fetch(`/osint/ajax/session-results/${sessionId}/`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.results && data.results.length > 0) {
-                displayResults(data.results);
-            }
+        fetch(`/osint/tools/${slug}/run/`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken()},
+            body: JSON.stringify({target, options: {save_results: true}})
         })
-        .catch(error => {
-            console.error('Error fetching results:', error);
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) monitorSession(slug, data.session_id);
+            else updateMonitor(slug, 100, 'FAILED', 'text-danger');
+        })
+        .catch(() => updateMonitor(slug, 100, 'ERROR', 'text-danger'));
+    }
+
+    function monitorSession(slug, sid) {
+        const timer = setInterval(() => {
+            fetch(`/osint/ajax/session-status/${sid}/`)
+            .then(r => r.json())
+            .then(data => {
+                updateMonitor(slug, data.progress, data.status.toUpperCase());
+                if (data.results_count > 0) fetchResults(sid);
+                if (data.status === 'completed' || data.status === 'failed') clearInterval(timer);
+            });
+        }, 2500);
+    }
+
+    function updateMonitor(slug, prog, status, colorClass = 'text-info') {
+        const fill = document.getElementById(`fill-${slug}`);
+        const text = document.querySelector(`#mon-${slug} .status-text`);
+        if (fill) fill.style.width = prog + '%';
+        if (text) {
+            text.textContent = status;
+            text.className = `status-text ${colorClass}`;
+        }
+    }
+
+    function fetchResults(sid) {
+        fetch(`/osint/ajax/session-results/${sid}/`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.results) data.results.forEach(renderResult);
         });
     }
 
-    const displayedResultIds = new Set();
+    function renderResult(res) {
+        if (displayedIds.has(res.id)) return;
+        displayedIds.add(res.id);
+        resultsHub.style.display = 'block';
+        document.getElementById('mainCount').textContent = displayedIds.size;
 
-    function displayResults(results) {
-        let newResultsFound = false;
-        results.forEach(result => {
-            // منع التكرار باستخدام المعرف الفريد
-            if (displayedResultIds.has(result.id)) return;
-            displayedResultIds.add(result.id);
-            newResultsFound = true;
-
-            const resultHtml = `
-                <div class="result-card" style="animation: fadeIn 0.5s ease-out;">
-                    <div class="result-header">
-                        <div class="result-title">
-                            <i class="fas fa-link me-2"></i>
-                            ${result.title}
-                        </div>
-                        <div class="result-source">${result.source}</div>
-                    </div>
-                    <div class="result-description">${result.description || 'لا يوجد وصف'}</div>
-                    <div class="result-meta">
-                        <span><i class="fas fa-tag me-1"></i>${result.result_type}</span>
-                        <span><i class="fas fa-shield-alt me-1"></i>${result.confidence}</span>
-                        ${result.url ? `<a href="${result.url}" target="_blank"><i class="fas fa-external-link-alt me-1"></i>فتح الرابط</a>` : ''}
-                    </div>
+        const html = `
+            <div class="glass-panel intel-card animate__animated animate__fadeInUp">
+                <div class="intel-tag">${res.source}</div>
+                <h5 class="mb-2">${res.title}</h5>
+                <p class="text-muted small mb-3">${res.description || 'No detailed data available.'}</p>
+                <div class="d-flex gap-3 small align-items-center">
+                    <span class="text-info"><i class="fas fa-fingerprint me-1"></i> ${res.result_type}</span>
+                    <span class="text-warning"><i class="fas fa-shield-alt me-1"></i> ${res.confidence}</span>
+                    ${res.url ? `<a href="${res.url}" target="_blank" class="text-white text-decoration-none ms-auto"><i class="fas fa-external-link-alt"></i></a>` : ''}
                 </div>
-            `;
-            resultsContent.insertAdjacentHTML('afterbegin', resultHtml); // إضافة النتائج الأحدث في الأعلى
-        });
-        
-        if (newResultsFound) {
-            // تحديث العداد
-            resultsCount.textContent = displayedResultIds.size;
-            // إظهار الحاوية
-            resultsContainer.style.display = 'block';
-        }
+            </div>
+        `;
+        intelResults.insertAdjacentHTML('afterbegin', html);
     }
 
-    function checkAllCompleted() {
-        const allProgress = document.querySelectorAll('.tool-progress');
-        const allCompleted = Array.from(allProgress).every(el => {
-            const icon = el.querySelector('.tool-name i');
-            return icon && (icon.classList.contains('fa-check-circle') || icon.classList.contains('fa-times-circle'));
-        });
-        
-        if (allCompleted) {
-            loadingSpinner.style.display = 'none';
-            
-            if (parseInt(resultsCount.textContent) === 0) {
-                resultsContent.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #cbd5e0;">
-                        <i class="fas fa-search fa-3x mb-3" style="color: #667eea; opacity: 0.5;"></i>
-                        <h5 style="color: #e2e8f0;">لم يتم العثور على نتائج</h5>
-                        <p style="color: #a0aec0;">جرب البحث بمعلومات مختلفة</p>
-                    </div>
-                `;
-                resultsContainer.style.display = 'block';
-            }
-        }
-    }
+    // محاكاة Global Feed
+    const feedEvents = [
+        "New CVE detected in Windows Kernel",
+        "IP 182.xx.xx.xx identified as malicious",
+        "Data breach scan completed for 100+ targets",
+        "Threat actor 'Ghost' activity spike in EU",
+        "API Security audit: 5 vulnerabilities fixed"
+    ];
 
-    function getToolName(slug) {
-        const names = {
-            'sherlock': 'Sherlock Social Search',
-            'github-osint': 'GitHub Investigator',
-            'email-osint': 'Advanced Email Analyzer',
-            'breach-detector': 'Data Breach Detector',
-            'google-dorks': 'Google Dorks Scraper',
-            'wayback-machine': 'Wayback Machine Archive',
-            'cert-transparency': 'SSL Certificate Transparency',
-            'ip-geolocation': 'IP Geolocation Intelligence',
-            'phone-analyzer': 'Phone Number Intelligence',
-            'subdomain-enum': 'Subdomain Enumerator',
-            'social-investigator': 'Social Media Investigator',
-            'infoga': 'Infoga Email Gatherer',
-            'cvestalker-pro': 'CVE-Stalker Vulnerabilities',
-            'mxtoolbox-pro': 'MxToolbox Intelligence',
-            'viewdns-pro': 'ViewDNS Ultimate Toolkit',
-            'hudsonrock-pro': 'Hudson Rock Infostealer',
-            'holehe-pro': 'Holehe Account Scanner',
-            'reverse-image': 'Reverse Image Search'
-        };
-        return names[slug] || slug;
-    }
+    setInterval(() => {
+        const event = feedEvents[Math.floor(Math.random() * feedEvents.length)];
+        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        const item = `
+            <div class="feed-item animate__animated animate__fadeIn">
+                <span class="feed-time">${time}</span>
+                <span>${event}</span>
+            </div>
+        `;
+        liveFeed.insertAdjacentHTML('afterbegin', item);
+        if (liveFeed.children.length > 15) liveFeed.lastElementChild.remove();
+    }, 4000);
 });
 </script>
 {% endblock %}
