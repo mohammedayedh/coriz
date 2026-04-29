@@ -105,22 +105,34 @@ class OSINTToolRunner:
 
     def _process_scraper_results(self, data):
         """معالجة نتائج الـ scraper المباشر وحفظها في DB"""
+        VALID_RESULT_TYPES = {'email', 'username', 'profile', 'domain', 'ip', 'phone', 'social_media', 'website', 'image', 'document', 'other'}
         results_list = []
 
         if isinstance(data, dict):
-            results_list = data.get('results', [])
-            # إذا لم يكن هناك results لكن يوجد بيانات مفيدة
-            if not results_list and data.get('success'):
-                results_list = [{'title': f"نتيجة {self.tool.name}", 'description': str(data), 'type': 'general', 'confidence': 'medium'}]
+            # البحث عن أي قائمة بيانات داخل الـ JSON
+            for key in ['results', 'data', 'vulnerabilities', 'items', 'matches']:
+                if key in data and isinstance(data[key], list) and data[key]:
+                    results_list = data[key]
+                    break
+            
+            # إذا لم نجد قائمة بمفتاح معروف، نبحث عن أي قائمة
+            if not results_list:
+                for k, v in data.items():
+                    if isinstance(v, list) and v and k not in ['tags', 'errors']:
+                        results_list = v
+                        break
+
+            # إذا لا يوجد أي قائمة، نُخزّن الـ JSON كاملاً كنتيجة واحدة
+            if not results_list and data.get('success') is not False:
+                results_list = [data]
+
         elif isinstance(data, list):
             results_list = data
 
         if not results_list:
             r_type = self.tool.tool_type or 'other'
-            if r_type == 'general':
+            if r_type not in VALID_RESULT_TYPES:
                 r_type = 'other'
-                
-            # لا نتائج - أنشئ نتيجة تفيد بذلك
             OSINTResult.objects.create(
                 session=self.session,
                 result_type=r_type,
@@ -130,41 +142,61 @@ class OSINTToolRunner:
                 confidence='low',
                 confidence_score=0.3,
                 source=self.tool.name,
-                tags=[self.tool.tool_type or 'general', 'no_results'],
+                tags=[r_type, 'no_results'],
                 metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
             )
         else:
             for item in results_list:
                 if not isinstance(item, dict):
                     continue
-                    
-                r_type = item.get('type')
-                if not r_type:
-                    r_type = self.tool.tool_type or 'other'
-                if r_type == 'general':
+
+                # تحديد نوع النتيجة - مع ضمان القيم الصحيحة فقط
+                r_type = item.get('type') or item.get('result_type') or self.tool.tool_type or 'other'
+                if r_type not in VALID_RESULT_TYPES:
                     r_type = 'other'
-                    
-                raw_title = item.get('title', f"نتيجة {self.tool.name}")
+
+                # استخراج العنوان - يدعم CVE ومصادر أخرى
+                raw_title = (
+                    item.get('cve_id') or
+                    item.get('title') or
+                    item.get('name') or
+                    item.get('vulnerability_name') or
+                    f"نتيجة {self.tool.name}"
+                )
                 if len(raw_title) > 200:
                     raw_title = raw_title[:196] + '...'
-                    
+
+                # استخراج الوصف
+                description = (
+                    item.get('description') or
+                    item.get('summary') or
+                    item.get('message') or
+                    ''
+                )
+
+                # ضمان قيمة confidence صحيحة
+                confidence = item.get('confidence', 'medium')
+                if confidence not in {'high', 'medium', 'low', 'unknown'}:
+                    confidence = 'medium'
+
                 OSINTResult.objects.create(
                     session=self.session,
                     result_type=r_type,
                     title=raw_title,
-                    description=item.get('description', ''),
+                    description=description,
                     url=item.get('url', ''),
                     raw_data=item,
-                    confidence=item.get('confidence', 'medium'),
-                    confidence_score=0.9 if item.get('confidence') == 'high' else 0.5,
+                    confidence=confidence,
+                    confidence_score=0.9 if confidence == 'high' else 0.5,
                     source=self.tool.name,
-                    tags=[self.tool.tool_type or 'general'],
+                    tags=[r_type],
                     metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
                 )
 
         from .models import OSINTResult as R
         self.session.results_count = R.objects.filter(session=self.session).count()
         self.session.save(update_fields=['results_count'])
+
     
     def test(self):
         """اختبار الأداة"""
