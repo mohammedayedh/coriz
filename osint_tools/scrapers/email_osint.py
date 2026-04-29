@@ -67,7 +67,7 @@ class EmailOSINT:
                 'title': "توصيات الأمان الاستباقية",
                 'description': " • ".join(breach['recommendations']),
                 'type': 'other',
-                'confidence': 'info'
+                'confidence': 'unknown'
             })
             
             results['total_found'] = len(results['results'])

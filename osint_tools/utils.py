@@ -144,10 +144,14 @@ class OSINTToolRunner:
                 if r_type == 'general':
                     r_type = 'other'
                     
+                raw_title = item.get('title', f"نتيجة {self.tool.name}")
+                if len(raw_title) > 200:
+                    raw_title = raw_title[:196] + '...'
+                    
                 OSINTResult.objects.create(
                     session=self.session,
                     result_type=r_type,
-                    title=item.get('title', f"نتيجة {self.tool.name}"),
+                    title=raw_title,
                     description=item.get('description', ''),
                     url=item.get('url', ''),
                     raw_data=item,
@@ -774,10 +778,11 @@ class OSINTToolRunner:
             data = json.loads(output_clean)
             if isinstance(data, dict):
                 desc = data.get('description') or data.get('message') or self._generate_summary(data)
+                raw_title = f"نتيجة من {self.tool.name}"
                 OSINTResult.objects.create(
                     session=self.session,
                     result_type='other',
-                    title=f"نتيجة من {self.tool.name}",
+                    title=raw_title,
                     description=desc,
                     raw_data=data,
                     confidence='high' if data.get('success', True) else 'medium',
@@ -790,10 +795,11 @@ class OSINTToolRunner:
         except json.JSONDecodeError:
             pass
 
+        raw_title = f"نتيجة من {self.tool.name}"
         OSINTResult.objects.create(
             session=self.session,
             result_type='other',
-            title=f"نتيجة من {self.tool.name}",
+            title=raw_title,
             description=output_clean[:200] + ('...' if len(output_clean) > 200 else ''),
             raw_data={'raw_output': output_clean},
             confidence='medium',
