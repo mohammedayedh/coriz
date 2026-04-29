@@ -153,7 +153,7 @@ def search_view(request):
         results = OSINTTool.objects.filter(
             Q(name__icontains=query) |
             Q(description__icontains=query),
-            is_active=True
+            status='active'
         ).order_by('-created_at')
         
         paginator = Paginator(results, 10)
