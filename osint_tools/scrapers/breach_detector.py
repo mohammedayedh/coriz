@@ -30,7 +30,7 @@ class BreachDetectorScraper:
                         results['results'].append({
                             'title': f"تسريب بيانات: {source.get('name')}",
                             'description': f"المصدر: {source.get('name')} | التاريخ: {source.get('date', 'Unknown')}",
-                            'type': 'data_leak',
+                            'type': 'other',
                             'confidence': 'high'
                         })
                     results['success'] = True

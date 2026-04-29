@@ -37,7 +37,7 @@ class EmailOSINT:
             results['results'].append({
                 'title': f"تحليل النطاق: {domain}",
                 'description': f"مزود خدمة: {dom_info.get('provider_name', 'خاص')} | بريد مؤقت: {'نعم' if dom_info['is_disposable'] else 'لا'}",
-                'type': 'domain_info',
+                'type': 'domain',
                 'confidence': 'high'
             })
             
@@ -66,7 +66,7 @@ class EmailOSINT:
             results['results'].append({
                 'title': "توصيات الأمان الاستباقية",
                 'description': " • ".join(breach['recommendations']),
-                'type': 'security_advice',
+                'type': 'other',
                 'confidence': 'info'
             })
             
