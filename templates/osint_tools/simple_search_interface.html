@@ -19,38 +19,32 @@
 
     /* هيكلية الصفحة المتكاملة */
     .interface-container {
-        padding: 40px 0;
+        padding: 30px 0;
         min-height: 800px;
     }
 
     .glass-card {
-        background: var(--glass-bg);
-        backdrop-filter: blur(10px);
-        border: 1px solid var(--glass-border);
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        background: rgba(23, 25, 35, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        transition: all 0.3s ease;
     }
 
-    /* منطقة البحث الاحترافية */
+    /* منطقة البحث المبسطة */
     .search-hero {
-        margin-bottom: 30px;
-        padding: 30px;
-        background: linear-gradient(135deg, rgba(49, 130, 206, 0.1), rgba(128, 90, 213, 0.1));
-    }
-
-    .search-input-group {
-        position: relative;
-        display: flex;
-        gap: 10px;
+        margin-bottom: 25px;
+        padding: 40px;
+        background: radial-gradient(circle at top left, rgba(49, 130, 206, 0.08), transparent);
     }
 
     .search-control {
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid var(--glass-border);
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         color: white;
-        border-radius: 10px;
-        padding: 12px 20px;
-        transition: all 0.3s;
+        border-radius: 12px;
+        padding: 14px 20px;
+        font-size: 0.95rem;
     }
 
     .search-control:focus {
@@ -64,9 +58,9 @@
         color: white;
         border: none;
         padding: 12px 30px;
-        border-radius: 10px;
+        border-radius: 12px;
         font-weight: 600;
-        transition: transform 0.2s;
+        box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3);
     }
 
     .btn-coriza:hover {
@@ -239,20 +233,23 @@
 
 {% block content %}
 <div class="interface-container container">
-    <!-- عنوان الهوية البصرية -->
-    <div class="d-flex align-items-center mb-4">
-        <div style="width: 4px; height: 30px; background: var(--coriza-blue); margin-left: 15px; border-radius: 2px;"></div>
-        <h3 class="m-0 fw-bold">مركز البحث والاستخبارات</h3>
-    </div>
-
-    <!-- لوحة البحث الرئيسية -->
+    <!-- لوحة البحث الرئيسية المبسطة -->
     <div class="glass-card search-hero mb-4">
+        <div class="row align-items-center mb-3">
+            <div class="col-auto">
+                <div style="width: 3px; height: 20px; background: var(--coriza-blue); border-radius: 2px;"></div>
+            </div>
+            <div class="col">
+                <h5 class="m-0 fw-bold opacity-80">محرك الاستخبارات الموحد</h5>
+            </div>
+        </div>
+        
         <div class="row g-3">
             <div class="col-md-7">
-                <input type="text" id="targetInput" class="search-control w-100" placeholder="أدخل المعرف للبحث...">
+                <input type="text" id="targetInput" class="search-control w-100" placeholder="ما الذي تبحث عنه اليوم؟">
                 <!-- شريط الاقتراحات الذكي -->
-                <div id="suggestionsBar" class="mt-2 d-flex flex-wrap gap-2 align-items-center">
-                    <span class="small text-muted me-2"><i class="fas fa-lightbulb"></i> اقتراحات:</span>
+                <div id="suggestionsBar" class="mt-3 d-flex flex-wrap gap-2 align-items-center opacity-80">
+                    <span class="small me-2"><i class="fas fa-magic"></i></span>
                     <div id="suggestionsList" class="d-flex flex-wrap gap-2">
                         <!-- تظهر هنا برمجياً -->
                     </div>
@@ -260,16 +257,16 @@
             </div>
             <div class="col-md-3">
                 <select id="typeSelector" class="search-control w-100">
-                    <option value="auto">تعرف تلقائي</option>
-                    <option value="email">بريد إلكتروني</option>
-                    <option value="username">اسم مستخدم</option>
-                    <option value="domain">نطاق / موقع</option>
-                    <option value="ip">عنوان IP</option>
-                    <option value="phone">رقم هاتف</option>
+                    <option value="auto">🔍 تعرف تلقائي</option>
+                    <option value="email">📧 بريد إلكتروني</option>
+                    <option value="username">👤 اسم مستخدم</option>
+                    <option value="domain">🌐 نطاق / موقع</option>
+                    <option value="ip">📡 عنوان IP</option>
+                    <option value="phone">📞 رقم هاتف</option>
                 </select>
             </div>
             <div class="col-md-2">
-                <button id="scanBtn" class="btn-coriza w-100"><i class="fas fa-search me-2"></i> تنفيذ</button>
+                <button id="scanBtn" class="btn-coriza w-100">تحليل <i class="fas fa-chevron-left ms-2 small"></i></button>
             </div>
         </div>
     </div>
