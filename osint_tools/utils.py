@@ -17,16 +17,18 @@ class OSINTToolRunner:
     
     # خريطة slug → scraper مباشر
     SCRAPER_MAP = {
-        'sherlock':            ('osint_tools.scrapers.social_investigator', 'SocialInvestigatorScraper', 'investigate'),
-        'social-investigator': ('osint_tools.scrapers.social_investigator', 'SocialInvestigatorScraper', 'investigate'),
-        'github-osint':        ('osint_tools.scrapers.github_osint',        'GitHubOSINT',               'get_user_info'),
-        'email-osint':         ('osint_tools.scrapers.email_osint',         'EmailOSINT',                'analyze_email'),
-        'breach-detector':     ('osint_tools.scrapers.breach_detector',     'BreachDetectorScraper',     'search_email'),
-        'ip-geolocation':      ('osint_tools.scrapers.ip_geolocation',      'IPGeolocationScraper',      'lookup'),
-        'cert-transparency':   ('osint_tools.scrapers.cert_transparency',   'CertTransparencyScraper',   'search'),
-        'wayback-machine':     ('osint_tools.scrapers.wayback_machine',     'WaybackMachineScraper',     'search_snapshots'),
-        'google-dorks':        ('osint_tools.scrapers.google_dorks',        'GoogleDorksScraper',        'search'),
-        'subdomain-enum':      ('osint_tools.scrapers.cert_transparency',   'CertTransparencyScraper',   'search'),
+        'sherlock':                    ('osint_tools.scrapers.social_investigator', 'SocialInvestigatorScraper', 'investigate'),
+        'social-investigator':         ('osint_tools.scrapers.social_investigator', 'SocialInvestigatorScraper', 'investigate'),
+        'github-osint':               ('osint_tools.scrapers.github_osint',         'GitHubOSINT',               'get_user_info'),
+        'email-osint':                ('osint_tools.scrapers.email_osint',          'EmailOSINT',                'analyze_email'),
+        'breach-detector':            ('osint_tools.scrapers.breach_detector',      'BreachDetectorScraper',     'search_email'),
+        'ip-geolocation':             ('osint_tools.scrapers.ip_geolocation',       'IPGeolocationScraper',      'lookup'),
+        'cert-transparency':          ('osint_tools.scrapers.cert_transparency',    'CertTransparencyScraper',   'search'),
+        'wayback-machine':            ('osint_tools.scrapers.wayback_machine',      'WaybackMachineScraper',     'search_snapshots'),
+        'google-dorks':               ('osint_tools.scrapers.google_dorks',         'GoogleDorksScraper',        'search'),
+        'subdomain-enum':             ('osint_tools.scrapers.cert_transparency',    'CertTransparencyScraper',   'search'),
+        # CVE-Stalker - direct Python scraper
+        'cve-stalker-vulnerabilities': ('osint_tools.scrapers.cve_stalker',         'CVEStalkerScraper',         'search'),
     }
 
     def __init__(self, session):
@@ -179,19 +181,22 @@ class OSINTToolRunner:
                 if confidence not in {'high', 'medium', 'low', 'unknown'}:
                     confidence = 'medium'
 
-                OSINTResult.objects.create(
-                    session=self.session,
-                    result_type=r_type,
-                    title=raw_title,
-                    description=description,
-                    url=item.get('url', ''),
-                    raw_data=item,
-                    confidence=confidence,
-                    confidence_score=0.9 if confidence == 'high' else 0.5,
-                    source=self.tool.name,
-                    tags=[r_type],
-                    metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
-                )
+                try:
+                    OSINTResult.objects.create(
+                        session=self.session,
+                        result_type=r_type,
+                        title=raw_title,
+                        description=description,
+                        url=item.get('url', ''),
+                        raw_data=item,
+                        confidence=confidence,
+                        confidence_score=0.9 if confidence == 'high' else 0.5,
+                        source=self.tool.name,
+                        tags=[r_type],
+                        metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
+                    )
+                except Exception as save_err:
+                    logger.error(f"فشل حفظ نتيجة [{raw_title}]: {save_err}")
 
         from .models import OSINTResult as R
         self.session.results_count = R.objects.filter(session=self.session).count()
