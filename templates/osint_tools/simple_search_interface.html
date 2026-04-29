@@ -216,6 +216,24 @@
         border-color: var(--coriza-blue);
         box-shadow: 0 0 10px rgba(49, 130, 206, 0.2);
     }
+
+    /* أزرار الاقتراحات */
+    .suggestion-chip {
+        padding: 2px 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--glass-border);
+        border-radius: 6px;
+        font-size: 0.75rem;
+        color: var(--coriza-blue);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .suggestion-chip:hover {
+        background: var(--coriza-blue);
+        color: white;
+        border-color: var(--coriza-blue);
+    }
 </style>
 {% endblock %}
 
@@ -231,14 +249,21 @@
     <div class="glass-card search-hero mb-4">
         <div class="row g-3">
             <div class="col-md-7">
-                <input type="text" id="targetInput" class="search-control w-100" placeholder="أدخل (بريد، IP، نطاق، اسم مستخدم)...">
+                <input type="text" id="targetInput" class="search-control w-100" placeholder="أدخل المعرف للبحث...">
+                <!-- شريط الاقتراحات الذكي -->
+                <div id="suggestionsBar" class="mt-2 d-flex flex-wrap gap-2 align-items-center">
+                    <span class="small text-muted me-2"><i class="fas fa-lightbulb"></i> اقتراحات:</span>
+                    <div id="suggestionsList" class="d-flex flex-wrap gap-2">
+                        <!-- تظهر هنا برمجياً -->
+                    </div>
+                </div>
             </div>
             <div class="col-md-3">
                 <select id="typeSelector" class="search-control w-100">
                     <option value="auto">تعرف تلقائي</option>
                     <option value="email">بريد إلكتروني</option>
                     <option value="username">اسم مستخدم</option>
-                    <option value="domain">نطاق</option>
+                    <option value="domain">نطاق / موقع</option>
                     <option value="ip">عنوان IP</option>
                     <option value="phone">رقم هاتف</option>
                 </select>
@@ -320,9 +345,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const monitorBar = document.getElementById('monitorBar');
     const inspector = document.getElementById('inspector');
     const historyList = document.getElementById('historyList');
+    const typeSelector = document.getElementById('typeSelector');
+    const suggestionsList = document.getElementById('suggestionsList');
 
     const resultStore = new Map();
     const historyStore = JSON.parse(localStorage.getItem('coriza_osint_history') || '[]');
+
+    // خريطة الاقتراحات
+    const suggestionsMap = {
+        'auto': ['example@gmail.com', 'google.com', '1.1.1.1'],
+        'email': ['test@gmail.com', 'admin@company.com', 'info@target.org'],
+        'username': ['johndoe', 'admin_sec', 'cyber_user'],
+        'domain': ['google.com', 'microsoft.net', 'internal.dev'],
+        'ip': ['8.8.8.8', '127.0.0.1', '192.168.1.1'],
+        'phone': ['+123456789', '0501234567', '00966...']
+    };
+
+    function updateSuggestions() {
+        const type = typeSelector.value;
+        const hints = suggestionsMap[type] || [];
+        suggestionsList.innerHTML = hints.map(h => `
+            <div class="suggestion-chip" onclick="setTarget('${h}')">${h}</div>
+        `).join('');
+    }
+
+    typeSelector.addEventListener('change', updateSuggestions);
+    updateSuggestions(); // التشغيل الأولي
 
     renderHistory();
 
