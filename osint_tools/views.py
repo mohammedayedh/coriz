@@ -1164,6 +1164,8 @@ def ajax_session_results(request, session_id):
             'result_type': result.get_result_type_display(),
             'confidence': result.get_confidence_display(),
             'source': result.source,
+            'raw_data': result.raw_data,
+            'metadata': result.metadata,
             'discovered_at': result.discovered_at.isoformat(),
         }
         for result in results

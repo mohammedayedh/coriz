@@ -1,405 +1,304 @@
 {% extends 'base/base.html' %}
 {% load static %}
 
-{% block title %}مركز العمليات الاستخباراتية - كوريزا{% endblock %}
+{% block title %}Intelligence Console - Coriza{% endblock %}
 
 {% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root {
-    --cyber-primary: #00f2ff;
-    --cyber-secondary: #7000ff;
-    --cyber-dark: #050a14;
-    --glass-bg: rgba(10, 20, 40, 0.7);
-    --glass-border: rgba(0, 242, 255, 0.2);
-    --neon-glow: 0 0 15px rgba(0, 242, 255, 0.4);
-}
+    :root {
+        --console-bg: #0d1117;
+        --panel-bg: #161b22;
+        --border-dim: #30363d;
+        --accent-blue: #58a6ff;
+        --text-main: #c9d1d9;
+        --text-dim: #8b949e;
+        --success: #238636;
+    }
 
-body {
-    background: var(--cyber-dark);
-    font-family: 'Outfit', sans-serif;
-    color: #e2e8f0;
-    overflow-x: hidden;
-}
+    body {
+        background-color: var(--console-bg);
+        color: var(--text-main);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        height: 100vh;
+        overflow: hidden;
+    }
 
-/* الخلفية المتحركة */
-.cyber-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    background: radial-gradient(circle at 50% 50%, #0a192f 0%, #050a14 100%);
-}
+    .console-layout {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
 
-.cyber-grid {
-    position: absolute;
-    width: 200%;
-    height: 200%;
-    top: -50%;
-    left: -50%;
-    background-image: 
-        linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
-    background-size: 50px 50px;
-    transform: perspective(500px) rotateX(60deg);
-    animation: grid-move 20s linear infinite;
-}
+    /* Top Bar */
+    .top-utility-bar {
+        height: 60px;
+        background: var(--panel-bg);
+        border-bottom: 1px solid var(--border-dim);
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        gap: 20px;
+        z-index: 100;
+    }
 
-@keyframes grid-move {
-    0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
-    100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
-}
+    .search-input-wrapper {
+        flex: 1;
+        position: relative;
+    }
 
-/* الهيكل الرئيسي */
-.command-center {
-    padding-top: 100px;
-    padding-bottom: 50px;
-}
+    .console-input {
+        width: 100%;
+        background: var(--console-bg);
+        border: 1px solid var(--border-dim);
+        border-radius: 6px;
+        padding: 8px 12px;
+        color: #fff;
+        font-size: 14px;
+    }
 
-.glass-panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+    .console-input:focus {
+        border-color: var(--accent-blue);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+    }
 
-.glass-panel:hover {
-    border-color: var(--cyber-primary);
-    box-shadow: var(--neon-glow);
-}
+    /* Main Grid */
+    .main-grid {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+    }
 
-/* قسم البحث المركزي */
-.search-core {
-    padding: 60px 40px;
-    text-align: center;
-    margin-bottom: 30px;
-}
+    /* Sidebar - History */
+    .history-panel {
+        width: 240px;
+        background: var(--panel-bg);
+        border-left: 1px solid var(--border-dim);
+        display: flex;
+        flex-direction: column;
+    }
 
-.core-title {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 3rem;
-    font-weight: 700;
-    letter-spacing: -1px;
-    margin-bottom: 15px;
-    background: linear-gradient(90deg, #fff, var(--cyber-primary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: var(--neon-glow);
-}
+    .panel-header {
+        padding: 15px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border-dim);
+    }
 
-.core-status {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem;
-    color: var(--cyber-primary);
-    margin-bottom: 40px;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
+    .history-list {
+        flex: 1;
+        overflow-y: auto;
+    }
 
-.status-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--cyber-primary);
-    border-radius: 50%;
-    box-shadow: 0 0 10px var(--cyber-primary);
-    animation: pulse 2s infinite;
-}
+    .history-item {
+        padding: 10px 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        cursor: pointer;
+        font-size: 13px;
+        transition: background 0.2s;
+    }
 
-@keyframes pulse {
-    0% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.3; transform: scale(1.2); }
-    100% { opacity: 1; transform: scale(1); }
-}
+    .history-item:hover { background: rgba(255,255,255,0.05); }
 
-/* صندوق البحث المطور */
-.search-mega-box {
-    position: relative;
-    max-width: 800px;
-    margin: 0 auto;
-}
+    /* Center Content - Table */
+    .content-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: var(--console-bg);
+    }
 
-.search-field {
-    width: 100%;
-    height: 70px;
-    background: rgba(0, 0, 0, 0.4);
-    border: 2px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 0 120px 0 30px;
-    font-size: 1.3rem;
-    color: #fff;
-    transition: all 0.3s;
-    font-family: 'Outfit', sans-serif;
-}
+    .results-table-wrapper {
+        flex: 1;
+        overflow-y: auto;
+    }
 
-.search-field:focus {
-    outline: none;
-    border-color: var(--cyber-primary);
-    box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
-    background: rgba(0, 0, 0, 0.6);
-}
+    .console-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
 
-.search-trigger {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    height: 50px;
-    padding: 0 30px;
-    background: linear-gradient(45deg, var(--cyber-secondary), var(--cyber-primary));
-    border: none;
-    border-radius: 14px;
-    color: #fff;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: all 0.3s;
-}
+    .console-table th {
+        position: sticky;
+        top: 0;
+        background: var(--panel-bg);
+        padding: 12px;
+        text-align: right;
+        border-bottom: 1px solid var(--border-dim);
+        color: var(--text-dim);
+    }
 
-.search-trigger:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px var(--cyber-secondary);
-}
+    .console-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border-dim);
+        white-space: nowrap;
+    }
 
-/* أنواع البحث بشكل كروت نيون */
-.search-modes {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
-    margin-bottom: 40px;
-}
+    .console-table tr:hover {
+        background: rgba(88, 166, 255, 0.05);
+        cursor: pointer;
+    }
 
-.mode-chip {
-    padding: 12px 25px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
-    border-radius: 100px;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.9rem;
-    font-weight: 600;
-}
+    .console-table tr.selected {
+        background: rgba(88, 166, 255, 0.1) !important;
+    }
 
-.mode-chip:hover, .mode-chip.active {
-    background: rgba(0, 242, 255, 0.1);
-    border-color: var(--cyber-primary);
-    color: var(--cyber-primary);
-    transform: translateY(-3px);
-}
+    /* Right Panel - Inspector */
+    .inspector-panel {
+        width: 450px;
+        background: var(--panel-bg);
+        border-right: 1px solid var(--border-dim);
+        display: flex;
+        flex-direction: column;
+        display: none; /* hidden by default */
+    }
 
-/* الجوانب */
-.stats-column {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
+    .inspector-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+    }
 
-.mini-stat-card {
-    padding: 20px;
-    text-align: center;
-}
+    .inspector-section {
+        margin-bottom: 25px;
+    }
 
-.mini-stat-val {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--cyber-primary);
-}
+    .section-lbl {
+        color: var(--text-dim);
+        font-size: 11px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
 
-.mini-stat-lbl {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
+    .raw-viewer {
+        background: #0d1117;
+        padding: 15px;
+        border-radius: 6px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        color: #7ee787;
+        overflow-x: auto;
+    }
 
-/* قسم النتائج المطور */
-.results-orchestrator {
-    margin-top: 50px;
-}
+    /* Badges */
+    .badge-console {
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        background: rgba(255,255,255,0.1);
+    }
 
-.intel-card {
-    background: rgba(10, 20, 40, 0.5);
-    border-left: 4px solid var(--cyber-primary);
-    margin-bottom: 20px;
-    padding: 25px;
-    position: relative;
-    overflow: hidden;
-}
+    .status-badge {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 5px;
+    }
 
-.intel-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100px;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.03));
-}
-
-.intel-tag {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    padding: 4px 10px;
-    border-radius: 4px;
-    background: rgba(0, 242, 255, 0.1);
-    color: var(--cyber-primary);
-    margin-bottom: 10px;
-    display: inline-block;
-}
-
-/* Feed الأيسر */
-.live-feed {
-    max-height: 600px;
-    overflow-y: auto;
-    padding: 15px;
-}
-
-.feed-item {
-    font-size: 0.85rem;
-    padding: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    gap: 12px;
-}
-
-.feed-time { color: var(--cyber-primary); font-family: 'JetBrains Mono', monospace; }
-
-/* شريط التقدم النيوني */
-.cyber-progress {
-    height: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
-    margin-top: 10px;
-    overflow: hidden;
-}
-
-.cyber-progress-fill {
-    height: 100%;
-    background: var(--cyber-primary);
-    box-shadow: var(--neon-glow);
-    width: 0%;
-    transition: width 0.5s ease;
-}
-
-/* Responsive */
-@media (max-width: 991px) {
-    .core-title { font-size: 2rem; }
-    .side-panel { margin-top: 20px; }
-}
+    /* Animations */
+    .loading-pulse {
+        animation: pulse-bg 1.5s infinite;
+    }
+    @keyframes pulse-bg {
+        0% { opacity: 0.5; }
+        50% { opacity: 1; }
+        100% { opacity: 0.5; }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="cyber-bg"><div class="cyber-grid"></div></div>
-
-<div class="command-center container-fluid px-lg-5">
-    <div class="row">
-        <!-- الجانب الأيمن: إحصائيات سريعة -->
-        <div class="col-lg-2 stats-column d-none d-lg-flex">
-            <div class="glass-panel mini-stat-card">
-                <div class="mini-stat-val">{{ total_tools }}</div>
-                <div class="mini-stat-lbl">الأنظمة النشطة</div>
-            </div>
-            <div class="glass-panel mini-stat-card">
-                <div class="mini-stat-val">{{ total_sources }}</div>
-                <div class="mini-stat-lbl">قواعد البيانات</div>
-            </div>
-            <div class="glass-panel mini-stat-card">
-                <div class="mini-stat-val">{{ total_searches }}</div>
-                <div class="mini-stat-lbl">عمليات ناجحة</div>
-            </div>
+<div class="console-layout">
+    <!-- Top Utility Bar -->
+    <div class="top-utility-bar">
+        <div style="font-weight: 800; font-size: 18px; color: var(--accent-blue);">CORIZA // OSINT</div>
+        
+        <div class="search-input-wrapper">
+            <input type="text" id="targetInput" class="console-input" placeholder="Type target (Email, IP, Domain, User) and press Enter...">
         </div>
 
-        <!-- المنتصف: منطقة العمليات -->
-        <div class="col-lg-7">
-            <div class="glass-panel search-core">
-                <div class="core-status">
-                    <span class="status-dot"></span>
-                    CORIZA INTELLIGENCE HUB :: SYSTEM ONLINE
-                </div>
-                
-                <h1 class="core-title">SCAN THE WORLD</h1>
-                
-                <!-- أوضاع البحث -->
-                <div class="search-modes" id="modeSelector">
-                    <div class="mode-chip active" data-mode="auto"><i class="fas fa-brain"></i> Auto-Detect</div>
-                    <div class="mode-chip" data-mode="email"><i class="fas fa-envelope"></i> Email</div>
-                    <div class="mode-chip" data-mode="username"><i class="fas fa-user-tag"></i> Username</div>
-                    <div class="mode-chip" data-mode="phone"><i class="fas fa-mobile-alt"></i> Phone</div>
-                    <div class="mode-chip" data-mode="domain"><i class="fas fa-shield-alt"></i> Domain</div>
-                    <div class="mode-chip" data-mode="ip"><i class="fas fa-network-wired"></i> IP Address</div>
-                </div>
+        <select id="typeSelector" class="console-input" style="width: 150px;">
+            <option value="auto">Auto-Detect</option>
+            <option value="email">Email</option>
+            <option value="username">Username</option>
+            <option value="domain">Domain</option>
+            <option value="ip">IP Address</option>
+            <option value="phone">Phone</option>
+        </select>
 
-                <!-- صندوق البحث -->
-                <div class="search-mega-box">
-                    <input type="text" id="masterSearch" class="search-field" 
-                           placeholder="Enter target identifier..." autocomplete="off">
-                    <button id="executeScan" class="search-trigger">
-                        <i class="fas fa-satellite-dish"></i>
-                        EXECUTE SCAN
-                    </button>
-                </div>
-
-                <!-- أمثلة ذكية -->
-                <div class="mt-4 opacity-50 small" style="font-family: 'JetBrains Mono', monospace;">
-                    HINT: USE <span class="text-info">@email</span> | <span class="text-info">+phone</span> | <span class="text-info">domain.com</span>
-                </div>
-            </div>
-
-            <!-- جاري التحميل / التقدم -->
-            <div id="activeMonitors" style="display: none;">
-                <h6 class="text-uppercase mb-4" style="letter-spacing: 2px;"><i class="fas fa-sync fa-spin me-2"></i> Active Intelligence Gathering</h6>
-                <div id="monitorGrid" class="row g-3"></div>
-            </div>
-
-            <!-- حاوية النتائج المكتشفة -->
-            <div id="resultsHub" class="results-orchestrator" style="display: none;">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="text-uppercase m-0" style="letter-spacing: 2px;">
-                        <i class="fas fa-database me-2"></i> Discovered Data Points
-                    </h4>
-                    <span class="badge bg-primary rounded-pill px-3" id="mainCount">0</span>
-                </div>
-                <div id="intelResults"></div>
-            </div>
-        </div>
-
-        <!-- الجانب الأيسر: Live Intelligence Feed -->
-        <div class="col-lg-3 d-none d-lg-block">
-            <div class="glass-panel" style="height: 100%;">
-                <div class="p-4 border-bottom border-secondary">
-                    <h6 class="text-uppercase m-0"><i class="fas fa-stream me-2"></i> Global Threat Feed</h6>
-                </div>
-                <div class="live-feed" id="liveFeed">
-                    <!-- سيتم تعبئته برمجياً -->
-                </div>
-            </div>
-        </div>
+        <button id="scanBtn" class="btn btn-primary btn-sm px-4">RUN ANALYSIS</button>
     </div>
-</div>
 
-<!-- Modal تفاصيل النتيجة -->
-<div class="modal fade" id="resultModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content glass-panel" style="background: rgba(5, 10, 20, 0.95);">
-            <div class="modal-header border-0">
-                <h5 class="modal-title" id="modalTitle">Intelligence Report</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    <div class="main-grid">
+        <!-- Center Area: Data Table -->
+        <div class="content-area">
+            <!-- Monitoring bar -->
+            <div id="activeMonitors" style="padding: 10px 20px; background: rgba(88, 166, 255, 0.05); border-bottom: 1px solid var(--border-dim); display: none;">
+                <div id="monitorContainer" class="d-flex gap-3 overflow-x-auto"></div>
             </div>
-            <div class="modal-body" id="modalBody"></div>
+
+            <div class="results-table-wrapper">
+                <table class="console-table" id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>IDENTIFIER</th>
+                            <th>TYPE</th>
+                            <th>SOURCE</th>
+                            <th>CONFIDENCE</th>
+                            <th>TIMESTAMP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Data rows here -->
+                    </tbody>
+                </table>
+                <div id="emptyState" style="text-align: center; padding: 100px; color: var(--text-dim);">
+                    <i class="fas fa-terminal fa-3x mb-3"></i>
+                    <p>READY FOR INPUT. AWAITING TARGET COMMAND...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Result Inspector -->
+        <div class="inspector-panel" id="inspector">
+            <div class="panel-header d-flex justify-content-between align-items-center">
+                <span>Result Inspector</span>
+                <button class="btn btn-link btn-sm text-dim" onclick="closeInspector()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="inspector-body">
+                <div class="inspector-section">
+                    <div class="section-lbl">Title & Summary</div>
+                    <h5 id="inspectTitle" class="mb-2"></h5>
+                    <p id="inspectDesc" class="small text-dim"></p>
+                </div>
+
+                <div class="inspector-section">
+                    <div class="section-lbl">Analysis Metadata</div>
+                    <div class="d-flex flex-wrap gap-2" id="inspectMeta"></div>
+                </div>
+
+                <div class="inspector-section">
+                    <div class="section-lbl">Full Raw Payload</div>
+                    <pre class="raw-viewer" id="inspectRaw"></pre>
+                </div>
+
+                <div id="inspectActions" class="mt-4 border-top pt-3 border-dim">
+                    <!-- Dynamic actions -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Left Sidebar: History -->
+        <div class="history-panel">
+            <div class="panel-header">Scan History</div>
+            <div class="history-list" id="historyList">
+                <!-- History items here -->
+            </div>
         </div>
     </div>
 </div>
@@ -410,76 +309,72 @@ function getCsrfToken() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const masterSearch = document.getElementById('masterSearch');
-    const executeBtn = document.getElementById('executeScan');
-    const monitorGrid = document.getElementById('monitorGrid');
-    const intelResults = document.getElementById('intelResults');
+    const targetInput = document.getElementById('targetInput');
+    const scanBtn = document.getElementById('scanBtn');
+    const tableBody = document.getElementById('tableBody');
+    const emptyState = document.getElementById('emptyState');
+    const inspector = document.getElementById('inspector');
+    const historyList = document.getElementById('historyList');
+    const monitorContainer = document.getElementById('monitorContainer');
     const activeMonitors = document.getElementById('activeMonitors');
-    const resultsHub = document.getElementById('resultsHub');
-    const liveFeed = document.getElementById('liveFeed');
-    
-    let currentMode = 'auto';
-    const displayedIds = new Set();
 
-    // تبديل الأنماط
-    document.querySelectorAll('.mode-chip').forEach(chip => {
-        chip.addEventListener('click', function() {
-            document.querySelectorAll('.mode-chip').forEach(c => c.classList.remove('active'));
-            this.classList.add('active');
-            currentMode = this.dataset.mode;
-        });
-    });
+    const resultStore = new Map();
+    const historyStore = JSON.parse(localStorage.getItem('osint_history') || '[]');
 
-    // تنفيذ البحث
-    executeBtn.addEventListener('click', startScan);
-    masterSearch.addEventListener('keypress', e => e.key === 'Enter' && startScan());
+    renderHistory();
 
-    function startScan() {
-        const query = masterSearch.value.trim();
-        if (!query) return alert('Target missing. Enter a query.');
+    scanBtn.addEventListener('click', executeScan);
+    targetInput.addEventListener('keypress', e => e.key === 'Enter' && executeScan());
 
-        // إعادة ضبط الواجهة
-        intelResults.innerHTML = '';
-        monitorGrid.innerHTML = '';
-        displayedIds.clear();
-        resultsHub.style.display = 'none';
+    function executeScan() {
+        const target = targetInput.value.trim();
+        if (!target) return;
+
+        // Add to history
+        if (!historyStore.includes(target)) {
+            historyStore.unshift(target);
+            if (historyStore.length > 20) historyStore.pop();
+            localStorage.setItem('osint_history', JSON.stringify(historyStore));
+            renderHistory();
+        }
+
+        // Reset UI
+        tableBody.innerHTML = '';
+        resultStore.clear();
+        emptyState.style.display = 'none';
         activeMonitors.style.display = 'block';
+        monitorContainer.innerHTML = '';
 
-        const tools = determineTools(query, currentMode);
-        tools.forEach(tool => launchTool(tool, query));
+        const type = document.getElementById('typeSelector').value;
+        const tools = getTools(target, type);
+
+        tools.forEach(tool => startTool(tool, target));
     }
 
-    function determineTools(query, mode) {
-        if (mode === 'auto') {
-            if (query.includes('@')) mode = 'email';
-            else if (query.match(/^\+?\d+$/)) mode = 'phone';
-            else if (query.includes('.')) mode = 'domain';
-            else mode = 'username';
+    function getTools(q, t) {
+        if (t === 'auto') {
+            if (q.includes('@')) t = 'email';
+            else if (q.match(/^\+?\d+$/)) t = 'phone';
+            else if (q.includes('.')) t = 'domain';
+            else t = 'username';
         }
         const map = {
             'email': ['email-osint', 'breach-detector', 'hudsonrock-pro', 'holehe-pro'],
-            'username': ['sherlock', 'github-osint', 'social-investigator'],
+            'username': ['sherlock', 'github-osint'],
             'phone': ['phone-analyzer'],
-            'domain': ['wayback-machine', 'cert-transparency', 'cvestalker-pro', 'mxtoolbox-pro'],
+            'domain': ['wayback-machine', 'cvestalker-pro', 'cert-transparency'],
             'ip': ['ip-geolocation']
         };
-        return map[mode] || [];
+        return map[t] || [];
     }
 
-    function launchTool(slug, target) {
-        // إضافة مراقب (Monitor) للأداة
-        const monitorHtml = `
-            <div class="col-md-6" id="mon-${slug}">
-                <div class="glass-panel p-3">
-                    <div class="d-flex justify-content-between small mb-1">
-                        <span class="text-uppercase">${slug.replace('-', ' ')}</span>
-                        <span class="status-text text-info">INITIATING...</span>
-                    </div>
-                    <div class="cyber-progress"><div class="cyber-progress-fill" id="fill-${slug}"></div></div>
-                </div>
+    function startTool(slug, target) {
+        const monHtml = `
+            <div id="mon-${slug}" class="badge-console d-flex align-items-center gap-2" style="border: 1px solid var(--accent-blue);">
+                <i class="fas fa-spinner fa-spin"></i> ${slug.toUpperCase()}
             </div>
         `;
-        monitorGrid.insertAdjacentHTML('beforeend', monitorHtml);
+        monitorContainer.insertAdjacentHTML('beforeend', monHtml);
 
         fetch(`/osint/tools/${slug}/run/`, {
             method: 'POST',
@@ -488,84 +383,95 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(r => r.json())
         .then(data => {
-            if (data.success) monitorSession(slug, data.session_id);
-            else updateMonitor(slug, 100, 'FAILED', 'text-danger');
-        })
-        .catch(() => updateMonitor(slug, 100, 'ERROR', 'text-danger'));
+            if (data.success) poll(slug, data.session_id);
+            else updateMon(slug, 'FAILED');
+        });
     }
 
-    function monitorSession(slug, sid) {
+    function poll(slug, sid) {
         const timer = setInterval(() => {
             fetch(`/osint/ajax/session-status/${sid}/`)
             .then(r => r.json())
             .then(data => {
-                updateMonitor(slug, data.progress, data.status.toUpperCase());
+                if (data.status === 'completed' || data.status === 'failed') {
+                    clearInterval(timer);
+                    updateMon(slug, data.status.toUpperCase());
+                }
                 if (data.results_count > 0) fetchResults(sid);
-                if (data.status === 'completed' || data.status === 'failed') clearInterval(timer);
             });
-        }, 2500);
+        }, 3000);
     }
 
-    function updateMonitor(slug, prog, status, colorClass = 'text-info') {
-        const fill = document.getElementById(`fill-${slug}`);
-        const text = document.querySelector(`#mon-${slug} .status-text`);
-        if (fill) fill.style.width = prog + '%';
-        if (text) {
-            text.textContent = status;
-            text.className = `status-text ${colorClass}`;
-        }
+    function updateMon(slug, status) {
+        const el = document.getElementById(`mon-${slug}`);
+        if (el) el.innerHTML = `${status === 'COMPLETED' ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>'} ${slug.toUpperCase()}`;
     }
 
     function fetchResults(sid) {
         fetch(`/osint/ajax/session-results/${sid}/`)
         .then(r => r.json())
         .then(data => {
-            if (data.results) data.results.forEach(renderResult);
+            if (data.results) data.results.forEach(renderRow);
         });
     }
 
-    function renderResult(res) {
-        if (displayedIds.has(res.id)) return;
-        displayedIds.add(res.id);
-        resultsHub.style.display = 'block';
-        document.getElementById('mainCount').textContent = displayedIds.size;
+    function renderRow(res) {
+        if (resultStore.has(res.id)) return;
+        resultStore.set(res.id, res);
 
-        const html = `
-            <div class="glass-panel intel-card animate__animated animate__fadeInUp">
-                <div class="intel-tag">${res.source}</div>
-                <h5 class="mb-2">${res.title}</h5>
-                <p class="text-muted small mb-3">${res.description || 'No detailed data available.'}</p>
-                <div class="d-flex gap-3 small align-items-center">
-                    <span class="text-info"><i class="fas fa-fingerprint me-1"></i> ${res.result_type}</span>
-                    <span class="text-warning"><i class="fas fa-shield-alt me-1"></i> ${res.confidence}</span>
-                    ${res.url ? `<a href="${res.url}" target="_blank" class="text-white text-decoration-none ms-auto"><i class="fas fa-external-link-alt"></i></a>` : ''}
-                </div>
-            </div>
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${res.title}</td>
+            <td><span class="badge-console">${res.result_type}</span></td>
+            <td><span class="text-dim">${res.source}</span></td>
+            <td><span class="badge-console" style="color: ${getConfColor(res.confidence)}">${res.confidence}</span></td>
+            <td class="text-dim">${res.discovered_at.replace('T', ' ').split('.')[0]}</td>
         `;
-        intelResults.insertAdjacentHTML('afterbegin', html);
+        row.onclick = () => inspect(res, row);
+        tableBody.prepend(row);
     }
 
-    // محاكاة Global Feed
-    const feedEvents = [
-        "New CVE detected in Windows Kernel",
-        "IP 182.xx.xx.xx identified as malicious",
-        "Data breach scan completed for 100+ targets",
-        "Threat actor 'Ghost' activity spike in EU",
-        "API Security audit: 5 vulnerabilities fixed"
-    ];
+    function getConfColor(c) {
+        if (c === 'عالي' || c === 'high') return '#7ee787';
+        if (c === 'متوسط' || c === 'medium') return '#d29922';
+        return '#8b949e';
+    }
 
-    setInterval(() => {
-        const event = feedEvents[Math.floor(Math.random() * feedEvents.length)];
-        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        const item = `
-            <div class="feed-item animate__animated animate__fadeIn">
-                <span class="feed-time">${time}</span>
-                <span>${event}</span>
-            </div>
+    function inspect(res, row) {
+        document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+        row.classList.add('selected');
+
+        inspector.style.display = 'flex';
+        document.getElementById('inspectTitle').textContent = res.title;
+        document.getElementById('inspectDesc').textContent = res.description || 'No description available for this record.';
+        document.getElementById('inspectRaw').textContent = JSON.stringify(res.raw_data, null, 4);
+        
+        const meta = document.getElementById('inspectMeta');
+        meta.innerHTML = `
+            <span class="badge-console">Source: ${res.source}</span>
+            <span class="badge-console">Type: ${res.result_type}</span>
+            <span class="badge-console">Confidence: ${res.confidence}</span>
         `;
-        liveFeed.insertAdjacentHTML('afterbegin', item);
-        if (liveFeed.children.length > 15) liveFeed.lastElementChild.remove();
-    }, 4000);
+
+        const actions = document.getElementById('inspectActions');
+        actions.innerHTML = res.url ? `<a href="${res.url}" target="_blank" class="btn btn-outline-info btn-sm w-100">Open Source Reference</a>` : '';
+    }
+
+    window.closeInspector = () => {
+        inspector.style.display = 'none';
+        document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+    };
+
+    function renderHistory() {
+        historyList.innerHTML = historyStore.map(h => `
+            <div class="history-item" onclick="setTarget('${h}')"><i class="fas fa-search-location me-2"></i> ${h}</div>
+        `).join('');
+    }
+
+    window.setTarget = (t) => {
+        targetInput.value = t;
+        executeScan();
+    };
 });
 </script>
 {% endblock %}
