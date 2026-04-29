@@ -408,28 +408,27 @@ document.addEventListener('DOMContentLoaded', function() {
         if (t === 'auto') {
             if (q.includes('@')) t = 'email';
             else if (q.match(/^\+?\d+$/)) t = 'phone';
-            else if (q.includes('.') && !q.match(/[a-zA-Z]/)) t = 'ip'; // Basic IP check
+            else if (q.includes('.') && !q.match(/[a-zA-Z]/)) t = 'ip';
             else if (q.includes('.')) t = 'domain';
             else t = 'username';
         }
         const map = {
             'email': [
-                'email-osint', 'breach-detector', 'hudsonrock-pro', 
-                'holehe-pro', 'social-analyzer', 'dehashed-lookup'
+                'breach-detector', 'email-osint', 'emailrep-pro', 
+                'holehe-pro', 'hudsonrock-pro', 'infoga', 'leakpeak-pro'
             ],
             'username': [
-                'sherlock', 'github-osint', 'social-investigator', 
-                'user-profiler', 'namecheck-osint'
+                'maigret', 'sherlock', 'social-investigator'
             ],
             'phone': [
-                'phone-analyzer', 'whatsapp-lookup', 'truecaller-osint'
+                'phone-analyzer'
             ],
             'domain': [
-                'wayback-machine', 'cvestalker-pro', 'cert-transparency', 
-                'subdomain-finder', 'dns-analyzer', 'whois-lookup'
+                'cvestalker-pro', 'cert-transparency', 'checknames-pro', 
+                'mxtoolbox-pro', 'subdomain-enum', 'viewdns-pro', 'wayback-machine'
             ],
             'ip': [
-                'ip-geolocation', 'threat-intel', 'shodan-lookup', 'abuseipdb-check'
+                'ip-geolocation', 'overpassmap-pro'
             ]
         };
         return map[t] || [];
