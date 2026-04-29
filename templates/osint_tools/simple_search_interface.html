@@ -408,15 +408,29 @@ document.addEventListener('DOMContentLoaded', function() {
         if (t === 'auto') {
             if (q.includes('@')) t = 'email';
             else if (q.match(/^\+?\d+$/)) t = 'phone';
+            else if (q.includes('.') && !q.match(/[a-zA-Z]/)) t = 'ip'; // Basic IP check
             else if (q.includes('.')) t = 'domain';
             else t = 'username';
         }
         const map = {
-            'email': ['email-osint', 'breach-detector', 'hudsonrock-pro', 'holehe-pro'],
-            'username': ['sherlock', 'github-osint'],
-            'phone': ['phone-analyzer'],
-            'domain': ['wayback-machine', 'cvestalker-pro', 'cert-transparency'],
-            'ip': ['ip-geolocation']
+            'email': [
+                'email-osint', 'breach-detector', 'hudsonrock-pro', 
+                'holehe-pro', 'social-analyzer', 'dehashed-lookup'
+            ],
+            'username': [
+                'sherlock', 'github-osint', 'social-investigator', 
+                'user-profiler', 'namecheck-osint'
+            ],
+            'phone': [
+                'phone-analyzer', 'whatsapp-lookup', 'truecaller-osint'
+            ],
+            'domain': [
+                'wayback-machine', 'cvestalker-pro', 'cert-transparency', 
+                'subdomain-finder', 'dns-analyzer', 'whois-lookup'
+            ],
+            'ip': [
+                'ip-geolocation', 'threat-intel', 'shodan-lookup', 'abuseipdb-check'
+            ]
         };
         return map[t] || [];
     }
