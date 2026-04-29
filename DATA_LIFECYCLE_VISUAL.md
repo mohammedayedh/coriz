@@ -8,7 +8,7 @@
 ╚══════════════════════════════════════════════════════════════════╝
 
 ┌─────────────────────────────────────────────────────────────────┐
-│ PHASE 1: DATA CREATION (إنشاء البيانات)                        │
+│ PHASE 1: DATA CREATION (إنشاء البيانات)                         │
 ├─────────────────────────────────────────────────────────────────┤
 │ Input: User Request (POST /osint/tools/sherlock/run/)           │
 │ Process:                                                        │
@@ -20,23 +20,23 @@
 │                  osint_tools_osintactivitylog                   │
 └─────────────────────────────────────────────────────────────────┘
                             ↓
-┌─────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────┐
 │ PHASE 2: DATA VALIDATION (التحقق من صحة البيانات)              │
-├─────────────────────────────────────────────────────────────────┤
-│ Checks:                                                          │
-│   ✓ User authentication (is_authenticated)                      │
+├────────────────────────────────────────────────────────────────┤
+│ Checks:                                                        │
+│   ✓ User authentication (is_authenticated)                     │
 │   ✓ User clearance level (L1-L4)                               │
-│   ✓ Tool clearance requirement                                  │
+│   ✓ Tool clearance requirement                                 │
 │   ✓ Rate limiting (cache check)                                │
 │   ✓ Input validation (target format)                           │
 │   ✓ JSON fields validation (JSONValidationMixin)               │
 │ Result: PASS → Continue | FAIL → Return Error                  │
-└─────────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│ PHASE 3: DATA STORAGE (تخزين البيانات)                         │
+│ PHASE 3: DATA STORAGE (تخزين البيانات)                          │
 ├─────────────────────────────────────────────────────────────────┤
-│ Storage Locations:                                               │
+│ Storage Locations:                                              │
 │   1. PostgreSQL/SQLite:                                         │
 │      - OSINTSession (status='pending')                          │
 │      - OSINTActivityLog                                         │
@@ -48,10 +48,10 @@
 └─────────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│ PHASE 4: DATA PROCESSING (معالجة البيانات)                     │
+│ PHASE 4: DATA PROCESSING (معالجة البيانات)                      │
 ├─────────────────────────────────────────────────────────────────┤
-│ Celery Worker:                                                   │
-│   1. Fetch task from Redis queue                               │
+│ Celery Worker:                                                  │
+│   1. Fetch task from Redis queue                                │
 │   2. Update session status → 'running'                          │
 │   3. Execute OSINTToolRunner.run()                              │
 │      a. Build command                                           │
@@ -59,11 +59,11 @@
 │      c. Parse output (JSON/Text)                                │
 │      d. Create OSINTResult objects                              │
 │   4. Update session status → 'completed'/'failed'               │
-│ Progress Updates: 0% → 10% → 30% → 70% → 100%                  │
+│ Progress Updates: 0% → 10% → 30% → 70% → 100%                   │
 └─────────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│ PHASE 5: DATA ANALYSIS (تحليل البيانات)                        │
+│ PHASE 5: DATA ANALYSIS (تحليل البيانات)                         │
 ├─────────────────────────────────────────────────────────────────┤
 │ Analysis Operations:                                             │
 │   1. Count results by type                                      │

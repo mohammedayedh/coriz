@@ -68,7 +68,7 @@ class WaybackMachineScraper:
                             'title': f"نسخة مؤرشفة - {dt.strftime('%Y-%m-%d')}",
                             'description': f"نوع الملف: {mime} | الحالة: {status}",
                             'url': f"https://web.archive.org/web/{ts}/{orig}",
-                            'type': 'archive',
+                            'type': 'website',
                             'timestamp': ts
                         }
                         results['results'].append(item)

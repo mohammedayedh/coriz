@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import argparse
+import io
 
 # إضافة مسار الأداة للـ PATH
 sys.path.append(os.path.join(os.getcwd(), 'external_tools', 'Coriza-Tool-Pro', 'mxtoolbox'))
@@ -18,8 +19,15 @@ def main():
     try:
         from mxtoolbox_tool import run_mxtoolbox
         
-        # Run the tool
-        data = run_mxtoolbox(api_key=API_KEY, command=args.command, target=args.target, output_file=None)
+        # كتم مخرجات الأداة الأصلية لمنع اختلاط أكواد الألوان (ANSI) مع JSON
+        old_stdout = sys.stdout
+        sys.stdout = io.StringIO()
+        
+        try:
+            # Run the tool
+            data = run_mxtoolbox(api_key=API_KEY, command=args.command, target=args.target, output_file=None)
+        finally:
+            sys.stdout = old_stdout
         
         if data:
             output = {

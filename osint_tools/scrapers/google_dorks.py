@@ -43,7 +43,7 @@ class GoogleDorksScraper:
                             'title': title_elem.text,
                             'url': link_elem['href'],
                             'description': desc_elem.text if desc_elem else "لا يوجد وصف",
-                            'type': 'dork_result'
+                            'type': 'other'
                         })
                 
                 results['total_found'] = len(results['results'])

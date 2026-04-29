@@ -56,7 +56,7 @@ class CertTransparencyScraper:
                     results['results'].append({
                         'title': sub,
                         'description': f"نطاق فرعي مكتشف (عبر شهادات SSL)",
-                        'type': 'subdomain',
+                        'type': 'domain',
                         'url': f"http://{sub}"
                     })
                 
@@ -80,7 +80,7 @@ class CertTransparencyScraper:
                         results['results'].append({
                             'title': sub,
                             'description': f"نطاق فرعي مكتشف (عبر DNS Lookup)",
-                            'type': 'subdomain',
+                            'type': 'domain',
                             'url': f"http://{sub}"
                         })
                 
