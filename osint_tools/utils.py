@@ -116,10 +116,14 @@ class OSINTToolRunner:
             results_list = data
 
         if not results_list:
+            r_type = self.tool.tool_type or 'other'
+            if r_type == 'general':
+                r_type = 'other'
+                
             # لا نتائج - أنشئ نتيجة تفيد بذلك
             OSINTResult.objects.create(
                 session=self.session,
-                result_type=self.tool.tool_type or 'general',
+                result_type=r_type,
                 title=f"فحص {self.tool.name}: {self.target}",
                 description="تم الفحص ولم يتم العثور على نتائج",
                 raw_data=data if isinstance(data, dict) else {'data': str(data)},
@@ -133,9 +137,16 @@ class OSINTToolRunner:
             for item in results_list:
                 if not isinstance(item, dict):
                     continue
+                    
+                r_type = item.get('type')
+                if not r_type:
+                    r_type = self.tool.tool_type or 'other'
+                if r_type == 'general':
+                    r_type = 'other'
+                    
                 OSINTResult.objects.create(
                     session=self.session,
-                    result_type=item.get('type', self.tool.tool_type or 'general'),
+                    result_type=r_type,
                     title=item.get('title', f"نتيجة {self.tool.name}"),
                     description=item.get('description', ''),
                     url=item.get('url', ''),
