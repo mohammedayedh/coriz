@@ -596,35 +596,45 @@ class OSINTToolRunner:
             data = json.loads(output)
             
             if isinstance(data, dict):
-                # إذا كانت الأداة تعيد قائمة نتائج بداخلها (مثل CVE-Stalker)
+                # البحث عن أي قائمة داخل الـ JSON لتفكيكها (مثل نتائج CVE أو غيرها)
                 results_list = None
-                for key in ['results', 'data', 'vulnerabilities', 'items']:
-                    if key in data and isinstance(data[key], list):
+                
+                # نفضل المفاتيح المعروفة أولاً
+                for key in ['results', 'data', 'vulnerabilities', 'items', 'matches']:
+                    if key in data and isinstance(data[key], list) and data[key]:
                         results_list = data[key]
                         break
+                
+                # إذا لم نجد مفتاحاً معروفاً، نأخذ أول قائمة نجدها (بشرط ألا تكون قائمة تافهة)
+                if not results_list:
+                    for k, v in data.items():
+                        if isinstance(v, list) and v and k not in ['tags', 'metadata', 'success', 'errors']:
+                            results_list = v
+                            break
                 
                 if results_list:
                     for item in results_list:
                         if not isinstance(item, dict): continue
                         
-                        title = item.get('cve_id') or item.get('vulnerability_name') or item.get('title') or f"نتيجة نطاق: {self.target}"
-                        desc = item.get('summary') or item.get('description') or self._generate_summary(item)
+                        # محاولة استخراج أفضل عنوان ووصف
+                        title = item.get('cve_id') or item.get('vulnerability_name') or item.get('title') or item.get('name') or f"نتيجة: {self.target}"
+                        desc = item.get('summary') or item.get('description') or item.get('text') or self._generate_summary(item)
                         
                         if len(title) > 200: title = title[:196] + "..."
 
                         OSINTResult.objects.create(
                             session=self.session,
-                            result_type='domain',
+                            result_type='domain', # أو يمكن محاولة استنتاجه من item.get('type')
                             title=title,
                             description=desc,
                             raw_data=item,
                             confidence='high',
                             confidence_score=0.9,
                             source=self.tool.name,
-                            tags=['domain', 'vulnerability' if 'cve_id' in item else 'info'],
+                            tags=['domain', 'item'],
                             metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
                         )
-                    return # إنهاء المعالجة بعد معالجة القائمة
+                    return # إنهاء المعالجة بعد النجاح في تفكيك القائمة
 
                 # السلوك الافتراضي لنتيجة واحدة
                 desc = data.get('description') or data.get('message') or self._generate_summary(data)
@@ -772,19 +782,28 @@ class OSINTToolRunner:
             data = json.loads(output)
             
             if isinstance(data, dict):
-                # التحقق من وجود قوائم نتائج
+                # البحث عن أي قائمة داخل الـ JSON لتفكيكها
                 results_list = None
-                for key in ['results', 'data', 'locations', 'items']:
-                    if key in data and isinstance(data[key], list):
+                
+                # نفضل المفاتيح المعروفة أولاً
+                for key in ['results', 'data', 'locations', 'items', 'matches']:
+                    if key in data and isinstance(data[key], list) and data[key]:
                         results_list = data[key]
                         break
+                
+                # إذا لم نجد مفتاحاً معروفاً، نأخذ أول قائمة نجدها
+                if not results_list:
+                    for k, v in data.items():
+                        if isinstance(v, list) and v and k not in ['tags', 'metadata', 'success', 'errors']:
+                            results_list = v
+                            break
 
                 if results_list:
                     for item in results_list:
                         if not isinstance(item, dict): continue
                         
-                        title = item.get('title') or item.get('city') or item.get('ip') or f"نتيجة IP: {self.target}"
-                        desc = item.get('description') or item.get('summary') or self._generate_summary(item)
+                        title = item.get('title') or item.get('city') or item.get('ip') or item.get('name') or f"نتيجة IP: {self.target}"
+                        desc = item.get('description') or item.get('summary') or item.get('text') or self._generate_summary(item)
                         
                         if len(title) > 200: title = title[:196] + "..."
 
@@ -860,12 +879,21 @@ class OSINTToolRunner:
         try:
             data = json.loads(output_clean)
             if isinstance(data, dict):
-                # التحقق مما إذا كان الـ JSON يحتوي على قائمة نتائج بداخل مفتاح معين
+                # البحث عن أي قائمة داخل الـ JSON لتفكيكها
                 results_list = None
-                for key in ['results', 'data', 'vulnerabilities', 'items']:
-                    if key in data and isinstance(data[key], list):
+                
+                # نفضل المفاتيح المعروفة أولاً
+                for key in ['results', 'data', 'vulnerabilities', 'items', 'matches']:
+                    if key in data and isinstance(data[key], list) and data[key]:
                         results_list = data[key]
                         break
+                
+                # إذا لم نجد مفتاحاً معروفاً، نأخذ أول قائمة نجدها
+                if not results_list:
+                    for k, v in data.items():
+                        if isinstance(v, list) and v and k not in ['tags', 'metadata', 'success', 'errors']:
+                            results_list = v
+                            break
                 
                 if results_list:
                     # إذا وجدت قائمة، قم بمعالجة كل عنصر بشكل منفصل
@@ -873,8 +901,8 @@ class OSINTToolRunner:
                         if not isinstance(item, dict): continue
                         
                         # استخراج أفضل عنوان ووصف ممكن
-                        title = item.get('cve_id') or item.get('vulnerability_name') or item.get('title') or f"نتيجة من {self.tool.name}"
-                        desc = item.get('summary') or item.get('description') or str(item)
+                        title = item.get('cve_id') or item.get('vulnerability_name') or item.get('title') or item.get('name') or f"نتيجة من {self.tool.name}"
+                        desc = item.get('summary') or item.get('description') or item.get('text') or self._generate_summary(item)
                         
                         # تقليم العنوان
                         if len(title) > 200: title = title[:196] + "..."
@@ -893,7 +921,7 @@ class OSINTToolRunner:
                         )
                     return # إنهاء المعالجة بعد معالجة القائمة
 
-                # إذا لم تكن قائمة، تعامل مع الكائن كـ نتيجة واحدة (السلوك القديم)
+                # إذا لم تكن قائمة، تعامل مع الكائن كـ نتيجة واحدة
                 desc = data.get('description') or data.get('message') or self._generate_summary(data)
                 raw_title = f"نتيجة من {self.tool.name}"
                 OSINTResult.objects.create(
