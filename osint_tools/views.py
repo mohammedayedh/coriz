@@ -639,42 +639,15 @@ def run_tool(request, tool_slug):
             user=request.user,
             session=session,
             action='tool_run',
-            description=f'تم جدولة تشغيل أداة {tool.name} للهدف: {target}',
+            description=f'تم تشغيل أداة {tool.name} للهدف: {target}',
             ip_address=request.META.get('REMOTE_ADDR'),
             user_agent=request.META.get('HTTP_USER_AGENT', '')
         )
         
-        # محاولة تشغيل عبر Celery، وإلا تشغيل مباشر في thread
-        try:
-            from .tasks import run_osint_tool as celery_task
-            task = celery_task.delay(session.id)
-            session.celery_task_id = task.id
-            session.save(update_fields=['celery_task_id', 'updated_at'])
-        except Exception as celery_error:
-            logger.warning(f"Celery غير متاح، تشغيل مباشر: {celery_error}")
-            # تشغيل مباشر في thread منفصل
-            import threading
-            from .utils import OSINTToolRunner
-            def run_in_thread(session_id):
-                try:
-                    from .models import OSINTSession as S
-                    s = S.objects.get(pk=session_id)
-                    s.mark_running(f'thread-{session_id}')
-                    runner = OSINTToolRunner(s)
-                    runner.run()
-                    s.refresh_from_db()
-                    if s.status in ('pending', 'running'):
-                        s.mark_completed()
-                except Exception as e:
-                    logger.error(f"خطأ في تشغيل الأداة في thread: {e}")
-                    try:
-                        from .models import OSINTSession as S
-                        s = S.objects.get(pk=session_id)
-                        s.mark_failed(str(e))
-                    except Exception:
-                        pass
-            t = threading.Thread(target=run_in_thread, args=(session.id,), daemon=True)
-            t.start()
+        # تشغيل الأداة مباشرة (synchronous) - موثوق على السيرفر
+        from .utils import OSINTToolRunner
+        runner = OSINTToolRunner(session)
+        runner.run()
 
         return JsonResponse({
             'success': True,
