@@ -15,54 +15,85 @@ logger = logging.getLogger(__name__)
 class OSINTToolRunner:
     """فئة لتشغيل أدوات OSINT"""
     
+    # خريطة slug → scraper مباشر
+    SCRAPER_MAP = {
+        'sherlock':            ('osint_tools.scrapers.social_investigator', 'SocialInvestigatorScraper', 'investigate'),
+        'social-investigator': ('osint_tools.scrapers.social_investigator', 'SocialInvestigatorScraper', 'investigate'),
+        'github-osint':        ('osint_tools.scrapers.github_osint',        'GitHubOSINT',               'get_user_info'),
+        'email-osint':         ('osint_tools.scrapers.email_osint',         'EmailOSINT',                'analyze_email'),
+        'breach-detector':     ('osint_tools.scrapers.breach_detector',     'BreachDetectorScraper',     'search_email'),
+        'ip-geolocation':      ('osint_tools.scrapers.ip_geolocation',      'IPGeolocationScraper',      'lookup'),
+        'cert-transparency':   ('osint_tools.scrapers.cert_transparency',   'CertTransparencyScraper',   'search'),
+        'wayback-machine':     ('osint_tools.scrapers.wayback_machine',     'WaybackMachineScraper',     'search_snapshots'),
+        'google-dorks':        ('osint_tools.scrapers.google_dorks',        'GoogleDorksScraper',        'search'),
+        'subdomain-enum':      ('osint_tools.scrapers.cert_transparency',   'CertTransparencyScraper',   'search'),
+    }
+
     def __init__(self, session):
         self.session = session
         self.tool = session.tool
         self.target = session.target
         self.config = session.config
         self.options = session.options
-        
+
+    def _run_scraper_directly(self):
+        """تشغيل الـ scraper مباشرة كـ Python class"""
+        slug = self.tool.slug
+        if slug not in self.SCRAPER_MAP:
+            return None  # لا يوجد scraper مباشر، جرب shell
+
+        module_path, class_name, method_name = self.SCRAPER_MAP[slug]
+        import importlib
+        module = importlib.import_module(module_path)
+        cls = getattr(module, class_name)
+        instance = cls()
+        method = getattr(instance, method_name)
+        result = method(self.target)
+        return result
+
     def run(self):
         """تشغيل الأداة"""
         try:
             logger.info(f"بدء تشغيل الأداة {self.tool.name} للهدف {self.target}")
             
-            # تحديث حالة الجلسة
             self.session.status = 'running'
             self.session.progress = 10
             self.session.current_step = 'جاري التهيئة...'
             self.session.started_at = timezone.now()
             self.session.save()
-            
-            # بناء الأمر
-            command = self._build_command()
-            logger.info(f"الأمر: {' '.join(command)}")
-            
-            # تحديث التقدم
-            self.session.progress = 30
-            self.session.current_step = 'جاري تشغيل الأداة...'
-            self.session.save()
-            
-            # تشغيل الأداة
-            result = self._execute_command(command)
-            
-            # تحديث التقدم
-            self.session.progress = 70
-            self.session.current_step = 'جاري معالجة النتائج...'
-            self.session.save()
-            
-            # معالجة النتائج
-            self._process_results(result)
-            
-            # تحديث حالة الجلسة
+
+            # --- محاولة 1: scraper مباشر ---
+            scraper_result = None
+            try:
+                scraper_result = self._run_scraper_directly()
+            except Exception as scraper_err:
+                logger.warning(f"فشل الـ scraper المباشر لـ {self.tool.slug}: {scraper_err}")
+
+            if scraper_result is not None:
+                self.session.progress = 70
+                self.session.current_step = 'جاري معالجة النتائج...'
+                self.session.save()
+                self._process_scraper_results(scraper_result)
+            else:
+                # --- محاولة 2: أمر shell ---
+                command = self._build_command()
+                logger.info(f"الأمر: {' '.join(command)}")
+                self.session.progress = 30
+                self.session.current_step = 'جاري تشغيل الأداة...'
+                self.session.save()
+                result = self._execute_command(command)
+                self.session.progress = 70
+                self.session.current_step = 'جاري معالجة النتائج...'
+                self.session.save()
+                self._process_results(result)
+
             self.session.status = 'completed'
             self.session.progress = 100
             self.session.current_step = 'تم الانتهاء بنجاح!'
             self.session.completed_at = timezone.now()
             self.session.save()
-            
             logger.info(f"تم تشغيل الأداة {self.tool.name} بنجاح")
-            
+
         except Exception as e:
             logger.error(f"خطأ في تشغيل الأداة {self.tool.name}: {e}")
             self.session.status = 'failed'
@@ -71,6 +102,54 @@ class OSINTToolRunner:
             self.session.error_message = str(e)
             self.session.completed_at = timezone.now()
             self.session.save()
+
+    def _process_scraper_results(self, data):
+        """معالجة نتائج الـ scraper المباشر وحفظها في DB"""
+        results_list = []
+
+        if isinstance(data, dict):
+            results_list = data.get('results', [])
+            # إذا لم يكن هناك results لكن يوجد بيانات مفيدة
+            if not results_list and data.get('success'):
+                results_list = [{'title': f"نتيجة {self.tool.name}", 'description': str(data), 'type': 'general', 'confidence': 'medium'}]
+        elif isinstance(data, list):
+            results_list = data
+
+        if not results_list:
+            # لا نتائج - أنشئ نتيجة تفيد بذلك
+            OSINTResult.objects.create(
+                session=self.session,
+                result_type=self.tool.tool_type or 'general',
+                title=f"فحص {self.tool.name}: {self.target}",
+                description="تم الفحص ولم يتم العثور على نتائج",
+                raw_data=data if isinstance(data, dict) else {'data': str(data)},
+                confidence='low',
+                confidence_score=0.3,
+                source=self.tool.name,
+                tags=[self.tool.tool_type or 'general', 'no_results'],
+                metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
+            )
+        else:
+            for item in results_list:
+                if not isinstance(item, dict):
+                    continue
+                OSINTResult.objects.create(
+                    session=self.session,
+                    result_type=item.get('type', self.tool.tool_type or 'general'),
+                    title=item.get('title', f"نتيجة {self.tool.name}"),
+                    description=item.get('description', ''),
+                    url=item.get('url', ''),
+                    raw_data=item,
+                    confidence=item.get('confidence', 'medium'),
+                    confidence_score=0.9 if item.get('confidence') == 'high' else 0.5,
+                    source=self.tool.name,
+                    tags=[self.tool.tool_type or 'general'],
+                    metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
+                )
+
+        from .models import OSINTResult as R
+        self.session.results_count = R.objects.filter(session=self.session).count()
+        self.session.save(update_fields=['results_count'])
     
     def test(self):
         """اختبار الأداة"""
