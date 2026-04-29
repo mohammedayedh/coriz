@@ -246,6 +246,14 @@ class OSINTToolRunner:
         
         try:
             command_str = command_template.format(**format_kwargs)
+            
+            # ضمان استخدام نفس مسار البايثون الخاص بالبيئة الافتراضية
+            import sys
+            if command_str.startswith('python3 '):
+                command_str = command_str.replace('python3 ', f'{sys.executable} ', 1)
+            elif command_str.startswith('python '):
+                command_str = command_str.replace('python ', f'{sys.executable} ', 1)
+                
             # استخدام shlex لتقسيم الأمر بشكل احترافي مع مراعاة النصوص المقتبسة
             return shlex.split(command_str)
         except KeyError as e:

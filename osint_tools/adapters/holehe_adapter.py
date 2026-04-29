@@ -51,7 +51,8 @@ def main():
                     "title": f"Account Found: {item['name']}",
                     "description": f"Target email is registered on {item['domain']}",
                     "url": f"https://{item['domain']}",
-                    "platform": item['name']
+                    "platform": item['name'],
+                    "type": "social_media"
                 } for item in results
             ],
             "error": None
