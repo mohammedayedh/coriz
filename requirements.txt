@@ -12,5 +12,7 @@ phonenumbers>=8.13.0
 trio
 httpx
 bs4
+beautifulsoup4
+requests
 termcolor
 tqdm
