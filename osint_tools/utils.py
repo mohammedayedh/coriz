@@ -596,6 +596,37 @@ class OSINTToolRunner:
             data = json.loads(output)
             
             if isinstance(data, dict):
+                # إذا كانت الأداة تعيد قائمة نتائج بداخلها (مثل CVE-Stalker)
+                results_list = None
+                for key in ['results', 'data', 'vulnerabilities', 'items']:
+                    if key in data and isinstance(data[key], list):
+                        results_list = data[key]
+                        break
+                
+                if results_list:
+                    for item in results_list:
+                        if not isinstance(item, dict): continue
+                        
+                        title = item.get('cve_id') or item.get('vulnerability_name') or item.get('title') or f"نتيجة نطاق: {self.target}"
+                        desc = item.get('summary') or item.get('description') or self._generate_summary(item)
+                        
+                        if len(title) > 200: title = title[:196] + "..."
+
+                        OSINTResult.objects.create(
+                            session=self.session,
+                            result_type='domain',
+                            title=title,
+                            description=desc,
+                            raw_data=item,
+                            confidence='high',
+                            confidence_score=0.9,
+                            source=self.tool.name,
+                            tags=['domain', 'vulnerability' if 'cve_id' in item else 'info'],
+                            metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
+                        )
+                    return # إنهاء المعالجة بعد معالجة القائمة
+
+                # السلوك الافتراضي لنتيجة واحدة
                 desc = data.get('description') or data.get('message') or self._generate_summary(data)
                 OSINTResult.objects.create(
                     session=self.session,
@@ -741,6 +772,37 @@ class OSINTToolRunner:
             data = json.loads(output)
             
             if isinstance(data, dict):
+                # التحقق من وجود قوائم نتائج
+                results_list = None
+                for key in ['results', 'data', 'locations', 'items']:
+                    if key in data and isinstance(data[key], list):
+                        results_list = data[key]
+                        break
+
+                if results_list:
+                    for item in results_list:
+                        if not isinstance(item, dict): continue
+                        
+                        title = item.get('title') or item.get('city') or item.get('ip') or f"نتيجة IP: {self.target}"
+                        desc = item.get('description') or item.get('summary') or self._generate_summary(item)
+                        
+                        if len(title) > 200: title = title[:196] + "..."
+
+                        OSINTResult.objects.create(
+                            session=self.session,
+                            result_type='ip',
+                            title=title,
+                            description=desc,
+                            raw_data=item,
+                            confidence='high',
+                            confidence_score=0.9,
+                            source=self.tool.name,
+                            tags=['ip', 'info'],
+                            metadata={'tool': self.tool.name, 'processed_at': timezone.now().isoformat()}
+                        )
+                    return # إنهاء المعالجة بعد معالجة القائمة
+
+                # السلوك الافتراضي لنتيجة واحدة
                 desc = data.get('description') or data.get('message') or self._generate_summary(data)
                 OSINTResult.objects.create(
                     session=self.session,
