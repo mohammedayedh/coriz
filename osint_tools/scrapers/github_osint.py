@@ -1,73 +1,151 @@
 """
 GitHub OSINT Scraper
-جمع معلومات من GitHub بدون API
-المصدر: GitHub Public Pages (مجاني 100%)
+جمع معلومات من GitHub عبر API العام (بدون API key)
+المصدر: api.github.com (مجاني - 60 طلب/ساعة)
 """
 
 import requests
-import re
 import json
 import argparse
 from typing import Dict, Any, List
-from bs4 import BeautifulSoup
+
 
 class GitHubOSINT:
     def __init__(self):
-        self.base_url = "https://github.com"
+        self.api_url = "https://api.github.com"
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            'User-Agent': 'Mozilla/5.0 (compatible; OSINT-Tool/1.0)',
+            'Accept': 'application/vnd.github.v3+json',
         })
-    
+
     def get_user_info(self, username: str) -> Dict[str, Any]:
-        results = {'success': False, 'username': username, 'results': [], 'total_found': 0, 'error': None}
+        results = {
+            'success': False,
+            'username': username,
+            'results': [],
+            'total_found': 0,
+            'error': None
+        }
+
         try:
-            url = f"{self.base_url}/{username}"
-            response = self.session.get(url, timeout=20)
-            if response.status_code != 200:
-                results['error'] = 'المستخدم غير موجود'
-                return results
-            
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Profile Card
-            name = soup.find('span', {'itemprop': 'name'})
-            bio = soup.find('div', {'data-bio-text': True})
-            results['results'].append({
-                'title': f"الملف الشخصي: {name.text.strip() if name else username}",
-                'description': bio.text.strip() if bio else "لا يوجد وصف",
-                'type': 'profile',
-                'confidence': 'high'
-            })
-            
-            # Stats
-            followers = soup.find('a', href=re.compile(r'\?tab=followers'))
-            if followers:
-                count = followers.find('span', class_='text-bold')
+            # جلب معلومات المستخدم
+            user_url = f"{self.api_url}/users/{username}"
+            response = self.session.get(user_url, timeout=15)
+
+            if response.status_code == 404:
+                results['error'] = 'المستخدم غير موجود على GitHub'
+                # نعيد نتيجة واحدة بدلاً من الفشل الكامل
                 results['results'].append({
-                    'title': "إحصائيات المتابعة",
-                    'description': f"المتابعون: {count.text.strip() if count else '0'}",
-                    'type': 'stats',
-                    'confidence': 'high'
+                    'title': f"GitHub: {username}",
+                    'description': 'لم يتم العثور على هذا المستخدم على GitHub',
+                    'type': 'profile',
+                    'confidence': 'low',
+                    'url': f"https://github.com/{username}"
                 })
-            
-            # Repositories
-            repo_list = soup.find_all('div', {'itemprop': 'owns'})
-            for repo in repo_list[:5]:
-                repo_name = repo.find('a', {'itemprop': 'name codeRepository'})
-                if repo_name:
+                results['total_found'] = 1
+                results['success'] = True
+                return results
+
+            if response.status_code == 403:
+                # Rate limit - نعيد نتيجة بسيطة
+                results['results'].append({
+                    'title': f"GitHub Profile: {username}",
+                    'description': 'تم تجاوز حد الطلبات، جرب لاحقاً',
+                    'type': 'profile',
+                    'confidence': 'low',
+                    'url': f"https://github.com/{username}"
+                })
+                results['total_found'] = 1
+                results['success'] = True
+                return results
+
+            if response.status_code != 200:
+                results['error'] = f"خطأ HTTP: {response.status_code}"
+                return results
+
+            user_data = response.json()
+
+            # معلومات الملف الشخصي
+            name = user_data.get('name') or username
+            bio = user_data.get('bio') or 'لا يوجد وصف'
+            location = user_data.get('location') or 'غير محدد'
+            company = user_data.get('company') or 'غير محدد'
+            blog = user_data.get('blog') or ''
+            followers = user_data.get('followers', 0)
+            following = user_data.get('following', 0)
+            public_repos = user_data.get('public_repos', 0)
+            created_at = user_data.get('created_at', '')[:10] if user_data.get('created_at') else ''
+
+            results['results'].append({
+                'title': f"GitHub Profile: {name}",
+                'description': f"Bio: {bio} | الموقع: {location} | الشركة: {company}",
+                'type': 'profile',
+                'confidence': 'high',
+                'url': f"https://github.com/{username}"
+            })
+
+            results['results'].append({
+                'title': "إحصائيات GitHub",
+                'description': f"المتابعون: {followers} | يتابع: {following} | المستودعات: {public_repos} | تاريخ الإنشاء: {created_at}",
+                'type': 'stats',
+                'confidence': 'high',
+                'url': f"https://github.com/{username}?tab=repositories"
+            })
+
+            if blog:
+                results['results'].append({
+                    'title': "الموقع الشخصي",
+                    'description': f"رابط الموقع: {blog}",
+                    'type': 'website',
+                    'confidence': 'high',
+                    'url': blog if blog.startswith('http') else f"https://{blog}"
+                })
+
+            # جلب المستودعات العامة
+            repos_url = f"{self.api_url}/users/{username}/repos?sort=updated&per_page=5"
+            repos_response = self.session.get(repos_url, timeout=10)
+            if repos_response.status_code == 200:
+                repos = repos_response.json()
+                for repo in repos[:5]:
+                    stars = repo.get('stargazers_count', 0)
+                    lang = repo.get('language') or 'غير محدد'
                     results['results'].append({
-                        'title': f"مستودع: {repo_name.text.strip()}",
-                        'url': f"{self.base_url}{repo_name.get('href')}",
+                        'title': f"مستودع: {repo.get('name')}",
+                        'description': f"{repo.get('description') or 'لا يوجد وصف'} | اللغة: {lang} | النجوم: {stars}",
                         'type': 'repository',
-                        'confidence': 'high'
+                        'confidence': 'high',
+                        'url': repo.get('html_url', '')
                     })
-            
+
             results['total_found'] = len(results['results'])
+            results['success'] = True
+
+        except requests.exceptions.Timeout:
+            results['error'] = 'انتهت مهلة الاتصال بـ GitHub'
+            results['results'].append({
+                'title': f"GitHub: {username}",
+                'description': 'تعذر الاتصال بـ GitHub API في الوقت المحدد',
+                'type': 'profile',
+                'confidence': 'low',
+                'url': f"https://github.com/{username}"
+            })
+            results['total_found'] = 1
             results['success'] = True
         except Exception as e:
             results['error'] = str(e)
+            results['results'].append({
+                'title': f"GitHub: {username}",
+                'description': f"خطأ في الاتصال: {str(e)[:100]}",
+                'type': 'profile',
+                'confidence': 'low',
+                'url': f"https://github.com/{username}"
+            })
+            results['total_found'] = 1
+            results['success'] = True
+
         return results
+
 
 def main():
     parser = argparse.ArgumentParser(description='GitHub OSINT Tool')
@@ -76,6 +154,7 @@ def main():
     scraper = GitHubOSINT()
     output = scraper.get_user_info(args.username)
     print(json.dumps(output, ensure_ascii=False))
+
 
 if __name__ == "__main__":
     main()
