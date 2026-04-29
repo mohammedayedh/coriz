@@ -247,12 +247,25 @@ class OSINTToolRunner:
         try:
             command_str = command_template.format(**format_kwargs)
             
-            # ضمان استخدام نفس مسار البايثون الخاص بالبيئة الافتراضية
+            # ضمان استخدام مسار البايثون الصحيح (سواء البيئة الافتراضية أو النظام)
             import sys
+            import os
+            
+            python_exe = sys.executable
+            # إذا كنا داخل بيئة افتراضية، تأكد من استخدام البايثون الخاص بها
+            venv_base = os.environ.get('VIRTUAL_ENV')
+            if venv_base:
+                venv_python = os.path.join(venv_base, 'bin', 'python')
+                if os.path.exists(venv_python):
+                    python_exe = venv_python
+            # كحل احتياطي للسيرفر
+            elif os.path.exists('/srv/coriza/venv/bin/python'):
+                python_exe = '/srv/coriza/venv/bin/python'
+                
             if command_str.startswith('python3 '):
-                command_str = command_str.replace('python3 ', f'{sys.executable} ', 1)
+                command_str = command_str.replace('python3 ', f'{python_exe} ', 1)
             elif command_str.startswith('python '):
-                command_str = command_str.replace('python ', f'{sys.executable} ', 1)
+                command_str = command_str.replace('python ', f'{python_exe} ', 1)
                 
             # استخدام shlex لتقسيم الأمر بشكل احترافي مع مراعاة النصوص المقتبسة
             return shlex.split(command_str)
