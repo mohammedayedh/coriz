@@ -2,8 +2,18 @@ import sys
 import os
 import json
 import argparse
-import trio
-import httpx
+
+try:
+    import trio
+    import httpx
+except ModuleNotFoundError as e:
+    print(json.dumps({
+        "success": False,
+        "error": f"Import Error: {str(e)}",
+        "debug_sys_executable": sys.executable,
+        "debug_sys_path": sys.path
+    }))
+    sys.exit(0)
 
 # إضافة مسار الأداة للـ PATH
 sys.path.append(os.path.join(os.getcwd(), 'external_tools', 'Coriza-Tool-Pro', 'holehe'))
