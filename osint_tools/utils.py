@@ -28,7 +28,7 @@ class OSINTToolRunner:
         'google-dorks':               ('osint_tools.scrapers.google_dorks',         'GoogleDorksScraper',        'search'),
         'subdomain-enum':             ('osint_tools.scrapers.cert_transparency',    'CertTransparencyScraper',   'search'),
         # CVE-Stalker - direct Python scraper
-        'cve-stalker-vulnerabilities': ('osint_tools.scrapers.cve_stalker',         'CVEStalkerScraper',         'search'),
+        'cvestalker-pro': ('osint_tools.scrapers.cve_stalker', 'CVEStalkerScraper', 'search'),
     }
 
     def __init__(self, session):
