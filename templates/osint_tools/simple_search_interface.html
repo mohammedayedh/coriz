@@ -19,32 +19,38 @@
 
     /* هيكلية الصفحة المتكاملة */
     .interface-container {
-        padding: 30px 0;
+        padding: 40px 0;
         min-height: 800px;
     }
 
     .glass-card {
-        background: rgba(23, 25, 35, 0.6);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 20px;
-        transition: all 0.3s ease;
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
 
-    /* منطقة البحث المبسطة */
+    /* منطقة البحث الاحترافية */
     .search-hero {
-        margin-bottom: 25px;
-        padding: 40px;
-        background: radial-gradient(circle at top left, rgba(49, 130, 206, 0.08), transparent);
+        margin-bottom: 30px;
+        padding: 30px;
+        background: linear-gradient(135deg, rgba(49, 130, 206, 0.1), rgba(128, 90, 213, 0.1));
+    }
+
+    .search-input-group {
+        position: relative;
+        display: flex;
+        gap: 10px;
     }
 
     .search-control {
-        background: rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--glass-border);
         color: white;
-        border-radius: 12px;
-        padding: 14px 20px;
-        font-size: 0.95rem;
+        border-radius: 10px;
+        padding: 12px 20px;
+        transition: all 0.3s;
     }
 
     .search-control:focus {
@@ -58,9 +64,9 @@
         color: white;
         border: none;
         padding: 12px 30px;
-        border-radius: 12px;
+        border-radius: 10px;
         font-weight: 600;
-        box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3);
+        transition: transform 0.2s;
     }
 
     .btn-coriza:hover {
@@ -86,7 +92,7 @@
         padding: 12px;
         margin-bottom: 8px;
         border-radius: 8px;
-        background: rgba(255,255,255,0.03);
+        background: rgba(255, 255, 255, 0.03);
         cursor: pointer;
         font-size: 0.9rem;
         border: 1px solid transparent;
@@ -118,7 +124,7 @@
     }
 
     .coriza-table th {
-        background: rgba(0,0,0,0.2);
+        background: rgba(0, 0, 0, 0.2);
         padding: 15px;
         text-align: right;
         color: var(--coriza-blue);
@@ -134,7 +140,7 @@
     }
 
     .coriza-table tr:hover {
-        background: rgba(255,255,255,0.02);
+        background: rgba(255, 255, 255, 0.02);
         cursor: pointer;
     }
 
@@ -151,7 +157,7 @@
         height: 100vh;
         background: #151921;
         border-left: 1px solid var(--glass-border);
-        box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
         z-index: 2000;
         transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
@@ -165,7 +171,7 @@
     .inspector-header {
         padding: 20px;
         border-bottom: 1px solid var(--glass-border);
-        background: rgba(0,0,0,0.2);
+        background: rgba(0, 0, 0, 0.2);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -192,7 +198,7 @@
         display: flex;
         gap: 15px;
         padding: 10px 20px;
-        background: rgba(0,0,0,0.1);
+        background: rgba(0, 0, 0, 0.1);
         border-bottom: 1px solid var(--glass-border);
         overflow-x: auto;
     }
@@ -201,7 +207,7 @@
         padding: 4px 12px;
         border-radius: 20px;
         font-size: 0.75rem;
-        background: rgba(255,255,255,0.05);
+        background: rgba(255, 255, 255, 0.05);
         border: 1px solid var(--glass-border);
         white-space: nowrap;
     }
@@ -233,23 +239,21 @@
 
 {% block content %}
 <div class="interface-container container">
-    <!-- لوحة البحث الرئيسية المبسطة -->
-    <div class="glass-card search-hero mb-4">
-        <div class="row align-items-center mb-3">
-            <div class="col-auto">
-                <div style="width: 3px; height: 20px; background: var(--coriza-blue); border-radius: 2px;"></div>
-            </div>
-            <div class="col">
-                <h5 class="m-0 fw-bold opacity-80">محرك الاستخبارات الموحد</h5>
-            </div>
+    <!-- عنوان الهوية البصرية -->
+    <div class="d-flex align-items-center mb-4">
+        <div style="width: 4px; height: 30px; background: var(--coriza-blue); margin-left: 15px; border-radius: 2px;">
         </div>
-        
+        <h3 class="m-0 fw-bold">مركز البحث والاستخبارات</h3>
+    </div>
+
+    <!-- لوحة البحث الرئيسية -->
+    <div class="glass-card search-hero mb-4">
         <div class="row g-3">
             <div class="col-md-7">
-                <input type="text" id="targetInput" class="search-control w-100" placeholder="ما الذي تبحث عنه اليوم؟">
+                <input type="text" id="targetInput" class="search-control w-100" placeholder="أدخل المعرف للبحث...">
                 <!-- شريط الاقتراحات الذكي -->
-                <div id="suggestionsBar" class="mt-3 d-flex flex-wrap gap-2 align-items-center opacity-80">
-                    <span class="small me-2"><i class="fas fa-magic"></i></span>
+                <div id="suggestionsBar" class="mt-2 d-flex flex-wrap gap-2 align-items-center">
+                    <span class="small text-muted me-2"><i class="fas fa-lightbulb"></i> اقتراحات:</span>
                     <div id="suggestionsList" class="d-flex flex-wrap gap-2">
                         <!-- تظهر هنا برمجياً -->
                     </div>
@@ -257,16 +261,16 @@
             </div>
             <div class="col-md-3">
                 <select id="typeSelector" class="search-control w-100">
-                    <option value="auto">🔍 تعرف تلقائي</option>
-                    <option value="email">📧 بريد إلكتروني</option>
-                    <option value="username">👤 اسم مستخدم</option>
-                    <option value="domain">🌐 نطاق / موقع</option>
-                    <option value="ip">📡 عنوان IP</option>
-                    <option value="phone">📞 رقم هاتف</option>
+                    <option value="auto">تعرف تلقائي</option>
+                    <option value="email">بريد إلكتروني</option>
+                    <option value="username">اسم مستخدم</option>
+                    <option value="domain">نطاق / موقع</option>
+                    <option value="ip">عنوان IP</option>
+                    <option value="phone">رقم هاتف</option>
                 </select>
             </div>
             <div class="col-md-2">
-                <button id="scanBtn" class="btn-coriza w-100">تحليل <i class="fas fa-chevron-left ms-2 small"></i></button>
+                <button id="scanBtn" class="btn-coriza w-100"><i class="fas fa-search me-2"></i> تنفيذ</button>
             </div>
         </div>
     </div>
@@ -282,7 +286,7 @@
         <!-- منطقة النتائج -->
         <div class="glass-card results-main">
             <div id="monitorBar" class="monitor-bar" style="display: none;"></div>
-            
+
             <div class="table-container">
                 <table class="coriza-table" id="resultsTable">
                     <thead>
@@ -311,7 +315,8 @@
 <div class="data-inspector" id="inspector">
     <div class="inspector-header">
         <h5 class="m-0 fw-bold">تفاصيل النتيجة</h5>
-        <button class="btn btn-link text-white p-0" onclick="toggleInspector(false)"><i class="fas fa-times"></i></button>
+        <button class="btn btn-link text-white p-0" onclick="toggleInspector(false)"><i
+                class="fas fa-times"></i></button>
     </div>
     <div class="inspector-body">
         <div class="mb-4">
@@ -331,195 +336,182 @@
 </div>
 
 <script>
-function getCsrfToken() {
-    return document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
-}
+    function getCsrfToken() {
+        return document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+    }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const targetInput = document.getElementById('targetInput');
-    const scanBtn = document.getElementById('scanBtn');
-    const tableBody = document.getElementById('tableBody');
-    const monitorBar = document.getElementById('monitorBar');
-    const inspector = document.getElementById('inspector');
-    const historyList = document.getElementById('historyList');
-    const typeSelector = document.getElementById('typeSelector');
-    const suggestionsList = document.getElementById('suggestionsList');
+    document.addEventListener('DOMContentLoaded', function () {
+        const targetInput = document.getElementById('targetInput');
+        const scanBtn = document.getElementById('scanBtn');
+        const tableBody = document.getElementById('tableBody');
+        const monitorBar = document.getElementById('monitorBar');
+        const inspector = document.getElementById('inspector');
+        const historyList = document.getElementById('historyList');
+        const typeSelector = document.getElementById('typeSelector');
+        const suggestionsList = document.getElementById('suggestionsList');
 
-    const resultStore = new Map();
-    const historyStore = JSON.parse(localStorage.getItem('coriza_osint_history') || '[]');
+        const resultStore = new Map();
+        const historyStore = JSON.parse(localStorage.getItem('coriza_osint_history') || '[]');
 
-    // خريطة الاقتراحات
-    const suggestionsMap = {
-        'auto': ['example@gmail.com', 'google.com', '1.1.1.1'],
-        'email': ['test@gmail.com', 'admin@company.com', 'info@target.org'],
-        'username': ['johndoe', 'admin_sec', 'cyber_user'],
-        'domain': ['google.com', 'microsoft.net', 'internal.dev'],
-        'ip': ['8.8.8.8', '127.0.0.1', '192.168.1.1'],
-        'phone': ['+123456789', '0501234567', '00966...']
-    };
+        // خريطة الاقتراحات
+        const suggestionsMap = {
+            'auto': ['example@gmail.com', 'google.com', '1.1.1.1'],
+            'email': ['test@gmail.com', 'admin@company.com', 'info@target.org'],
+            'username': ['johndoe', 'admin_sec', 'cyber_user'],
+            'domain': ['google.com', 'microsoft.net', 'internal.dev'],
+            'ip': ['8.8.8.8', '127.0.0.1', '192.168.1.1'],
+            'phone': ['+123456789', '0501234567', '00966...']
+        };
 
-    function updateSuggestions() {
-        const type = typeSelector.value;
-        const hints = suggestionsMap[type] || [];
-        suggestionsList.innerHTML = hints.map(h => `
+        function updateSuggestions() {
+            const type = typeSelector.value;
+            const hints = suggestionsMap[type] || [];
+            suggestionsList.innerHTML = hints.map(h => `
             <div class="suggestion-chip" onclick="setTarget('${h}')">${h}</div>
         `).join('');
-    }
-
-    typeSelector.addEventListener('change', updateSuggestions);
-    updateSuggestions(); // التشغيل الأولي
-
-    renderHistory();
-
-    scanBtn.addEventListener('click', runAnalysis);
-    targetInput.addEventListener('keypress', e => e.key === 'Enter' && runAnalysis());
-
-    function runAnalysis() {
-        const target = targetInput.value.trim();
-        if (!target) return;
-
-        if (!historyStore.includes(target)) {
-            historyStore.unshift(target);
-            if (historyStore.length > 15) historyStore.pop();
-            localStorage.setItem('coriza_osint_history', JSON.stringify(historyStore));
-            renderHistory();
         }
 
-        tableBody.innerHTML = '';
-        resultStore.clear();
-        document.getElementById('emptyState').style.display = 'none';
-        monitorBar.style.display = 'flex';
-        monitorBar.innerHTML = '';
+        typeSelector.addEventListener('change', updateSuggestions);
+        updateSuggestions(); // التشغيل الأولي
 
-        const type = document.getElementById('typeSelector').value;
-        const tools = getTools(target, type);
+        renderHistory();
 
-        tools.forEach(tool => {
-            const chip = document.createElement('div');
-            chip.className = 'tool-chip active';
-            chip.id = `chip-${tool}`;
-            chip.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>${tool.toUpperCase()}`;
-            monitorBar.appendChild(chip);
-            startTool(tool, target);
-        });
-    }
+        scanBtn.addEventListener('click', runAnalysis);
+        targetInput.addEventListener('keypress', e => e.key === 'Enter' && runAnalysis());
 
-    function getTools(q, t) {
-        if (t === 'auto') {
-            if (q.includes('@')) t = 'email';
-            else if (q.match(/^\+?\d+$/)) t = 'phone';
-            else if (q.includes('.') && !q.match(/[a-zA-Z]/)) t = 'ip';
-            else if (q.includes('.')) t = 'domain';
-            else t = 'username';
-        }
-        const map = {
-            'email': [
-                'breach-detector', 'email-osint', 'emailrep-pro', 
-                'holehe-pro', 'hudsonrock-pro', 'infoga', 'leakpeak-pro'
-            ],
-            'username': [
-                'maigret', 'sherlock', 'social-investigator'
-            ],
-            'phone': [
-                'phone-analyzer'
-            ],
-            'domain': [
-                'cvestalker-pro', 'cert-transparency', 'checknames-pro', 
-                'mxtoolbox-pro', 'subdomain-enum', 'viewdns-pro', 'wayback-machine'
-            ],
-            'ip': [
-                'ip-geolocation', 'overpassmap-pro'
-            ]
-        };
-        return map[t] || [];
-    }
+        function runAnalysis() {
+            const target = targetInput.value.trim();
+            if (!target) return;
 
-    function startTool(slug, target) {
-        fetch(`/osint/tools/${slug}/run/`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken()},
-            body: JSON.stringify({target, options: {save_results: true}})
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) poll(slug, data.session_id);
-            else markToolStatus(slug, false);
-        });
-    }
+            if (!historyStore.includes(target)) {
+                historyStore.unshift(target);
+                if (historyStore.length > 15) historyStore.pop();
+                localStorage.setItem('coriza_osint_history', JSON.stringify(historyStore));
+                renderHistory();
+            }
 
-    function poll(slug, sid) {
-        const timer = setInterval(() => {
-            fetch(`/osint/ajax/session-status/${sid}/`)
-            .then(r => r.json())
-            .then(data => {
-                if (data.status === 'completed' || data.status === 'failed') {
-                    clearInterval(timer);
-                    markToolStatus(slug, data.status === 'completed');
-                }
-                if (data.results_count > 0) fetchResults(sid);
+            tableBody.innerHTML = '';
+            resultStore.clear();
+            document.getElementById('emptyState').style.display = 'none';
+            monitorBar.style.display = 'flex';
+            monitorBar.innerHTML = '';
+
+            const type = document.getElementById('typeSelector').value;
+            const tools = getTools(target, type);
+
+            tools.forEach(tool => {
+                const chip = document.createElement('div');
+                chip.className = 'tool-chip active';
+                chip.id = `chip-${tool}`;
+                chip.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>${tool.toUpperCase()}`;
+                monitorBar.appendChild(chip);
+                startTool(tool, target);
             });
-        }, 3000);
-    }
-
-    function markToolStatus(slug, success) {
-        const chip = document.getElementById(`chip-${slug}`);
-        if (chip) {
-            chip.classList.remove('active');
-            chip.innerHTML = `<i class="fas fa-${success ? 'check text-success' : 'times text-danger'} me-2"></i>${slug.toUpperCase()}`;
         }
-    }
 
-    function fetchResults(sid) {
-        fetch(`/osint/ajax/session-results/${sid}/`)
-        .then(r => r.json())
-        .then(data => {
-            if (data.results) data.results.forEach(renderRow);
-        });
-    }
+        function getTools(q, t) {
+            if (t === 'auto') {
+                if (q.includes('@')) t = 'email';
+                else if (q.match(/^\+?\d+$/)) t = 'phone';
+                else if (q.includes('.')) t = 'domain';
+                else t = 'username';
+            }
+            const map = {
+                'email': ['email-osint', 'breach-detector', 'hudsonrock-pro', 'holehe-pro'],
+                'username': ['sherlock', 'github-osint'],
+                'phone': ['phone-analyzer'],
+                'domain': ['wayback-machine', 'cvestalker-pro', 'cert-transparency'],
+                'ip': ['ip-geolocation']
+            };
+            return map[t] || [];
+        }
 
-    function renderRow(res) {
-        if (resultStore.has(res.id)) return;
-        resultStore.set(res.id, res);
+        function startTool(slug, target) {
+            fetch(`/osint/tools/${slug}/run/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+                body: JSON.stringify({ target, options: { save_results: true } })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) poll(slug, data.session_id);
+                    else markToolStatus(slug, false);
+                });
+        }
 
-        const row = document.createElement('tr');
-        row.innerHTML = `
+        function poll(slug, sid) {
+            const timer = setInterval(() => {
+                fetch(`/osint/ajax/session-status/${sid}/`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.status === 'completed' || data.status === 'failed') {
+                            clearInterval(timer);
+                            markToolStatus(slug, data.status === 'completed');
+                        }
+                        if (data.results_count > 0) fetchResults(sid);
+                    });
+            }, 3000);
+        }
+
+        function markToolStatus(slug, success) {
+            const chip = document.getElementById(`chip-${slug}`);
+            if (chip) {
+                chip.classList.remove('active');
+                chip.innerHTML = `<i class="fas fa-${success ? 'check text-success' : 'times text-danger'} me-2"></i>${slug.toUpperCase()}`;
+            }
+        }
+
+        function fetchResults(sid) {
+            fetch(`/osint/ajax/session-results/${sid}/`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.results) data.results.forEach(renderRow);
+                });
+        }
+
+        function renderRow(res) {
+            if (resultStore.has(res.id)) return;
+            resultStore.set(res.id, res);
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
             <td class="fw-bold text-white">${res.title}</td>
             <td><span class="badge bg-dark border border-secondary">${res.result_type}</span></td>
             <td><span class="text-info">${res.source}</span></td>
             <td><span style="color: ${res.confidence === 'عالي' ? '#4ade80' : '#fbbf24'}">${res.confidence}</span></td>
             <td class="small text-muted">${res.discovered_at.split('T')[0]}</td>
         `;
-        row.onclick = () => {
-            document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
-            row.classList.add('selected');
-            inspect(res);
+            row.onclick = () => {
+                document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+                row.classList.add('selected');
+                inspect(res);
+            };
+            tableBody.prepend(row);
+        }
+
+        function inspect(res) {
+            document.getElementById('inspectTitle').textContent = res.title;
+            document.getElementById('inspectDesc').textContent = res.description || 'لا يوجد وصف مفصل متاح لهذه النتيجة.';
+            document.getElementById('inspectRaw').textContent = JSON.stringify(res.raw_data, null, 4);
+            document.getElementById('inspectLink').innerHTML = res.url ?
+                `<a href="${res.url}" target="_blank" class="btn btn-outline-primary btn-sm w-100">فتح رابط المصدر <i class="fas fa-external-link-alt ms-2"></i></a>` : '';
+            toggleInspector(true);
+        }
+
+        window.toggleInspector = (open) => {
+            inspector.classList.toggle('open', open);
         };
-        tableBody.prepend(row);
-    }
 
-    function inspect(res) {
-        document.getElementById('inspectTitle').textContent = res.title;
-        document.getElementById('inspectDesc').textContent = res.description || 'لا يوجد وصف مفصل متاح لهذه النتيجة.';
-        document.getElementById('inspectRaw').textContent = JSON.stringify(res.raw_data, null, 4);
-        document.getElementById('inspectLink').innerHTML = res.url ? 
-            `<a href="${res.url}" target="_blank" class="btn btn-outline-primary btn-sm w-100">فتح رابط المصدر <i class="fas fa-external-link-alt ms-2"></i></a>` : '';
-        toggleInspector(true);
-    }
-
-    window.toggleInspector = (open) => {
-        inspector.classList.toggle('open', open);
-    };
-
-    function renderHistory() {
-        historyList.innerHTML = historyStore.map(h => `
+        function renderHistory() {
+            historyList.innerHTML = historyStore.map(h => `
             <div class="history-item" onclick="setTarget('${h}')"><i class="fas fa-history me-2 text-muted"></i> ${h}</div>
         `).join('');
-    }
+        }
 
-    window.setTarget = (t) => {
-        targetInput.value = t;
-        runAnalysis();
-    };
-});
+        window.setTarget = (t) => {
+            targetInput.value = t;
+            runAnalysis();
+        };
+    });
 </script>
 {% endblock %}
