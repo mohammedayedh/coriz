@@ -25,7 +25,7 @@ class CompanyIntelScraper:
         results = {
             'success': False,
             'query': name,
-            'companies': [],
+            'results': [],
             'total_results': 0,
             'error': None
         }
@@ -43,15 +43,16 @@ class CompanyIntelScraper:
                 if not company_name: continue
                 
                 details = {
-                    'name': company_name.text.strip(),
-                    'link': self.base_url + company_name['href'],
+                    'title': company_name.text.strip(),
+                    'url': self.base_url + company_name['href'],
                     'id': item.select_one('.company_number').text.strip() if item.select_one('.company_number') else 'Unknown',
                     'jurisdiction': item.select_one('.jurisdiction').text.strip() if item.select_one('.jurisdiction') else 'Unknown',
                     'status': item.select_one('.status').text.strip() if item.select_one('.status') else 'Unknown',
+                    'description': f"رقم الشركة: {item.select_one('.company_number').text.strip() if item.select_one('.company_number') else 'غير معروف'} | الحالة: {item.select_one('.status').text.strip() if item.select_one('.status') else 'غير معروف'}"
                 }
-                results['companies'].append(details)
+                results['results'].append(details)
 
-            results['total_results'] = len(results['companies'])
+            results['total_results'] = len(results['results'])
             results['success'] = True
             
         except Exception as e:
