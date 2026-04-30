@@ -26,20 +26,31 @@ def main():
     sys.stdout = open(os.devnull, 'w')
 
     try:
-        results = checkname.run_namechk(username=target)
+        raw_results = checkname.run_namechk(username=target)
         sys.stdout.close()
         sys.stdout = original_stdout
 
-        registered = [r["Domain"] for r in results if "Registered" in r.get("Status", "")]
-        available = [r["Domain"] for r in results if "Available" in r.get("Status", "")]
+        # تحويل النتائج إلى صيغة كائنات مفصلة يفهمها النظام
+        formatted_results = []
+        for r in raw_results:
+            domain = r.get("Domain")
+            status = r.get("Status", "Unknown")
+            is_registered = "Registered" in status
+            
+            formatted_results.append({
+                "title": domain,
+                "result_type": "domain",
+                "status": status,
+                "confidence": "high" if is_registered else "medium",
+                "description": f"النطاق {domain} حالة توفره: {status}",
+                "url": f"http://{domain}" if is_registered else ""
+            })
 
         output = {
             "target": target,
-            "total_checked": len(results),
-            "registered": registered,
-            "available": available,
-            "registered_count": len(registered),
-            "available_count": len(available)
+            "success": True,
+            "results": formatted_results,
+            "total_checked": len(raw_results)
         }
         print(json.dumps(output))
 
