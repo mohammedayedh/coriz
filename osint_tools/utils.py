@@ -1,6 +1,7 @@
 import subprocess
 import json
 import os
+import sys
 import logging
 import time
 import shlex
@@ -285,9 +286,6 @@ class OSINTToolRunner:
             command_str = command_template.format(**format_kwargs)
             
             # ضمان استخدام مسار البايثون الصحيح (سواء البيئة الافتراضية أو النظام)
-            import sys
-            import os
-            
             python_exe = sys.executable
             # إذا كنا داخل بيئة افتراضية، تأكد من استخدام البايثون الخاص بها
             venv_base = os.environ.get('VIRTUAL_ENV')
