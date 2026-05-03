@@ -1639,3 +1639,61 @@ def ajax_completed_sessions(request):
             'error': 'حدث خطأ في جلب الجلسات',
             'sessions': []
         }, status=500)
+
+@csrf_exempt
+@login_required
+def ajax_run_tool(request):
+    """تشغيل أداة OSINT عبر AJAX"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        tool_slug = data.get('tool_slug')
+        target = data.get('target')
+        
+        if not tool_slug or not target:
+            return JsonResponse({'success': False, 'error': 'Missing tool_slug or target'}, status=400)
+            
+        tool = get_object_or_404(OSINTTool, slug=tool_slug)
+        
+        # التحقق من وجود جلسة نشطة لنفس الهدف والأداة (لمنع التكرار)
+        active_session = OSINTSession.objects.filter(
+            user=request.user,
+            tool=tool,
+            target=target,
+            status='running'
+        ).first()
+        
+        if active_session:
+            return JsonResponse({
+                'success': False, 
+                'error': f'يوجد جلسة نشطة بالفعل لهذا الهدف (جلسة #{active_session.id})',
+                'session_id': active_session.id
+            })
+
+        # إنشاء جلسة جديدة
+        session = OSINTSession.objects.create(
+            user=request.user,
+            tool=tool,
+            target=target,
+            status='pending',
+            progress=0,
+            current_step='جاري التحضير...'
+        )
+        
+        # تشغيل الأداة (إذا كان Celery مفعلاً سيعمل في الخلفية، وإذا لم يكن سيعمل الآن)
+        from .tasks import run_osint_tool_task
+        if hasattr(run_osint_tool_task, 'delay'):
+            run_osint_tool_task.delay(session.id)
+        else:
+            run_osint_tool_task(session.id)
+            
+        return JsonResponse({
+            'success': True,
+            'session_id': session.id,
+            'message': 'بدأت عملية الفحص بنجاح'
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
