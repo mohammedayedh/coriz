@@ -25,31 +25,31 @@
             </div>
             <div class="card-body">
                 <ul class="list-group list-group-flush bg-transparent">
-                    <li class="list-group-item bg-transparent border-secondary text-white d-flex justify-content-between">
-                        <span class="text-secondary">العنوان</span>
-                        <strong class="text-end">{{ report.title }}</strong>
+                    <li class="list-group-item bg-transparent border-secondary text-white pb-3">
+                        <div class="text-secondary mb-1">العنوان</div>
+                        <strong class="d-block text-info fs-5" dir="auto">{{ report.title }}</strong>
                     </li>
-                    <li class="list-group-item bg-transparent border-secondary text-white d-flex justify-content-between">
+                    <li class="list-group-item bg-transparent border-secondary text-white d-flex justify-content-between align-items-center py-3">
                         <span class="text-secondary">النوع</span>
                         <span class="badge bg-primary">{{ report.get_report_type_display }}</span>
                     </li>
-                    <li class="list-group-item bg-transparent border-secondary text-white d-flex justify-content-between">
+                    <li class="list-group-item bg-transparent border-secondary text-white d-flex justify-content-between align-items-center py-3">
                         <span class="text-secondary">التنسيق</span>
                         <span class="badge bg-secondary text-uppercase">{{ report.format }}</span>
                     </li>
-                    <li class="list-group-item bg-transparent border-secondary text-white d-flex justify-content-between">
+                    <li class="list-group-item bg-transparent border-secondary text-white d-flex justify-content-between align-items-center py-3">
                         <span class="text-secondary">تاريخ الإنشاء</span>
-                        <span class="text-end" dir="ltr">{{ report.created_at|date:"Y-m-d H:i" }}</span>
+                        <span dir="ltr">{{ report.created_at|date:"Y-m-d H:i" }}</span>
                     </li>
-                    <li class="list-group-item bg-transparent border-secondary text-white d-flex justify-content-between">
+                    <li class="list-group-item bg-transparent border-secondary text-white d-flex justify-content-between align-items-center py-3">
                         <span class="text-secondary">الحالة</span>
                         <span class="badge bg-{% if report.status == 'completed' %}success{% elif report.status == 'failed' %}danger{% else %}warning{% endif %}">
                             {{ report.get_status_display }}
                         </span>
                     </li>
-                    <li class="list-group-item bg-transparent border-secondary text-white d-flex justify-content-between">
+                    <li class="list-group-item bg-transparent border-secondary text-white d-flex justify-content-between align-items-center py-3">
                         <span class="text-secondary">حجم الملف</span>
-                        <span>{{ report.file_size|filesizeformat }}</span>
+                        <span dir="auto">{{ report.file_size|filesizeformat }}</span>
                     </li>
                 </ul>
                 
