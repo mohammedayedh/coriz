@@ -102,15 +102,25 @@
 
 {% block extra_js %}
 {{ block.super }}
-<!-- استخدام مكتبة CryptoJS لتوليد الهاش لحظياً في المتصفح مع معالجة فشل التحميل -->
+<!-- محاولة تحميل مكتبة CryptoJS للـ MD5 والنسخ الاحتياطي -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" 
-        onerror="this.src='https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js'"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log("Hash Generator Ready.");
-    });
+        onerror="console.warn('CryptoJS failed to load from primary CDN, trying fallback...'); this.src='https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js'"></script>
 
-    function generateHashes() {
+<script>
+    // دالة التشفير الأصلية (Native Browser API) - تعمل بدون إنترنت للـ SHA
+    async function nativeHash(algo, text) {
+        try {
+            const msgBuffer = new TextEncoder().encode(text);
+            const hashBuffer = await crypto.subtle.digest(algo, msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        } catch (e) {
+            console.error('Native hash failed for ' + algo, e);
+            return null;
+        }
+    }
+
+    async function generateHashes() {
         const input = document.getElementById('inputText');
         const text = input.value;
         
@@ -121,73 +131,68 @@
         const genBtn = document.querySelector('button[onclick="generateHashes()"]');
 
         if (!text) {
-            md5Out.value = '';
-            sha1Out.value = '';
-            sha256Out.value = '';
-            sha512Out.value = '';
+            [md5Out, sha1Out, sha256Out, sha512Out].forEach(el => el.value = '');
             return;
         }
 
+        const originalBtnHtml = genBtn.innerHTML;
+        genBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جاري التحليل...';
+        genBtn.disabled = true;
+
         try {
-            if (typeof CryptoJS === 'undefined') {
-                alert("⚠️ عذراً، لم يتم تحميل مكتبة التشفير بشكل صحيح. يرجى التأكد من اتصالك بالإنترنت وتحديث الصفحة.");
-                return;
+            // 1. استخدام التشفير المحلي للمتصفح (SHA-1, SHA-256, SHA-512)
+            const nSha1 = await nativeHash('SHA-1', text);
+            const nSha256 = await nativeHash('SHA-256', text);
+            const nSha512 = await nativeHash('SHA-512', text);
+
+            if (nSha1) sha1Out.value = nSha1;
+            if (nSha256) sha256Out.value = nSha256;
+            if (nSha512) sha512Out.value = nSha512;
+
+            // 2. استخدام CryptoJS للـ MD5 أو كبديل إذا فشل التشفير المحلي
+            if (typeof CryptoJS !== 'undefined') {
+                md5Out.value = CryptoJS.MD5(text).toString();
+                if (!sha1Out.value) sha1Out.value = CryptoJS.SHA1(text).toString();
+                if (!sha256Out.value) sha256Out.value = CryptoJS.SHA256(text).toString();
+                if (!sha512Out.value) sha512Out.value = CryptoJS.SHA512(text).toString();
+            } else {
+                md5Out.value = "⚠️ يتطلب إنترنت لتحميل مكتبة MD5";
+                md5Out.style.color = "#ff4444 !important";
             }
 
-            // إضافة تأثير بصري على الزر
-            const originalBtnHtml = genBtn.innerHTML;
-            genBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جاري التوليد...';
-            genBtn.disabled = true;
-
-            setTimeout(() => {
-                md5Out.value = CryptoJS.MD5(text).toString();
-                sha1Out.value = CryptoJS.SHA1(text).toString();
-                sha256Out.value = CryptoJS.SHA256(text).toString();
-                sha512Out.value = CryptoJS.SHA512(text).toString();
-                
-                genBtn.innerHTML = originalBtnHtml;
-                genBtn.disabled = false;
-
-                // تمييز الحقول المحدثة
-                [md5Out, sha1Out, sha256Out, sha512Out].forEach(el => {
+            // تأثير بصري للنجاح
+            [md5Out, sha1Out, sha256Out, sha512Out].forEach(el => {
+                if (el.value && !el.value.includes('⚠️')) {
                     el.classList.add('is-valid');
                     setTimeout(() => el.classList.remove('is-valid'), 800);
-                });
-            }, 100);
+                }
+            });
 
         } catch (error) {
-            console.error('Hash generation error:', error);
-            alert("❌ حدث خطأ أثناء توليد الهاش: " + error.message);
+            console.error('Hash error:', error);
+        } finally {
+            genBtn.innerHTML = originalBtnHtml;
+            genBtn.disabled = false;
         }
     }
 
     function clearInput() {
         document.getElementById('inputText').value = '';
-        const md5Out = document.getElementById('md5Output');
-        const sha1Out = document.getElementById('sha1Output');
-        const sha256Out = document.getElementById('sha256Output');
-        const sha512Out = document.getElementById('sha512Output');
-        
-        md5Out.value = '';
-        sha1Out.value = '';
-        sha256Out.value = '';
-        sha512Out.value = '';
+        [document.getElementById('md5Output'), document.getElementById('sha1Output'), 
+         document.getElementById('sha256Output'), document.getElementById('sha512Output')].forEach(el => el.value = '');
         document.getElementById('inputText').focus();
     }
 
     function copyHash(elementId, btnElement) {
         const hashOutput = document.getElementById(elementId);
-        if(!hashOutput.value) return;
+        if(!hashOutput.value || hashOutput.value.includes('⚠️')) return;
 
         hashOutput.select();
-        hashOutput.setSelectionRange(0, 99999);
-        
         try {
             navigator.clipboard.writeText(hashOutput.value).then(() => {
                 const originalHtml = btnElement.innerHTML;
                 btnElement.innerHTML = '<i class="fas fa-check text-success"></i> تم النسخ';
                 btnElement.classList.replace('btn-outline-secondary', 'btn-success');
-                
                 setTimeout(() => {
                     btnElement.innerHTML = originalHtml;
                     btnElement.classList.replace('btn-success', 'btn-outline-secondary');
