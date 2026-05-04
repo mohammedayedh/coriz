@@ -1130,66 +1130,176 @@ class ReportGenerator:
         )
 
     def _build_html_content(self):
-        """بناء محتوى HTML المشترك"""
-        html_content = f"""
-        <!DOCTYPE html>
-        <html dir="rtl" lang="ar">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>{self.report.title}</title>
-            <style>
-                body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; }}
-                .header {{ background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }}
-                .result {{ border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 5px; }}
-                .confidence-high {{ border-left: 4px solid #28a745; }}
-                .confidence-medium {{ border-left: 4px solid #ffc107; }}
-                .confidence-low {{ border-left: 4px solid #dc3545; }}
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>{self.report.title}</h1>
-                <p><strong>الأداة:</strong> {self.session.tool.name}</p>
-                <p><strong>الهدف:</strong> {self.session.target}</p>
-                <p><strong>تاريخ الإنشاء:</strong> {self.report.generated_at.strftime('%Y-%m-%d %H:%M:%S')}</p>
-                <p><strong>عدد النتائج:</strong> {self.results.count()}</p>
-            </div>
-            
-            <div class="summary">
-                <h2>ملخص النتائج</h2>
-                <p>{self.report.summary or 'لا يوجد ملخص متاح'}</p>
-            </div>
-            
-            <div class="results">
-                <h2>النتائج المكتشفة</h2>
-        """
-        
+        """بناء محتوى HTML المشترك - تصميم احترافي"""
+        results_rows = ""
         for result in self.results:
-            confidence_class = f"confidence-{result.confidence}"
-            html_content += f"""
-                <div class="result {confidence_class}">
-                    <h3>{result.title}</h3>
-                    <p><strong>النوع:</strong> {result.result_type}</p>
-                    <p><strong>مستوى الثقة:</strong> {result.confidence}</p>
-                    <p><strong>المصدر:</strong> {result.source}</p>
-                    <p><strong>الوصف:</strong> {result.description}</p>
-                    {f'<p><strong>الرابط:</strong> <a href="{result.url}" target="_blank">{result.url}</a></p>' if result.url else ''}
-                    <p><strong>تاريخ الاكتشاف:</strong> {result.discovered_at.strftime('%Y-%m-%d %H:%M:%S')}</p>
-                </div>
-            """
-        
-        html_content += """
-            </div>
+            confidence_color = {
+                'high': '#22c55e',
+                'medium': '#f59e0b',
+                'low': '#ef4444',
+            }.get(result.confidence, '#94a3b8')
             
-            <div class="recommendations">
-                <h2>التوصيات</h2>
-                <p>""" + (self.report.recommendations or 'لا توجد توصيات متاحة') + """</p>
-            </div>
-        </body>
-        </html>
-        """
-        return html_content
+            confidence_label = {
+                'high': 'عالية',
+                'medium': 'متوسطة',
+                'low': 'منخفضة',
+            }.get(result.confidence, result.confidence)
+            
+            url_html = f'<a href="{result.url}" style="color:#38bdf8;word-break:break-all;">{result.url}</a>' if result.url else '<span style="color:#64748b;">—</span>'
+            
+            results_rows += f"""
+            <tr style="border-bottom:1px solid #1e293b;">
+                <td style="padding:12px 16px;color:#f1f5f9;vertical-align:top;">{result.title or '—'}</td>
+                <td style="padding:12px 16px;color:#94a3b8;vertical-align:top;">{result.result_type or '—'}</td>
+                <td style="padding:12px 16px;vertical-align:top;">
+                    <span style="display:inline-block;padding:3px 10px;border-radius:12px;background:{confidence_color}22;color:{confidence_color};border:1px solid {confidence_color}44;font-size:12px;">{confidence_label}</span>
+                </td>
+                <td style="padding:12px 16px;color:#cbd5e1;vertical-align:top;max-width:300px;">{result.description or '—'}</td>
+                <td style="padding:12px 16px;vertical-align:top;">{url_html}</td>
+                <td style="padding:12px 16px;color:#64748b;vertical-align:top;white-space:nowrap;">{result.discovered_at.strftime('%Y-%m-%d')}</td>
+            </tr>"""
+
+        results_section = f"""
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+            <thead>
+                <tr style="background:#1e293b;">
+                    <th style="padding:12px 16px;color:#38bdf8;text-align:right;font-weight:600;">العنوان</th>
+                    <th style="padding:12px 16px;color:#38bdf8;text-align:right;font-weight:600;">النوع</th>
+                    <th style="padding:12px 16px;color:#38bdf8;text-align:right;font-weight:600;">مستوى الثقة</th>
+                    <th style="padding:12px 16px;color:#38bdf8;text-align:right;font-weight:600;">الوصف</th>
+                    <th style="padding:12px 16px;color:#38bdf8;text-align:right;font-weight:600;">الرابط</th>
+                    <th style="padding:12px 16px;color:#38bdf8;text-align:right;font-weight:600;">التاريخ</th>
+                </tr>
+            </thead>
+            <tbody>{results_rows if results_rows else '<tr><td colspan="6" style="padding:24px;text-align:center;color:#64748b;">لا توجد نتائج مكتشفة</td></tr>'}</tbody>
+        </table>""" if self.results.exists() else '<p style="color:#64748b;text-align:center;padding:32px;">لا توجد نتائج في هذه الجلسة.</p>'
+
+        report_type_label = {'summary': 'ملخص', 'detailed': 'مفصل', 'executive': 'تنفيذي', 'technical': 'تقني'}.get(self.report.report_type, self.report.report_type)
+
+        return f"""<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{self.report.title}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        * {{ margin:0; padding:0; box-sizing:border-box; }}
+        body {{ font-family:'Cairo',sans-serif; background:#0f172a; color:#e2e8f0; direction:rtl; }}
+        .page {{ max-width:1100px; margin:0 auto; padding:40px 24px; }}
+        .header {{ background:linear-gradient(135deg,#1e3a5f,#0f2744); border-radius:16px; padding:36px 40px; margin-bottom:32px; border:1px solid #1e40af44; }}
+        .header-top {{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }}
+        .logo {{ font-size:28px; font-weight:900; color:#38bdf8; letter-spacing:2px; }}
+        .logo span {{ color:#fff; }}
+        .badge-type {{ background:#1d4ed822; color:#60a5fa; border:1px solid #1d4ed844; border-radius:8px; padding:4px 14px; font-size:13px; }}
+        .report-title {{ font-size:26px; font-weight:700; color:#fff; margin-bottom:8px; }}
+        .report-subtitle {{ color:#94a3b8; font-size:14px; }}
+        .meta-grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:32px; }}
+        .meta-card {{ background:#1e293b; border:1px solid #334155; border-radius:12px; padding:20px; }}
+        .meta-label {{ color:#64748b; font-size:12px; margin-bottom:6px; }}
+        .meta-value {{ color:#f1f5f9; font-size:15px; font-weight:600; word-break:break-all; }}
+        .section {{ background:#1e293b; border:1px solid #334155; border-radius:12px; margin-bottom:24px; overflow:hidden; }}
+        .section-header {{ padding:16px 24px; background:#0f172a; border-bottom:1px solid #334155; display:flex; align-items:center; gap:10px; }}
+        .section-header h2 {{ font-size:16px; font-weight:700; color:#38bdf8; margin:0; }}
+        .section-icon {{ width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; }}
+        .section-body {{ padding:24px; color:#cbd5e1; line-height:1.8; white-space:pre-line; }}
+        .table-wrapper {{ overflow-x:auto; }}
+        .stats-row {{ display:flex; gap:16px; margin-bottom:32px; flex-wrap:wrap; }}
+        .stat-card {{ flex:1; min-width:140px; background:#1e293b; border:1px solid #334155; border-radius:12px; padding:20px; text-align:center; }}
+        .stat-num {{ font-size:36px; font-weight:900; color:#38bdf8; }}
+        .stat-label {{ color:#64748b; font-size:13px; margin-top:4px; }}
+        .footer {{ text-align:center; color:#334155; font-size:13px; padding-top:24px; border-top:1px solid #1e293b; margin-top:40px; }}
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-top">
+            <div class="logo">CORIZA<span> OSINT</span></div>
+            <span class="badge-type">{report_type_label}</span>
+        </div>
+        <div class="report-title">{self.report.title}</div>
+        <div class="report-subtitle">تقرير استخباراتي مفتوح المصدر - {self.session.tool.name}</div>
+    </div>
+
+    <!-- Metadata -->
+    <div class="meta-grid">
+        <div class="meta-card">
+            <div class="meta-label">🎯 الهدف</div>
+            <div class="meta-value">{self.session.target}</div>
+        </div>
+        <div class="meta-card">
+            <div class="meta-label">🛠️ الأداة المستخدمة</div>
+            <div class="meta-value">{self.session.tool.name}</div>
+        </div>
+        <div class="meta-card">
+            <div class="meta-label">📅 تاريخ الإنشاء</div>
+            <div class="meta-value">{self.report.generated_at.strftime('%Y-%m-%d %H:%M')}</div>
+        </div>
+        <div class="meta-card">
+            <div class="meta-label">📋 نوع التقرير</div>
+            <div class="meta-value">{report_type_label}</div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-num">{self.results.count()}</div>
+            <div class="stat-label">إجمالي النتائج</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" style="color:#22c55e;">{self.results.filter(confidence='high').count()}</div>
+            <div class="stat-label">ثقة عالية</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" style="color:#f59e0b;">{self.results.filter(confidence='medium').count()}</div>
+            <div class="stat-label">ثقة متوسطة</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" style="color:#ef4444;">{self.results.filter(confidence='low').count()}</div>
+            <div class="stat-label">ثقة منخفضة</div>
+        </div>
+    </div>
+
+    {f'''<!-- Summary -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">📝</div>
+            <h2>الملخص التنفيذي</h2>
+        </div>
+        <div class="section-body">{self.report.summary}</div>
+    </div>''' if self.report.summary else ''}
+
+    <!-- Results -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">🔍</div>
+            <h2>النتائج المكتشفة ({self.results.count()})</h2>
+        </div>
+        <div class="table-wrapper">
+            {results_section}
+        </div>
+    </div>
+
+    {f'''<!-- Recommendations -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">🛡️</div>
+            <h2>التوصيات الأمنية</h2>
+        </div>
+        <div class="section-body">{self.report.recommendations}</div>
+    </div>''' if self.report.recommendations else ''}
+
+    <div class="footer">
+        تم إنشاء هذا التقرير بواسطة منصة Coriza OSINT &nbsp;|&nbsp; {self.report.generated_at.strftime('%Y-%m-%d %H:%M:%S')}
+    </div>
+
+</div>
+</body>
+</html>"""
 
     def _generate_xml_report(self):
         """إنشاء تقرير XML"""
