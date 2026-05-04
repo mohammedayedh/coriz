@@ -102,9 +102,14 @@
 
 {% block extra_js %}
 {{ block.super }}
-<!-- استخدام مكتبة CryptoJS لتوليد الهاش لحظياً في المتصفح -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<!-- استخدام مكتبة CryptoJS لتوليد الهاش لحظياً في المتصفح مع معالجة فشل التحميل -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" 
+        onerror="this.src='https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js'"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Hash Generator Ready.");
+    });
+
     function generateHashes() {
         const input = document.getElementById('inputText');
         const text = input.value;
@@ -113,6 +118,7 @@
         const sha1Out = document.getElementById('sha1Output');
         const sha256Out = document.getElementById('sha256Output');
         const sha512Out = document.getElementById('sha512Output');
+        const genBtn = document.querySelector('button[onclick="generateHashes()"]');
 
         if (!text) {
             md5Out.value = '';
@@ -124,29 +130,48 @@
 
         try {
             if (typeof CryptoJS === 'undefined') {
-                console.error('CryptoJS is not loaded');
+                alert("⚠️ عذراً، لم يتم تحميل مكتبة التشفير بشكل صحيح. يرجى التأكد من اتصالك بالإنترنت وتحديث الصفحة.");
                 return;
             }
 
-            md5Out.value = CryptoJS.MD5(text).toString();
-            sha1Out.value = CryptoJS.SHA1(text).toString();
-            sha256Out.value = CryptoJS.SHA256(text).toString();
-            sha512Out.value = CryptoJS.SHA512(text).toString();
-            
-            // إضافة فئة للتمييز عند التحديث
-            [md5Out, sha1Out, sha256Out, sha512Out].forEach(el => {
-                el.classList.add('is-valid');
-                setTimeout(() => el.classList.remove('is-valid'), 500);
-            });
+            // إضافة تأثير بصري على الزر
+            const originalBtnHtml = genBtn.innerHTML;
+            genBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جاري التوليد...';
+            genBtn.disabled = true;
+
+            setTimeout(() => {
+                md5Out.value = CryptoJS.MD5(text).toString();
+                sha1Out.value = CryptoJS.SHA1(text).toString();
+                sha256Out.value = CryptoJS.SHA256(text).toString();
+                sha512Out.value = CryptoJS.SHA512(text).toString();
+                
+                genBtn.innerHTML = originalBtnHtml;
+                genBtn.disabled = false;
+
+                // تمييز الحقول المحدثة
+                [md5Out, sha1Out, sha256Out, sha512Out].forEach(el => {
+                    el.classList.add('is-valid');
+                    setTimeout(() => el.classList.remove('is-valid'), 800);
+                });
+            }, 100);
 
         } catch (error) {
             console.error('Hash generation error:', error);
+            alert("❌ حدث خطأ أثناء توليد الهاش: " + error.message);
         }
     }
 
     function clearInput() {
         document.getElementById('inputText').value = '';
-        generateHashes();
+        const md5Out = document.getElementById('md5Output');
+        const sha1Out = document.getElementById('sha1Output');
+        const sha256Out = document.getElementById('sha256Output');
+        const sha512Out = document.getElementById('sha512Output');
+        
+        md5Out.value = '';
+        sha1Out.value = '';
+        sha256Out.value = '';
+        sha512Out.value = '';
         document.getElementById('inputText').focus();
     }
 
@@ -169,22 +194,29 @@
                 }, 2000);
             });
         } catch (err) {
-            // Fallback for older browsers
             document.execCommand('copy');
+            const originalHtml = btnElement.innerHTML;
             btnElement.innerHTML = 'تم!';
-            setTimeout(() => { btnElement.innerHTML = '<i class="fas fa-copy"></i> نسخ'; }, 2000);
+            setTimeout(() => { btnElement.innerHTML = originalHtml; }, 2000);
         }
     }
 </script>
 
 <style>
     .is-valid {
-        border-color: var(--primary-color) !important;
-        box-shadow: 0 0 10px rgba(0, 255, 0, 0.2) !important;
+        border-color: #00ff00 !important;
+        box-shadow: 0 0 15px rgba(0, 255, 0, 0.3) !important;
+        transition: all 0.3s ease;
     }
     .form-control:read-only {
-        color: #00ff00 !important; /* لون أخضر سيكريت ليكون واضحاً جداً */
+        color: #00ff00 !important;
         cursor: pointer;
+        background: rgba(0,0,0,0.4) !important;
+    }
+    textarea#inputText:focus {
+        background: rgba(0,0,0,0.5) !important;
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 10px rgba(0,255,0,0.1) !important;
     }
 </style>
 {% endblock %}
