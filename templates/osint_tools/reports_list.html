@@ -192,23 +192,23 @@
                                             <small class="text-muted">-</small>
                                         {% endif %}
                                     </td>
-                                    <td>
-                                        <small class="text-muted">
-                                            {{ report.created_at|date:"Y-m-d H:i" }}
-                                        </small>
-                                    </td>
+                                     <td>
+                                         <small class="text-muted">
+                                             {{ report.generated_at|date:"Y-m-d H:i" }}
+                                         </small>
+                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
                                             <button class="btn btn-sm btn-outline-primary" 
                                                     onclick="viewReport({{ report.id }})" title="عرض التقرير">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            {% if report.file %}
-                                                <a href="{{ report.file.url }}" download 
+                                             {% if report.file %}
+                                                <a href="{% url 'osint_tools:download_report' report.id %}" 
                                                    class="btn btn-sm btn-outline-success" title="تحميل">
                                                     <i class="fas fa-download"></i>
                                                 </a>
-                                            {% endif %}
+                                             {% endif %}
                                             <button class="btn btn-sm btn-outline-info" 
                                                     onclick="shareReport({{ report.id }})" title="مشاركة">
                                                 <i class="fas fa-share"></i>
@@ -364,8 +364,8 @@ function submitGenerateReport() {
     };
     
     // التحقق من البيانات
-    if (!formData.title || !formData.session_id) {
-        alert('الرجاء ملء جميع الحقول المطلوبة');
+    if (!formData.session_id) {
+        alert('الرجاء اختيار الجلسة');
         return;
     }
     

@@ -55,7 +55,7 @@
                 
                 <div class="d-grid gap-2 mt-4">
                     {% if report.file %}
-                        <a href="{{ report.file.url }}" download class="btn btn-success">
+                        <a href="{% url 'osint_tools:download_report' report.id %}" class="btn btn-success">
                             <i class="fas fa-download me-2"></i>تحميل التقرير
                         </a>
                     {% else %}

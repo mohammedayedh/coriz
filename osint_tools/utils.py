@@ -1009,6 +1009,11 @@ class ReportGenerator:
                 self._generate_csv_report()
             elif self.report.format == 'pdf':
                 self._generate_pdf_report()
+            elif self.report.format == 'xml':
+                self._generate_xml_report()
+            else:
+                # صيغة غير معروفة - نولد HTML بديلاً
+                self._generate_html_report()
             
             # تحديث حجم الملف
             if self.report.file:
@@ -1021,66 +1026,8 @@ class ReportGenerator:
     
     def _generate_html_report(self):
         """إنشاء تقرير HTML"""
-        html_content = f"""
-        <!DOCTYPE html>
-        <html dir="rtl" lang="ar">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>{self.report.title}</title>
-            <style>
-                body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; }}
-                .header {{ background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }}
-                .result {{ border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 5px; }}
-                .confidence-high {{ border-left: 4px solid #28a745; }}
-                .confidence-medium {{ border-left: 4px solid #ffc107; }}
-                .confidence-low {{ border-left: 4px solid #dc3545; }}
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>{self.report.title}</h1>
-                <p><strong>الأداة:</strong> {self.session.tool.name}</p>
-                <p><strong>الهدف:</strong> {self.session.target}</p>
-                <p><strong>تاريخ الإنشاء:</strong> {self.report.generated_at.strftime('%Y-%m-%d %H:%M:%S')}</p>
-                <p><strong>عدد النتائج:</strong> {self.results.count()}</p>
-            </div>
-            
-            <div class="summary">
-                <h2>ملخص النتائج</h2>
-                <p>{self.report.summary or 'لا يوجد ملخص متاح'}</p>
-            </div>
-            
-            <div class="results">
-                <h2>النتائج المكتشفة</h2>
-        """
+        html_content = self._build_html_content()
         
-        for result in self.results:
-            confidence_class = f"confidence-{result.confidence}"
-            html_content += f"""
-                <div class="result {confidence_class}">
-                    <h3>{result.title}</h3>
-                    <p><strong>النوع:</strong> {result.result_type}</p>
-                    <p><strong>مستوى الثقة:</strong> {result.confidence}</p>
-                    <p><strong>المصدر:</strong> {result.source}</p>
-                    <p><strong>الوصف:</strong> {result.description}</p>
-                    {f'<p><strong>الرابط:</strong> <a href="{result.url}" target="_blank">{result.url}</a></p>' if result.url else ''}
-                    <p><strong>تاريخ الاكتشاف:</strong> {result.discovered_at.strftime('%Y-%m-%d %H:%M:%S')}</p>
-                </div>
-            """
-        
-        html_content += """
-            </div>
-            
-            <div class="recommendations">
-                <h2>التوصيات</h2>
-                <p>""" + (self.report.recommendations or 'لا توجد توصيات متاحة') + """</p>
-            </div>
-        </body>
-        </html>
-        """
-        
-        # حفظ الملف
         from django.core.files.base import ContentFile
         self.report.file.save(
             f"report_{self.report.id}.html",
@@ -1172,10 +1119,113 @@ class ReportGenerator:
         )
     
     def _generate_pdf_report(self):
-        """إنشاء تقرير PDF"""
-        # هذا يتطلب مكتبة مثل reportlab أو weasyprint
-        # للتبسيط، سنقوم بإنشاء HTML أولاً ثم تحويله
-        self._generate_html_report()
+        """إنشاء تقرير PDF - يتم حفظه كـ HTML بامتداد pdf"""
+        # توليد HTML كاملاً ثم حفظه باسم pdf
+        html_content = self._build_html_content()
         
-        # يمكن إضافة تحويل HTML إلى PDF هنا
-        # باستخدام مكتبات مثل weasyprint أو wkhtmltopdf
+        from django.core.files.base import ContentFile
+        self.report.file.save(
+            f"report_{self.report.id}.pdf",
+            ContentFile(html_content.encode('utf-8'))
+        )
+
+    def _build_html_content(self):
+        """بناء محتوى HTML المشترك"""
+        html_content = f"""
+        <!DOCTYPE html>
+        <html dir="rtl" lang="ar">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>{self.report.title}</title>
+            <style>
+                body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; }}
+                .header {{ background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }}
+                .result {{ border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 5px; }}
+                .confidence-high {{ border-left: 4px solid #28a745; }}
+                .confidence-medium {{ border-left: 4px solid #ffc107; }}
+                .confidence-low {{ border-left: 4px solid #dc3545; }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>{self.report.title}</h1>
+                <p><strong>الأداة:</strong> {self.session.tool.name}</p>
+                <p><strong>الهدف:</strong> {self.session.target}</p>
+                <p><strong>تاريخ الإنشاء:</strong> {self.report.generated_at.strftime('%Y-%m-%d %H:%M:%S')}</p>
+                <p><strong>عدد النتائج:</strong> {self.results.count()}</p>
+            </div>
+            
+            <div class="summary">
+                <h2>ملخص النتائج</h2>
+                <p>{self.report.summary or 'لا يوجد ملخص متاح'}</p>
+            </div>
+            
+            <div class="results">
+                <h2>النتائج المكتشفة</h2>
+        """
+        
+        for result in self.results:
+            confidence_class = f"confidence-{result.confidence}"
+            html_content += f"""
+                <div class="result {confidence_class}">
+                    <h3>{result.title}</h3>
+                    <p><strong>النوع:</strong> {result.result_type}</p>
+                    <p><strong>مستوى الثقة:</strong> {result.confidence}</p>
+                    <p><strong>المصدر:</strong> {result.source}</p>
+                    <p><strong>الوصف:</strong> {result.description}</p>
+                    {f'<p><strong>الرابط:</strong> <a href="{result.url}" target="_blank">{result.url}</a></p>' if result.url else ''}
+                    <p><strong>تاريخ الاكتشاف:</strong> {result.discovered_at.strftime('%Y-%m-%d %H:%M:%S')}</p>
+                </div>
+            """
+        
+        html_content += """
+            </div>
+            
+            <div class="recommendations">
+                <h2>التوصيات</h2>
+                <p>""" + (self.report.recommendations or 'لا توجد توصيات متاحة') + """</p>
+            </div>
+        </body>
+        </html>
+        """
+        return html_content
+
+    def _generate_xml_report(self):
+        """إنشاء تقرير XML"""
+        import xml.etree.ElementTree as ET
+        
+        root = ET.Element('osint_report')
+        
+        # معلومات التقرير
+        meta = ET.SubElement(root, 'metadata')
+        ET.SubElement(meta, 'title').text = self.report.title
+        ET.SubElement(meta, 'report_type').text = self.report.report_type
+        ET.SubElement(meta, 'format').text = self.report.format
+        ET.SubElement(meta, 'generated_at').text = self.report.generated_at.isoformat()
+        ET.SubElement(meta, 'tool').text = self.session.tool.name
+        ET.SubElement(meta, 'target').text = self.session.target
+        ET.SubElement(meta, 'results_count').text = str(self.results.count())
+        
+        # النتائج
+        results_el = ET.SubElement(root, 'results')
+        for result in self.results:
+            result_el = ET.SubElement(results_el, 'result')
+            ET.SubElement(result_el, 'id').text = str(result.id)
+            ET.SubElement(result_el, 'type').text = result.result_type
+            ET.SubElement(result_el, 'title').text = result.title
+            ET.SubElement(result_el, 'description').text = result.description or ''
+            ET.SubElement(result_el, 'url').text = result.url or ''
+            ET.SubElement(result_el, 'confidence').text = result.confidence
+            ET.SubElement(result_el, 'source').text = result.source or ''
+            ET.SubElement(result_el, 'discovered_at').text = result.discovered_at.isoformat()
+        
+        from django.core.files.base import ContentFile
+        import xml.dom.minidom
+        xml_str = xml.dom.minidom.parseString(
+            ET.tostring(root, encoding='unicode')
+        ).toprettyxml(indent='  ')
+        self.report.file.save(
+            f"report_{self.report.id}.xml",
+            ContentFile(xml_str.encode('utf-8'))
+        )
