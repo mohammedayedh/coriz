@@ -34,6 +34,7 @@ urlpatterns = [
     path('reports/', views.reports_list, name='reports_list'),
     path('reports/<int:report_id>/', views.report_detail, name='report_detail'),
     path('reports/<int:report_id>/download/', views.download_report, name='download_report'),
+    path('reports/<int:report_id>/delete/', views.delete_report, name='delete_report'),
     path('configurations/', views.configurations_list, name='configurations_list'),
     path('configurations/<int:config_id>/', views.configuration_detail, name='configuration_detail'),
     path('analytics/', views.osint_analytics, name='analytics'),

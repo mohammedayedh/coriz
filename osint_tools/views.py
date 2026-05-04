@@ -918,6 +918,21 @@ def download_report(request, report_id):
 
 
 @login_required
+@require_http_methods(["POST"])
+def delete_report(request, report_id):
+    """حذف التقرير"""
+    report = get_object_or_404(OSINTReport, id=report_id, user=request.user)
+    
+    try:
+        if report.file:
+            report.file.delete(save=False)
+        report.delete()
+        return JsonResponse({'success': True, 'message': 'تم حذف التقرير بنجاح'})
+    except Exception as e:
+        logger.error(f"خطأ في حذف التقرير: {e}")
+        return JsonResponse({'success': False, 'message': 'حدث خطأ أثناء الحذف'})
+
+@login_required
 def configurations_list(request):
     """قائمة الإعدادات"""
     configs = OSINTConfiguration.objects.filter(user=request.user, is_active=True).order_by('-updated_at')
