@@ -212,7 +212,7 @@
     <footer class="py-5 mt-5">
         <div class="container">
             <div class="row">
-                <div class="col-lg-4 mb-4">
+                <div class="col-lg-5 mb-4">
                     <div class="footer-brand mb-3">
                         <img src="{% static 'images/logo.png' %}" alt="كوريزا OSINT" class="footer-logo me-2">
                         <h5 class="fw-bold cyber-text d-inline">كوريزا OSINT</h5>
@@ -224,7 +224,7 @@
 
                 </div>
 
-                <div class="col-lg-2 col-md-6 mb-4">
+                <div class="col-lg-3 col-md-6 mb-4">
                     <h6 class="fw-bold mb-3 cyber-text">أدوات OSINT</h6>
                     <ul class="list-unstyled">
                         <li><a href="{% url 'osint_tools:dashboard' %}" class="text-secondary text-decoration-none">لوحة
@@ -240,7 +240,7 @@
                     </ul>
                 </div>
 
-                <div class="col-lg-2 col-md-6 mb-4">
+                <div class="col-lg-4 col-md-6 mb-4">
                     <h6 class="fw-bold mb-3 cyber-text">الموارد</h6>
                     <ul class="list-unstyled">
                         <li><a href="{% url 'main:privacy_policy' %}" class="text-secondary text-decoration-none">سياسة
@@ -250,19 +250,7 @@
                     </ul>
                 </div>
 
-                <div class="col-lg-4 mb-4">
-                    <h6 class="fw-bold mb-3 cyber-text">خلاصة التهديدات (Threat Feeds)</h6>
-                    <p class="text-secondary mb-3">اشترك في خدمة الإنذار المبكر للحصول على آخر مؤشرات التسريبات والأدوات
-                        الاستخباراتية الجديدة.</p>
-                    <form class="newsletter-form" id="newsletterForm">
-                        <div class="input-group">
-                            <input type="email" class="form-control" placeholder="بريد العمل الرسمي" required>
-                            <button class="btn btn-primary" type="submit">
-                                <i class="fas fa-satellite-dish"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
+
             </div>
 
             <hr class="my-4">
