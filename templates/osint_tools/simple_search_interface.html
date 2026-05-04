@@ -266,7 +266,7 @@
                     <option value="username">اسم مستخدم</option>
                     <option value="domain">نطاق / موقع</option>
                     <option value="ip">عنوان IP</option>
-                    <option value="phone">رقم هاتف</option>
+
                 </select>
             </div>
             <div class="col-md-2">
@@ -360,7 +360,7 @@
             'username': ['johndoe', 'admin_sec', 'cyber_user'],
             'domain': ['google.com', 'microsoft.net', 'internal.dev'],
             'ip': ['8.8.8.8', '127.0.0.1', '192.168.1.1'],
-            'phone': ['+123456789', '0501234567', '00966...']
+
         };
 
         function updateSuggestions() {
@@ -412,14 +412,13 @@
         function getTools(q, t) {
             if (t === 'auto') {
                 if (q.includes('@')) t = 'email';
-                else if (q.match(/^\+?\d+$/)) t = 'phone';
                 else if (q.includes('.')) t = 'domain';
                 else t = 'username';
             }
             const map = {
                 'email': ['email-osint', 'breach-detector', 'hudsonrock-pro', 'holehe-pro'],
                 'username': ['sherlock', 'github-osint'],
-                'phone': ['phone-analyzer'],
+
                 'domain': ['wayback-machine', 'cvestalker-pro', 'cert-transparency'],
                 'ip': ['ip-geolocation']
             };

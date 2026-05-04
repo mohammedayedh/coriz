@@ -46,7 +46,7 @@
                         <select name="result_type" id="result_type" class="form-select">
                             <option value="">جميع الأنواع</option>
                             <option value="email" {% if request.GET.result_type == "email" %}selected{% endif %}>بريد إلكتروني</option>
-                            <option value="phone" {% if request.GET.result_type == "phone" %}selected{% endif %}>رقم هاتف</option>
+
                             <option value="social" {% if request.GET.result_type == "social" %}selected{% endif %}>وسائل التواصل</option>
                             <option value="domain" {% if request.GET.result_type == "domain" %}selected{% endif %}>نطاق</option>
                             <option value="ip" {% if request.GET.result_type == "ip" %}selected{% endif %}>عنوان IP</option>
@@ -118,10 +118,6 @@
                                         {% if result.result_type == 'email' %}
                                             <span class="badge bg-info">
                                                 <i class="fas fa-envelope me-1"></i>بريد إلكتروني
-                                            </span>
-                                        {% elif result.result_type == 'phone' %}
-                                            <span class="badge bg-warning">
-                                                <i class="fas fa-phone me-1"></i>هاتف
                                             </span>
                                         {% elif result.result_type == 'social' %}
                                             <span class="badge bg-primary">
