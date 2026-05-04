@@ -883,6 +883,15 @@ def report_detail(request, report_id):
     """تفاصيل التقرير"""
     report = get_object_or_404(OSINTReport, id=report_id, user=request.user)
     
+    # محاولة توليد التقرير المعلق تلقائياً إذا تم الدخول إليه ولم يكتمل
+    if report.status in ['pending', 'running']:
+        try:
+            from .tasks import generate_osint_report
+            generate_osint_report.apply(args=[report.id])
+            report.refresh_from_db()
+        except Exception as e:
+            logger.error(f"فشل في استرداد التقرير المعلق: {e}")
+    
     context = {
         'report': report,
     }
