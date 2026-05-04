@@ -92,6 +92,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script>
 function inspectJWT() {
     const token = document.getElementById('jwtInput').value.trim();

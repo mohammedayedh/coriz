@@ -62,7 +62,7 @@
                         <option value="4">4</option>
                         <option value="8">8</option>
                     </select>
-                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="copyOutput()">
+                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="copyOutput(event)">
                         <i class="fas fa-copy me-1"></i> نسخ
                     </button>
                 </div>
@@ -137,6 +137,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script>
 let parsedJSON = null;
 
@@ -196,17 +197,19 @@ function clearInput() {
     resetStats();
 }
 
-function copyOutput() {
+function copyOutput(event) {
     const output = document.getElementById('jsonOutput').textContent;
     if (!output) return;
     
     navigator.clipboard.writeText(output).then(() => {
-        const btn = event.target.closest('button');
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check text-success me-1"></i> تم النسخ';
-        setTimeout(() => {
-            btn.innerHTML = originalHtml;
-        }, 2000);
+        const btn = event ? event.currentTarget : null;
+        if (btn) {
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check text-success me-1"></i> تم النسخ';
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+            }, 2000);
+        }
     });
 }
 

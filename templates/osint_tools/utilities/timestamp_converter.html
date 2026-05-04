@@ -29,7 +29,7 @@
                         <label class="form-label text-secondary">Unix Timestamp (ثانية)</label>
                         <div class="input-group">
                             <input type="text" id="currentTimestamp" class="form-control font-monospace fs-5 text-primary" readonly>
-                            <button class="btn btn-outline-primary" onclick="copyToClipboard('currentTimestamp')">
+                            <button class="btn btn-outline-primary" onclick="copyToClipboard('currentTimestamp', event)">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
@@ -98,7 +98,7 @@
                         <small class="text-secondary d-block mb-1">Unix Timestamp (ثانية)</small>
                         <div class="input-group">
                             <input type="text" id="timestampSeconds" class="form-control font-monospace text-warning" readonly>
-                            <button class="btn btn-outline-warning btn-sm" onclick="copyToClipboard('timestampSeconds')">
+                            <button class="btn btn-outline-warning btn-sm" onclick="copyToClipboard('timestampSeconds', event)">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
@@ -107,7 +107,7 @@
                         <small class="text-secondary d-block mb-1">Unix Timestamp (ميلي ثانية)</small>
                         <div class="input-group">
                             <input type="text" id="timestampMillis" class="form-control font-monospace text-info" readonly>
-                            <button class="btn btn-outline-info btn-sm" onclick="copyToClipboard('timestampMillis')">
+                            <button class="btn btn-outline-info btn-sm" onclick="copyToClipboard('timestampMillis', event)">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
@@ -153,6 +153,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script>
 // تحديث الوقت الحالي كل ثانية
 function updateCurrentTime() {
@@ -265,13 +266,13 @@ function setQuickTime(offsetSeconds) {
 }
 
 // نسخ إلى الحافظة
-function copyToClipboard(elementId) {
+function copyToClipboard(elementId, event) {
     const element = document.getElementById(elementId);
     const text = element.value || element.textContent;
     
     navigator.clipboard.writeText(text).then(() => {
         // إظهار رسالة نجاح
-        const btn = event.target.closest('button');
+        const btn = event ? event.currentTarget : null;
         if (btn) {
             const originalHtml = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-check text-success"></i>';

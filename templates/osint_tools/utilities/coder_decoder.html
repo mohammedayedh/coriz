@@ -76,6 +76,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script>
     function processText(direction = 'encode') {
         const plainBox = document.getElementById('plainText');
