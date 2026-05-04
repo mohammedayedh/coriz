@@ -83,6 +83,50 @@
         </div>
     </section>
 
+    <!-- Quick Access Section -->
+    <section class="quick-access py-4" style="margin-top: -40px; position: relative; z-index: 10;">
+        <div class="container">
+            <div class="row g-3 justify-content-center">
+                <div class="col-lg-3 col-md-6">
+                    <a href="{% url 'osint_tools:dashboard' %}" class="quick-card">
+                        <div class="quick-icon"><i class="fas fa-search-location"></i></div>
+                        <div class="quick-info">
+                            <span class="quick-title">منصة الاستخبارات</span>
+                            <span class="quick-subtitle">Intelligence Console</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <a href="{% url 'osint_tools:tools_list' %}" class="quick-card">
+                        <div class="quick-icon"><i class="fas fa-tools"></i></div>
+                        <div class="quick-info">
+                            <span class="quick-title">جميع الأدوات</span>
+                            <span class="quick-subtitle">All OSINT Tools</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <a href="{% url 'osint_tools:cybersecurity_resources' %}" class="quick-card">
+                        <div class="quick-icon"><i class="fas fa-book-reader"></i></div>
+                        <div class="quick-info">
+                            <span class="quick-title">الموارد السيبرانية</span>
+                            <span class="quick-subtitle">Cyber Resources</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <a href="{% url 'osint_tools:utilities_dashboard' %}" class="quick-card">
+                        <div class="quick-icon"><i class="fas fa-toolbox"></i></div>
+                        <div class="quick-info">
+                            <span class="quick-title">الأدوات المساعدة</span>
+                            <span class="quick-subtitle">Utilities & Crypto</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- OSINT Tools Categories -->
     <section class="tools-categories py-5">
         <div class="container">
@@ -546,6 +590,51 @@
     max-width: 700px;
     margin-inline: auto;
     font-size: 1.1rem;
+}
+
+/* Quick Access */
+.quick-card {
+    display: flex;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 16px;
+    padding: 1.25rem;
+    text-decoration: none;
+    color: var(--text-light);
+    backdrop-filter: blur(12px);
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.quick-card:hover {
+    transform: translateY(-5px);
+    border-color: #667eea;
+    background: rgba(30, 41, 59, 0.95);
+    color: var(--text-light);
+}
+.quick-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-left: 1rem;
+    flex-shrink: 0;
+}
+.quick-info {
+    display: flex;
+    flex-direction: column;
+}
+.quick-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+.quick-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
 }
 
 /* Tools Categories */
