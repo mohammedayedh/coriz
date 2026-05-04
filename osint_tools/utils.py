@@ -998,6 +998,12 @@ class ReportGenerator:
         self.session = report.session
         self.results = OSINTResult.objects.filter(session=self.session)
         
+        # تفريق النتائج حسب نوع التقرير
+        if self.report.report_type == 'summary':
+            # في الملخص، نأخذ أفضل 15 نتيجة فقط (حسب الثقة)
+            self.results = self.results.order_by('-confidence')[:15]
+        # في 'detailed' نتركها كما هي لجلب كل النتائج
+        
     def generate(self):
         """إنشاء التقرير"""
         try:
