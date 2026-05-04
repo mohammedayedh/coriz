@@ -904,16 +904,22 @@ def download_report(request, report_id):
     """تحميل التقرير"""
     report = get_object_or_404(OSINTReport, id=report_id, user=request.user)
     
-    if not report.file:
-        raise Http404("ملف التقرير غير موجود")
+    import os
+    from django.http import FileResponse
+    
+    # التأكد من وجود الملف فعلياً
+    if not report.file or not report.file.storage.exists(report.file.name):
+        raise Http404("ملف التقرير غير موجود على الخادم")
     
     # زيادة عدد التحميلات
     report.downloaded_count += 1
     report.save(update_fields=['downloaded_count'])
     
-    response = HttpResponse(report.file.read(), content_type='application/octet-stream')
-    response['Content-Disposition'] = f'attachment; filename="{report.file.name}"'
+    # استخراج اسم الملف فقط بدون المسار (مثل osint_reports/) لتجنب رفض المتصفح
+    safe_filename = os.path.basename(report.file.name)
     
+    # استخدام FileResponse لتقديم الملف بشكل آمن
+    response = FileResponse(report.file.open('rb'), as_attachment=True, filename=safe_filename)
     return response
 
 
