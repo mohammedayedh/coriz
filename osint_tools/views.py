@@ -295,6 +295,15 @@ def sessions_list(request):
     tool_filter = request.GET.get('tool')
     if tool_filter:
         sessions = sessions.filter(tool_id=tool_filter)
+        
+    # فلترة حسب التاريخ
+    date_from = request.GET.get('date_from')
+    if date_from:
+        sessions = sessions.filter(created_at__gte=date_from)
+        
+    date_to = request.GET.get('date_to')
+    if date_to:
+        sessions = sessions.filter(created_at__lte=date_to)
     
     # البحث
     search_query = request.GET.get('search')

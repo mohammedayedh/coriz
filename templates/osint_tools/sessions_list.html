@@ -195,10 +195,10 @@
                             <ul class="pagination justify-content-center">
                                 {% if page_obj.has_previous %}
                                     <li class="page-item">
-                                        <a class="page-link" href="?page=1{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">الأولى</a>
+                                        <a class="page-link" href="?page=1{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">الأولى</a>
                                     </li>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">السابقة</a>
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">السابقة</a>
                                     </li>
                                 {% endif %}
 
@@ -210,10 +210,10 @@
 
                                 {% if page_obj.has_next %}
                                     <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">التالية</a>
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">التالية</a>
                                     </li>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">الأخيرة</a>
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.tool %}&tool={{ request.GET.tool }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">الأخيرة</a>
                                     </li>
                                 {% endif %}
                             </ul>
