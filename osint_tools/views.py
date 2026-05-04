@@ -703,8 +703,8 @@ def generate_report(request, session_id):
             status='pending'
         )
         
-        # جدولة إنشاء التقرير عبر Celery
-        task = generate_osint_report.delay(report.id)
+        # تنفيذ إنشاء التقرير بشكل فوري ومباشر لضمان عدم تعليقه
+        task = generate_osint_report.apply(args=[report.id])
         report.celery_task_id = task.id
         report.save(update_fields=['celery_task_id', 'updated_at'])
 
