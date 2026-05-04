@@ -26,7 +26,12 @@
             <div class="card-body p-0">
                 <textarea id="inputText" class="form-control border-0 text-white p-4 font-monospace fs-5" rows="4" 
                           style="background: rgba(0,0,0,0.3); resize: none; box-shadow: none;" 
-                          placeholder="اكتب النص هنا للبدء في التوليد اللحظي..." onkeyup="generateHashes()"></textarea>
+                          placeholder="اكتب النص هنا واضغط توليد..." onkeyup="generateHashes()"></textarea>
+                <div class="text-start p-3 border-top border-secondary" style="background: rgba(0,0,0,0.2);">
+                    <button class="btn btn-primary px-4" onclick="generateHashes()">
+                        <i class="fas fa-bolt me-2"></i>توليد الهاش الآن
+                    </button>
+                </div>
             </div>
         </div>
     </div>
