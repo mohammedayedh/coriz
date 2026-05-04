@@ -28,8 +28,11 @@
                           style="background: rgba(0,0,0,0.3); resize: none; box-shadow: none;" 
                           placeholder="اكتب النص هنا واضغط توليد..." onkeyup="generateHashes()"></textarea>
                 <div class="text-start p-3 border-top border-secondary" style="background: rgba(0,0,0,0.2);">
-                    <button class="btn btn-primary px-4" onclick="generateHashes()">
+                    <button class="btn btn-primary px-4 me-2" onclick="generateHashes()">
                         <i class="fas fa-bolt me-2"></i>توليد الهاش الآن
+                    </button>
+                    <button class="btn btn-outline-secondary px-4" onclick="clearInput()">
+                        <i class="fas fa-eraser me-2"></i>مسح
                     </button>
                 </div>
             </div>
@@ -98,24 +101,53 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <!-- استخدام مكتبة CryptoJS لتوليد الهاش لحظياً في المتصفح -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script>
     function generateHashes() {
-        const text = document.getElementById('inputText').value;
+        const input = document.getElementById('inputText');
+        const text = input.value;
         
+        const md5Out = document.getElementById('md5Output');
+        const sha1Out = document.getElementById('sha1Output');
+        const sha256Out = document.getElementById('sha256Output');
+        const sha512Out = document.getElementById('sha512Output');
+
         if (!text) {
-            document.getElementById('md5Output').value = '';
-            document.getElementById('sha1Output').value = '';
-            document.getElementById('sha256Output').value = '';
-            document.getElementById('sha512Output').value = '';
+            md5Out.value = '';
+            sha1Out.value = '';
+            sha256Out.value = '';
+            sha512Out.value = '';
             return;
         }
 
-        document.getElementById('md5Output').value = CryptoJS.MD5(text).toString();
-        document.getElementById('sha1Output').value = CryptoJS.SHA1(text).toString();
-        document.getElementById('sha256Output').value = CryptoJS.SHA256(text).toString();
-        document.getElementById('sha512Output').value = CryptoJS.SHA512(text).toString();
+        try {
+            if (typeof CryptoJS === 'undefined') {
+                console.error('CryptoJS is not loaded');
+                return;
+            }
+
+            md5Out.value = CryptoJS.MD5(text).toString();
+            sha1Out.value = CryptoJS.SHA1(text).toString();
+            sha256Out.value = CryptoJS.SHA256(text).toString();
+            sha512Out.value = CryptoJS.SHA512(text).toString();
+            
+            // إضافة فئة للتمييز عند التحديث
+            [md5Out, sha1Out, sha256Out, sha512Out].forEach(el => {
+                el.classList.add('is-valid');
+                setTimeout(() => el.classList.remove('is-valid'), 500);
+            });
+
+        } catch (error) {
+            console.error('Hash generation error:', error);
+        }
+    }
+
+    function clearInput() {
+        document.getElementById('inputText').value = '';
+        generateHashes();
+        document.getElementById('inputText').focus();
     }
 
     function copyHash(elementId, btnElement) {
@@ -124,13 +156,35 @@
 
         hashOutput.select();
         hashOutput.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(hashOutput.value).then(() => {
-            const originalHtml = btnElement.innerHTML;
-            btnElement.innerHTML = '<i class="fas fa-check text-success"></i> تم النسخ';
-            setTimeout(() => {
-                btnElement.innerHTML = originalHtml;
-            }, 2000);
-        });
+        
+        try {
+            navigator.clipboard.writeText(hashOutput.value).then(() => {
+                const originalHtml = btnElement.innerHTML;
+                btnElement.innerHTML = '<i class="fas fa-check text-success"></i> تم النسخ';
+                btnElement.classList.replace('btn-outline-secondary', 'btn-success');
+                
+                setTimeout(() => {
+                    btnElement.innerHTML = originalHtml;
+                    btnElement.classList.replace('btn-success', 'btn-outline-secondary');
+                }, 2000);
+            });
+        } catch (err) {
+            // Fallback for older browsers
+            document.execCommand('copy');
+            btnElement.innerHTML = 'تم!';
+            setTimeout(() => { btnElement.innerHTML = '<i class="fas fa-copy"></i> نسخ'; }, 2000);
+        }
     }
 </script>
+
+<style>
+    .is-valid {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.2) !important;
+    }
+    .form-control:read-only {
+        color: #00ff00 !important; /* لون أخضر سيكريت ليكون واضحاً جداً */
+        cursor: pointer;
+    }
+</style>
 {% endblock %}
