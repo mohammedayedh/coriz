@@ -32,11 +32,16 @@ def run_emailrep(email, output_file=None):
     """
     url = f"https://emailrep.io/{email}"
     
+    import os
     # يفضل وضع User-Agent لكي لا يتم حظر الطلب من السيرفر
     headers = {
         "User-Agent": "MyOSINT_Toolkit/1.0"
-        # "Key": "YOUR_API_KEY_HERE" # يمكنك إزالة علامة التعليق ووضع مفتاحك هنا إذا كان لديك حساب لزيادة الحد المسموح
     }
+    
+    # دعم استخدام مفتاح API إذا كان متوفراً في متغيرات البيئة لزيادة الحد المسموح
+    api_key = os.environ.get('EMAILREP_API_KEY')
+    if api_key:
+        headers["Key"] = api_key
 
     print(f"\n[*] Checking reputation for: {email}...")
 

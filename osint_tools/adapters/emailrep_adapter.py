@@ -34,12 +34,14 @@ def main():
         if result:
             print(json.dumps(result))
         else:
-            print(json.dumps({"error": "No data returned - rate limit or invalid email"}))
+            print(json.dumps({"error": "No data returned - rate limit exceeded or invalid email"}))
+            sys.exit(1)
 
     except Exception as e:
         sys.stdout.close()
         sys.stdout = original_stdout
         print(json.dumps({"error": str(e)}))
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
