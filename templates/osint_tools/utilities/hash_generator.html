@@ -31,7 +31,7 @@
                     <button class="btn btn-outline-secondary px-4" onclick="clearInput()">
                         <i class="fas fa-eraser me-2"></i>مسح الحقول
                     </button>
-                    <span class="text-secondary ms-3 small"><i class="fas fa-magic me-1"></i>يتم التوليد تلقائياً أثناء الكتابة</span>
+                    <span class="text-secondary ms-3 small"><i id="statusIcon" class="fas fa-magic me-1"></i>يتم التوليد تلقائياً أثناء الكتابة</span>
                 </div>
             </div>
         </div>
@@ -42,7 +42,7 @@
         <div class="row g-3">
             
             <!-- MD5 -->
-            <div class="col-md-6">
+            <div class="col-12">
                 <div class="content-card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -55,7 +55,7 @@
             </div>
 
             <!-- SHA-1 -->
-            <div class="col-md-6">
+            <div class="col-12">
                 <div class="content-card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -126,16 +126,15 @@
         const sha1Out = document.getElementById('sha1Output');
         const sha256Out = document.getElementById('sha256Output');
         const sha512Out = document.getElementById('sha512Output');
-        const genBtn = document.querySelector('button[onclick="generateHashes()"]');
+        const statusIcon = document.getElementById('statusIcon');
 
         if (!text) {
             [md5Out, sha1Out, sha256Out, sha512Out].forEach(el => el.value = '');
+            if (statusIcon) statusIcon.className = 'fas fa-magic me-1';
             return;
         }
 
-        const originalBtnHtml = genBtn.innerHTML;
-        genBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جاري التحليل...';
-        genBtn.disabled = true;
+        if (statusIcon) statusIcon.className = 'fas fa-spinner fa-spin me-1 text-primary';
 
         try {
             // 1. استخدام التشفير المحلي للمتصفح (SHA-1, SHA-256, SHA-512)
@@ -169,8 +168,7 @@
         } catch (error) {
             console.error('Hash error:', error);
         } finally {
-            genBtn.innerHTML = originalBtnHtml;
-            genBtn.disabled = false;
+            if (statusIcon) statusIcon.className = 'fas fa-check text-success me-1';
         }
     }
 
