@@ -30,6 +30,8 @@ class OSINTToolRunner:
         'subdomain-enum':             ('osint_tools.scrapers.cert_transparency',    'CertTransparencyScraper',   'search'),
         # CVE-Stalker - direct Python scraper
         'cvestalker-pro': ('osint_tools.scrapers.cve_stalker', 'CVEStalkerScraper', 'search'),
+        # GHunt - Google Intelligence
+        'ghunt': ('osint_tools.scrapers.ghunt_scraper', 'GHuntScraper', 'investigate_email'),
     }
 
     def __init__(self, session):
