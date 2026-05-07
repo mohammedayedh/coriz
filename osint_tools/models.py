@@ -65,7 +65,6 @@ class OSINTTool(JSONValidationMixin, models.Model):
         ('username', 'اسم المستخدم'),
         ('domain', 'النطاق'),
         ('ip', 'عنوان IP'),
-        ('phone', 'رقم الهاتف'),
         ('social', 'وسائل التواصل الاجتماعي'),
         ('google', 'Google'),
         ('general', 'عام'),
