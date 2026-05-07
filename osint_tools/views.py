@@ -915,8 +915,12 @@ def download_report(request, report_id):
     report.downloaded_count += 1
     report.save(update_fields=['downloaded_count'])
     
-    # استخراج اسم الملف فقط بدون المسار (مثل osint_reports/) لتجنب رفض المتصفح
-    safe_filename = os.path.basename(report.file.name)
+    # استخراج اسم الملف وإضافة تاريخ ووقت التصدير لجعله مميزاً وواضحاً للمستخدم
+    from django.utils import timezone
+    export_date = timezone.now().strftime('%Y%m%d_%H%M%S')
+    # Use the format of the report to determine extension
+    ext = report.format
+    safe_filename = f"Coriza_Report_{report.report_type}_{export_date}.{ext}"
     
     # استخدام FileResponse لتقديم الملف بشكل آمن
     response = FileResponse(report.file.open('rb'), as_attachment=True, filename=safe_filename)

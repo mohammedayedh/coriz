@@ -1180,7 +1180,7 @@ class ReportGenerator:
                 </tr>
             </thead>
             <tbody>{results_rows if results_rows else '<tr><td colspan="6" style="padding:24px;text-align:center;color:#64748b;">لا توجد نتائج مكتشفة</td></tr>'}</tbody>
-        </table>""" if self.results.exists() else '<p style="color:#64748b;text-align:center;padding:32px;">لا توجد نتائج في هذه الجلسة.</p>'
+        </table>""" if len(self.results) > 0 else '<p style="color:#64748b;text-align:center;padding:32px;">لا توجد نتائج في هذه الجلسة.</p>'
 
         report_type_label = {'summary': 'ملخص', 'detailed': 'مفصل', 'executive': 'تنفيذي', 'technical': 'تقني'}.get(self.report.report_type, self.report.report_type)
 
