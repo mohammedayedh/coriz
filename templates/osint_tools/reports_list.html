@@ -30,19 +30,14 @@
             </div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <button class="btn btn-primary w-100" onclick="generateReport()">
                             <i class="fas fa-file-plus me-2"></i>إنشاء تقرير جديد
                         </button>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <button class="btn btn-success w-100" onclick="exportAllReports()">
                             <i class="fas fa-download me-2"></i>تصدير جميع التقارير
-                        </button>
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn btn-info w-100" onclick="scheduleReport()">
-                            <i class="fas fa-clock me-2"></i>جدولة تقرير
                         </button>
                     </div>
                 </div>
@@ -465,10 +460,6 @@ function deleteReport(reportId) {
 function exportAllReports() {
     const params = new URLSearchParams(window.location.search);
     window.open(`/osint/ajax/export-results/all/?${params.toString()}`, '_blank');
-}
-
-function scheduleReport() {
-    alert('ميزة جدولة التقارير ستكون متاحة قريباً.\n\nيمكنك حالياً:\n• إنشاء تقارير فورية\n• تصدير التقارير بصيغ متعددة\n• مشاركة التقارير');
 }
 </script>
 
