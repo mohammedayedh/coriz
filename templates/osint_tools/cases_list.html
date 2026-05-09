@@ -5,70 +5,139 @@
 
 {% block content %}
 <div class="container py-5 mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="cyber-text m-0"><i class="fas fa-folder-open me-2"></i>القضايا والتحقيقات الجارية</h2>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newCaseModal">
-            <i class="fas fa-plus me-1"></i> فتح قضية جديدة
-        </button>
+    <!-- Academic / Presentation Module Header -->
+    <div class="module-presentation-header mb-5 p-4 rounded-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(2, 6, 23, 0.95) 100%); border: 1px solid rgba(34, 197, 94, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div class="position-absolute top-0 end-0 p-4 opacity-10">
+            <i class="fas fa-archive fa-8x text-success"></i>
+        </div>
+        
+        <div class="row position-relative z-2 align-items-center">
+            <div class="col-lg-8">
+                <div class="d-inline-block px-3 py-1 rounded-pill mb-3" style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2);">
+                    <i class="fas fa-layer-group me-2"></i>الوحدة الثانية: إدارة التحقيقات
+                </div>
+                <h2 class="fw-bold text-white mb-3" style="font-size: 2.2rem;">نظام إدارة ملفات القضايا (Case Management)</h2>
+                <p class="text-secondary mb-4" style="line-height: 1.8; font-size: 1.1rem;">
+                    يعتبر نظام إدارة القضايا هو العصب التنظيمي لمنصة "كوريزا". لا يقوم المحقق ببدء استعلامات عشوائية، بل يتم تغليف كل استهداف داخل <strong>"ملف قضية"</strong> مركزي. هذا التصميم يضمن ربط جميع الجلسات (Sessions)، الأدلة (Evidence)، والتقارير المتعلقة بهدف واحد في وعاء أمني معزول يسهل الرجوع إليه.
+                </p>
+                <div class="d-flex gap-3">
+                    <button class="btn btn-success px-4 py-2" data-bs-toggle="modal" data-bs-target="#newCaseModal" style="box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);">
+                        <i class="fas fa-plus me-2"></i>تأسيس ملف قضية جديد
+                    </button>
+                    <a href="#cases-grid" class="btn btn-outline-secondary px-4 py-2">
+                        <i class="fas fa-arrow-down me-2"></i>استعراض القضايا
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 d-none d-lg-block border-start border-secondary ps-4">
+                <h6 class="text-success fw-bold mb-3"><i class="fas fa-cogs me-2"></i>كيف تعمل هذه الوحدة؟</h6>
+                <ul class="list-unstyled text-secondary small" style="line-height: 1.8;">
+                    <li><i class="fas fa-check-circle text-success me-2"></i><strong>العزل:</strong> فصل بيئة عمل كل تحقيق عن الآخر.</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i><strong>التتبع:</strong> ربط تلقائي لمئات الاستعلامات بالهدف الأساسي.</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i><strong>الحفظ التلقائي:</strong> أرشفة النتائج بقاعدة البيانات لتقليل الاستعلام الخارجي (Rate Limits).</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <!-- Modal إنشاء قضية -->
     <div class="modal fade" id="newCaseModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content text-dark">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background: #0f172a; border: 1px solid rgba(34, 197, 94, 0.3);">
                 <form method="POST">
                     {% csrf_token %}
-                    <div class="modal-header">
-                        <h5 class="modal-title">فتح قضية جديدة</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title text-success"><i class="fas fa-folder-plus me-2"></i>تأسيس ملف قضية جديد</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">الهدف الأساسي / عنوان القضية</label>
-                            <input type="text" name="title" class="form-control" required placeholder="مثال: اختراق سيرفرات شركة X">
+                    <div class="modal-body p-4">
+                        <div class="alert alert-dark border-secondary text-secondary small mb-4">
+                            <i class="fas fa-info-circle me-2"></i>سيتم إنشاء بيئة معزولة لهذا التحقيق. جميع عمليات البحث القادمة ضمن هذه القضية سيتم ربطها آلياً لتسهيل بناء التقارير.
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label text-light">الهدف الأساسي / المسمى الرمزي للقضية</label>
+                            <input type="text" name="title" class="form-control bg-dark text-white border-secondary" required placeholder="مثال: اختراق سيرفرات شركة X / تتبع حساب المشتبه به Y">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">وصف القضية</label>
-                            <textarea name="description" class="form-control" rows="3" placeholder="تفاصيل مبدئية عن الهدف..."></textarea>
+                            <label class="form-label text-light">الوصف الأولي ومعطيات الاستخبارات (Intelligence Brief)</label>
+                            <textarea name="description" class="form-control bg-dark text-white border-secondary" rows="4" placeholder="أدخل تفاصيل مبدئية، روابط، أو أي ملاحظات للبدء..."></textarea>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">حفظ وفتح الملف</button>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-success px-4">حفظ واعتماد الملف <i class="fas fa-check ms-2"></i></button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <div class="row">
+    <!-- Title and Filters -->
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-5" id="cases-grid">
+        <h4 class="text-white m-0"><i class="fas fa-database text-secondary me-2"></i>الأرشيف الاستخباراتي (Cases Archive)</h4>
+        <div class="badge bg-dark border border-secondary p-2 text-secondary">
+            إجمالي الملفات: {{ page_obj.paginator.count }}
+        </div>
+    </div>
+
+    <div class="row g-4">
         {% for case in page_obj %}
-        <div class="col-md-6 mb-4">
-            <div class="card bg-dark text-light border-secondary hover-effect h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h4 class="card-title text-info">{{ case.title }}</h4>
-                        <span class="badge bg-{% if case.status == 'open' %}success{% elif case.status == 'in_progress' %}warning{% else %}danger{% endif %}">
-                            {{ case.get_status_display }}
-                        </span>
+        <div class="col-xl-4 col-md-6">
+            <div class="card h-100" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease;">
+                <!-- Status Header -->
+                <div class="card-header border-bottom border-secondary d-flex justify-content-between align-items-center py-3" style="background: rgba(0,0,0,0.2);">
+                    <span class="text-secondary small fw-bold"><i class="fas fa-fingerprint me-1"></i> ID: {{ case.id|stringformat:"04d" }}</span>
+                    {% if case.status == 'open' %}
+                        <span class="badge" style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">قضية مفتوحة</span>
+                    {% elif case.status == 'in_progress' %}
+                        <span class="badge" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">قيد التحليل</span>
+                    {% else %}
+                        <span class="badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">قضية مغلقة</span>
+                    {% endif %}
+                </div>
+                
+                <div class="card-body p-4">
+                    <h5 class="card-title text-white fw-bold mb-3">{{ case.title }}</h5>
+                    <p class="card-text text-secondary small mb-4" style="line-height: 1.6; height: 4.8em; overflow: hidden;">
+                        {{ case.description|default:"لا يوجد وصف أولي لهذه القضية." }}
+                    </p>
+                    
+                    <!-- Meta info -->
+                    <div class="d-flex justify-content-between align-items-center p-3 rounded" style="background: rgba(0,0,0,0.3);">
+                        <div class="text-center">
+                            <i class="fas fa-calendar-alt text-primary mb-1"></i>
+                            <div class="text-secondary" style="font-size: 0.7rem;">التأسيس</div>
+                            <div class="text-white small fw-bold">{{ case.created_at|date:"Y-m-d" }}</div>
+                        </div>
+                        <div class="border-start border-secondary" style="height: 30px;"></div>
+                        <div class="text-center">
+                            <i class="fas fa-terminal text-warning mb-1"></i>
+                            <div class="text-secondary" style="font-size: 0.7rem;">الجلسات</div>
+                            <div class="text-white small fw-bold">{{ case.sessions.count }} جلسة نشطة</div>
+                        </div>
                     </div>
-                    <p class="card-text text-muted">{{ case.description|truncatewords:20 }}</p>
-                    <div class="text-secondary small mb-3">
-                        <i class="fas fa-calendar-alt me-1"></i> {{ case.created_at|date:"Y-m-d H:i" }}
-                        <span class="mx-2">|</span>
-                        <i class="fas fa-search me-1"></i> {{ case.sessions.count }} جلسات
-                    </div>
-                    <a href="{% url 'osint_tools:case_detail' case.id %}" class="btn btn-outline-info w-100">
-                        استعراض الملف
+                </div>
+                
+                <div class="card-footer border-top border-secondary p-0">
+                    <a href="{% url 'osint_tools:case_detail' case.id %}" class="btn w-100 py-3 rounded-bottom text-white hover-glow" style="background: rgba(34, 197, 94, 0.1);">
+                        استعراض المعطيات <i class="fas fa-arrow-left ms-2"></i>
                     </a>
                 </div>
             </div>
         </div>
         {% empty %}
         <div class="col-12">
-            <div class="alert alert-secondary text-center py-5">
-                <i class="fas fa-folder-minus fa-3x mb-3 text-muted"></i>
-                <h5>لا يوجد قضايا مفتوحة!</h5>
-                <p>قم بفتح قضية جديدة لتبدأ العمل الاستخباراتي المنظم.</p>
+            <div class="alert p-5 text-center rounded-4" style="background: rgba(15, 23, 42, 0.8); border: 1px dashed rgba(255,255,255,0.2);">
+                <div class="mb-4 d-inline-block p-4 rounded-circle" style="background: rgba(34, 197, 94, 0.1);">
+                    <i class="fas fa-folder-open fa-4x text-success"></i>
+                </div>
+                <h4 class="text-white fw-bold">الأرشيف فارغ حالياً</h4>
+                <p class="text-secondary mx-auto mb-4" style="max-width: 500px;">
+                    لم يتم إنشاء أي ملفات قضايا حتى الآن. ابدأ بتأسيس ملف قضية جديد لتنظيم استعلاماتك وعمليات البحث التي ستقوم بها.
+                </p>
+                <button class="btn btn-success px-4 py-2" data-bs-toggle="modal" data-bs-target="#newCaseModal">
+                    <i class="fas fa-plus me-2"></i>إنشاء القضية الأولى
+                </button>
             </div>
         </div>
         {% endfor %}
@@ -76,16 +145,16 @@
 
     <!-- Pagination -->
     {% if page_obj.has_other_pages %}
-    <nav class="mt-4">
+    <nav class="mt-5">
         <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
-            <li class="page-item"><a class="page-link bg-dark text-info border-secondary" href="?page={{ page_obj.previous_page_number }}">السابق</a></li>
+            <li class="page-item"><a class="page-link" style="background: rgba(15, 23, 42, 0.8); border-color: rgba(255,255,255,0.1); color: #fff;" href="?page={{ page_obj.previous_page_number }}">السابق</a></li>
             {% endif %}
             
-            <li class="page-item active"><span class="page-link bg-info border-info">{{ page_obj.number }}</span></li>
+            <li class="page-item active"><span class="page-link bg-success border-success text-white">{{ page_obj.number }}</span></li>
             
             {% if page_obj.has_next %}
-            <li class="page-item"><a class="page-link bg-dark text-info border-secondary" href="?page={{ page_obj.next_page_number }}">التالي</a></li>
+            <li class="page-item"><a class="page-link" style="background: rgba(15, 23, 42, 0.8); border-color: rgba(255,255,255,0.1); color: #fff;" href="?page={{ page_obj.next_page_number }}">التالي</a></li>
             {% endif %}
         </ul>
     </nav>
