@@ -39,23 +39,23 @@
 {% endblock %}
 
 {% block content %}
+<div class="container pb-5">
+
 <!-- Header Section -->
-<section class="py-5 mt-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <h1 class="display-5 fw-bold mb-3">
-                    <i class="fas fa-chart-bar me-3"></i>نتائج الجلسة
-                </h1>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{% url 'osint_tools:dashboard' %}">لوحة التحكم</a></li>
-                        <li class="breadcrumb-item"><a href="{% url 'osint_tools:sessions_list' %}">الجلسات</a></li>
-                        <li class="breadcrumb-item"><a href="{% url 'osint_tools:session_detail' session.id %}">جلسة #{{ session.id }}</a></li>
-                        <li class="breadcrumb-item active">النتائج</li>
-                    </ol>
-                </nav>
-            </div>
+<section class="py-4 mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="fas fa-chart-bar ms-3"></i>نتائج الجلسة
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'osint_tools:dashboard' %}">لوحة التحكم</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'osint_tools:sessions_list' %}">الجلسات</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'osint_tools:session_detail' session.id %}">جلسة #{{ session.id }}</a></li>
+                    <li class="breadcrumb-item active">النتائج</li>
+                </ol>
+            </nav>
         </div>
     </div>
 </section>
@@ -368,13 +368,15 @@
 </div>
 
 <!-- Back Button -->
-<div class="row mt-4">
+<div class="row mt-4 mb-5">
     <div class="col-12">
         <a href="{% url 'osint_tools:session_detail' session.id %}" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-right me-2"></i>العودة لتفاصيل الجلسة
+            <i class="fas fa-arrow-right ms-2"></i>العودة لتفاصيل الجلسة
         </a>
     </div>
 </div>
+
+</div><!-- end container -->
 
 <script>
 function viewMode(mode) {
