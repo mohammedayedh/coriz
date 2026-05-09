@@ -331,42 +331,79 @@
     </section>
 
 
-    <!-- How It Works -->
-    <section class="how-it-works py-5">
+    <!-- Investigation Lifecycle (How It Works) -->
+    <section class="investigation-lifecycle py-5 position-relative" style="background: rgba(15, 23, 42, 0.4); border-top: 1px solid rgba(14, 165, 233, 0.1); border-bottom: 1px solid rgba(14, 165, 233, 0.1);">
         <div class="container">
-            <div class="section-head">
-                <h2 class="section-title">كيف تعمل المنصة</h2>
-                <p class="section-lead">عملية بسيطة من 4 خطوات للحصول على نتائج احترافية</p>
+            <div class="section-head text-center mb-5">
+                <div class="d-inline-block px-3 py-1 rounded-pill mb-3" style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2);">
+                    <i class="fas fa-sync-alt me-2"></i>دورة حياة التحقيق (Intelligence Lifecycle)
+                </div>
+                <h2 class="section-title fw-bold" style="font-size: 2.2rem;">كيف تتم إدارة العمليات داخل كوريزا؟</h2>
+                <p class="section-lead mx-auto" style="max-width: 700px;">
+                    منهجية العمل في المنصة تحاكي المعايير الاحترافية لإدارة التحقيقات الجنائية الرقمية، بدءاً من تحديد الهدف وحتى استخراج التقرير النهائي.
+                </p>
             </div>
-            <div class="row g-4">
-                <div class="col-lg-3 col-md-6">
-                    <div class="step-card">
-                        <div class="step-number">1</div>
-                        <h5>اختر الأداة</h5>
-                        <p>اختر من بين 27 أداة متخصصة حسب نوع البحث</p>
+
+            <!-- Workflow Container -->
+            <div class="workflow-container position-relative mt-5">
+                <!-- Connecting Line -->
+                <div class="d-none d-lg-block position-absolute" style="top: 25%; left: 10%; right: 10%; height: 2px; background: linear-gradient(90deg, rgba(14,165,233,0) 0%, rgba(14,165,233,0.5) 50%, rgba(14,165,233,0) 100%); z-index: 1;"></div>
+
+                <div class="row g-4 position-relative z-2">
+                    <!-- Step 1 -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="workflow-step text-center p-4 rounded-4 h-100" style="background: #0f172a; border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;">
+                            <div class="step-icon mb-4 mx-auto" style="width: 70px; height: 70px; background: linear-gradient(135deg, rgba(14,165,233,0.2) 0%, rgba(14,165,233,0.05) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(14,165,233,0.5);">
+                                <i class="fas fa-folder-plus fa-2x text-primary"></i>
+                            </div>
+                            <div class="step-badge mb-2 d-inline-block px-2 py-1 rounded text-primary small" style="background: rgba(14,165,233,0.1);">المرحلة الأولى</div>
+                            <h5 class="fw-bold text-white mb-3">التهيئة والتنظيم</h5>
+                            <p class="text-secondary small">يتم إنشاء "ملف قضية" (Case) جديد لتحديد مسار التحقيق، الهدف (إيميل، نطاق، اسم مستخدم)، وتجهيز بيئة العمل.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="workflow-step text-center p-4 rounded-4 h-100" style="background: #0f172a; border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;">
+                            <div class="step-icon mb-4 mx-auto" style="width: 70px; height: 70px; background: linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(245,158,11,0.05) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(245,158,11,0.5);">
+                                <i class="fas fa-satellite-dish fa-2x text-warning"></i>
+                            </div>
+                            <div class="step-badge mb-2 d-inline-block px-2 py-1 rounded text-warning small" style="background: rgba(245,158,11,0.1);">المرحلة الثانية</div>
+                            <h5 class="fw-bold text-white mb-3">الاستطلاع العميق</h5>
+                            <p class="text-secondary small">إطلاق جلسات (Sessions) متعددة ومتزامنة باستخدام أدوات OSINT لجمع البيانات الخام من عشرات المصادر.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="workflow-step text-center p-4 rounded-4 h-100" style="background: #0f172a; border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;">
+                            <div class="step-icon mb-4 mx-auto" style="width: 70px; height: 70px; background: linear-gradient(135deg, rgba(168,85,247,0.2) 0%, rgba(168,85,247,0.05) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(168,85,247,0.5);">
+                                <i class="fas fa-project-diagram fa-2x text-purple" style="color: #a855f7;"></i>
+                            </div>
+                            <div class="step-badge mb-2 d-inline-block px-2 py-1 rounded text-purple small" style="color: #a855f7; background: rgba(168,85,247,0.1);">المرحلة الثالثة</div>
+                            <h5 class="fw-bold text-white mb-3">التحليل والمقاطعة</h5>
+                            <p class="text-secondary small">معالجة النتائج المكتشفة، استخدام أدوات التشفير لفك الغموض، وربط الخيوط عبر لوحة التحليلات.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="workflow-step text-center p-4 rounded-4 h-100" style="background: #0f172a; border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;">
+                            <div class="step-icon mb-4 mx-auto" style="width: 70px; height: 70px; background: linear-gradient(135deg, rgba(34,197,94,0.2) 0%, rgba(34,197,94,0.05) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(34,197,94,0.5);">
+                                <i class="fas fa-file-signature fa-2x text-success"></i>
+                            </div>
+                            <div class="step-badge mb-2 d-inline-block px-2 py-1 rounded text-success small" style="background: rgba(34,197,94,0.1);">المرحلة الرابعة</div>
+                            <h5 class="fw-bold text-white mb-3">الاعتماد والتصدير</h5>
+                            <p class="text-secondary small">تخزين البيانات بشكل آمن وتوليد تقارير استخباراتية رسمية (PDF/JSON) جاهزة للعرض أو الاعتماد.</p>
+                        </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="step-card">
-                        <div class="step-number">2</div>
-                        <h5>أدخل الهدف</h5>
-                        <p>أدخل البريد، اسم المستخدم، النطاق، أو أي هدف آخر</p>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="step-card">
-                        <div class="step-number">3</div>
-                        <h5>شغّل الأداة</h5>
-                        <p>راقب التقدم في الوقت الفعلي مع تحديثات مباشرة</p>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="step-card">
-                        <div class="step-number">4</div>
-                        <h5>احصل على النتائج</h5>
-                        <p>استعرض، حلل، وصدّر النتائج بصيغ متعددة</p>
-                    </div>
-                </div>
+            </div>
+            
+            <div class="text-center mt-5">
+                <a href="{% url 'osint_tools:dashboard' %}" class="btn btn-primary px-4 py-2" style="box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);">
+                    <i class="fas fa-play-circle me-2"></i>بدء أول دورة تحقيق لك
+                </a>
             </div>
         </div>
     </section>
