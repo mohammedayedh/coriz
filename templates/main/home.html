@@ -408,47 +408,80 @@
         </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="stats-section py-5">
-        <div class="container">
-            <div class="row g-4 text-center">
+    <!-- Advanced Stats Section (Capabilities in Numbers) -->
+    <section class="platform-stats py-5 position-relative overflow-hidden" style="background: linear-gradient(135deg, #020617 0%, #0f172a 100%); border-top: 1px solid rgba(14, 165, 233, 0.2); border-bottom: 1px solid rgba(14, 165, 233, 0.2);">
+        <!-- Background decorative elements -->
+        <div class="position-absolute" style="top: 10%; left: 5%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(14, 165, 233, 0.05) 0%, transparent 70%);"></div>
+        <div class="position-absolute" style="bottom: 10%; right: 5%; width: 250px; height: 250px; background: radial-gradient(circle, rgba(34, 197, 94, 0.05) 0%, transparent 70%);"></div>
+        
+        <div class="container position-relative z-2">
+            <div class="section-head text-center mb-5">
+                <h2 class="section-title fw-bold text-white mb-3" style="font-size: 2rem;">قدرات وإمكانيات المنصة بالأرقام</h2>
+                <p class="text-secondary mx-auto" style="max-width: 600px;">
+                    إحصائيات تعكس حجم التغطية الاستخباراتية التي توفرها كوريزا لضمان عدم ترك أي أثر رقمي دون فحص.
+                </p>
+            </div>
+
+            <div class="row g-4 justify-content-center">
+                <!-- Stat 1 -->
                 <div class="col-lg-3 col-md-6">
-                    <div class="stat-box">
-                        <div class="stat-icon">
-                            <i class="fas fa-tools"></i>
+                    <div class="stat-card-advanced h-100 text-center p-4 rounded-4" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(14, 165, 233, 0.2); backdrop-filter: blur(10px); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                        <div class="stat-icon-wrapper mb-3 mx-auto" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; background: rgba(14, 165, 233, 0.05); border-radius: 50%; box-shadow: inset 0 0 20px rgba(14, 165, 233, 0.1);">
+                            <i class="fas fa-satellite fa-2x text-primary" style="text-shadow: 0 0 10px rgba(14,165,233,0.5);"></i>
                         </div>
-                        <h3 class="stat-number">27</h3>
-                        <p class="stat-label">أداة OSINT</p>
+                        <h2 class="display-4 fw-bold text-white mb-1" style="font-family: monospace;">27+</h2>
+                        <h6 class="text-primary fw-bold mb-2">أداة استخباراتية نشطة</h6>
+                        <p class="text-secondary small mb-0">محركات فحص مدمجة تعمل بشكل متوازٍ</p>
                     </div>
                 </div>
+
+                <!-- Stat 2 -->
                 <div class="col-lg-3 col-md-6">
-                    <div class="stat-box">
-                        <div class="stat-icon">
-                            <i class="fas fa-globe"></i>
+                    <div class="stat-card-advanced h-100 text-center p-4 rounded-4" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(168, 85, 247, 0.2); backdrop-filter: blur(10px); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                        <div class="stat-icon-wrapper mb-3 mx-auto" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; background: rgba(168, 85, 247, 0.05); border-radius: 50%; box-shadow: inset 0 0 20px rgba(168, 85, 247, 0.1);">
+                            <i class="fas fa-network-wired fa-2x text-purple" style="color: #a855f7; text-shadow: 0 0 10px rgba(168,85,247,0.5);"></i>
                         </div>
-                        <h3 class="stat-number">2500+</h3>
-                        <p class="stat-label">موقع مدعوم</p>
+                        <h2 class="display-4 fw-bold text-white mb-1" style="font-family: monospace;">2500+</h2>
+                        <h6 class="fw-bold mb-2" style="color: #a855f7;">موقع ومنصة مدعومة</h6>
+                        <p class="text-secondary small mb-0">نطاق بحث واسع يغطي أغلب شبكات التواصل</p>
                     </div>
                 </div>
+
+                <!-- Stat 3 -->
                 <div class="col-lg-3 col-md-6">
-                    <div class="stat-box">
-                        <div class="stat-icon">
-                            <i class="fas fa-newspaper"></i>
+                    <div class="stat-card-advanced h-100 text-center p-4 rounded-4" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(245, 158, 11, 0.2); backdrop-filter: blur(10px); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                        <div class="stat-icon-wrapper mb-3 mx-auto" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; background: rgba(245, 158, 11, 0.05); border-radius: 50%; box-shadow: inset 0 0 20px rgba(245, 158, 11, 0.1);">
+                            <i class="fas fa-rss fa-2x text-warning" style="text-shadow: 0 0 10px rgba(245,158,11,0.5);"></i>
                         </div>
-                        <h3 class="stat-number">50+</h3>
-                        <p class="stat-label">مصدر أمني</p>
+                        <h2 class="display-4 fw-bold text-white mb-1" style="font-family: monospace;">50+</h2>
+                        <h6 class="text-warning fw-bold mb-2">مصدر استخباراتي مباشر</h6>
+                        <p class="text-secondary small mb-0">تحديثات حية لأخبار الثغرات والتهديدات</p>
                     </div>
                 </div>
+
+                <!-- Stat 4 -->
                 <div class="col-lg-3 col-md-6">
-                    <div class="stat-box">
-                        <div class="stat-icon">
-                            <i class="fas fa-shield-alt"></i>
+                    <div class="stat-card-advanced h-100 text-center p-4 rounded-4" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(34, 197, 94, 0.2); backdrop-filter: blur(10px); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                        <div class="stat-icon-wrapper mb-3 mx-auto" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; background: rgba(34, 197, 94, 0.05); border-radius: 50%; box-shadow: inset 0 0 20px rgba(34, 197, 94, 0.1);">
+                            <i class="fas fa-shield-check fa-2x text-success" style="text-shadow: 0 0 10px rgba(34,197,94,0.5);"></i>
                         </div>
-                        <h3 class="stat-number">4</h3>
-                        <p class="stat-label">مستوى أمان</p>
+                        <h2 class="display-4 fw-bold text-white mb-1" style="font-family: monospace;">4</h2>
+                        <h6 class="text-success fw-bold mb-2">مستويات تصريح أمني</h6>
+                        <p class="text-secondary small mb-0">بنية تحتية صارمة للتحكم في الوصول للبيانات</p>
                     </div>
                 </div>
             </div>
+            
+            <style>
+                .stat-card-advanced:hover {
+                    transform: translateY(-10px);
+                    background: rgba(255,255,255,0.05) !important;
+                }
+                .stat-card-advanced:hover .stat-icon-wrapper i {
+                    transform: scale(1.1);
+                    transition: transform 0.3s ease;
+                }
+            </style>
         </div>
     </section>
 
