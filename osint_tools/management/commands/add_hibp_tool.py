@@ -16,7 +16,7 @@ class Command(BaseCommand):
             slug='hibp',
             defaults={
                 'name': 'Have I Been Pwned',
-                'description': 'محرك بحث عن التسريبات الأمنية وقواعد البيانات المخترقة. يحتوي على أكثر من 12 مليار حساب مسرب من آلاف التسريبات الأمنية',
+                'description': 'محرك بحث عن التسريبات الأمنية وقواعد البيانات المخترقة. يحتوي على أكثر من 12 مليار حساب مسرب من آلاف التسريبات الأمنية. يوفر معلومات تفصيلية عن كل تسريب والبحث في مواقع Paste وفحص كلمات المرور المخترقة. مجاني 100% ولا يحتاج API key.',
                 'tool_type': 'email',
                 'source_type': 'open',
                 'required_clearance': 'L1',
@@ -25,9 +25,9 @@ class Command(BaseCommand):
                 'color': '#00a8cc',
                 'requires_auth': False,
                 'api_key_required': False,
-                'rate_limit': 40,  # 40 طلب/دقيقة (مع rate limiting داخلي)
+                'rate_limit': 40,
                 'timeout': 30,
-                'tool_path': '',  # يعمل مباشرة عبر scraper
+                'tool_path': '',
                 'executable_name': '',
                 'command_template': '',
                 'config_schema': {
@@ -46,32 +46,7 @@ class Command(BaseCommand):
                         'default': True,
                         'description': 'تضمين التسريبات غير المؤكدة'
                     }
-                },
-                'input_types': ['email'],
-                'output_format': 'json',
-                'documentation_url': 'https://haveibeenpwned.com/API/v3',
-                'example_usage': 'أدخل عنوان بريد إلكتروني للبحث عن التسريبات المرتبطة به',
-                'tags': ['breach', 'leak', 'security', 'email', 'password', 'data-breach'],
-                'features': [
-                    'البحث في أكثر من 12 مليار حساب مسرب',
-                    'معلومات تفصيلية عن كل تسريب',
-                    'البحث في مواقع Paste',
-                    'فحص كلمات المرور المخترقة',
-                    'مجاني 100% - لا يحتاج API key',
-                    'تحديثات مستمرة'
-                ],
-                'limitations': [
-                    'Rate Limiting: طلب واحد كل 1.5 ثانية',
-                    'لا يعرض كلمات المرور المسربة (لأسباب أمنية)',
-                    'يعرض فقط التسريبات المعروفة والموثقة'
-                ],
-                'use_cases': [
-                    'التحقق من أمان البريد الإلكتروني',
-                    'اكتشاف التسريبات الأمنية',
-                    'تقييم المخاطر الأمنية',
-                    'التحقيق في الحوادث الأمنية',
-                    'مراقبة أمان الحسابات'
-                ]
+                }
             }
         )
         
