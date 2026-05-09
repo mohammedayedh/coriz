@@ -10,43 +10,27 @@ class Command(BaseCommand):
     help = 'إضافة أداة Have I Been Pwned (HIBP) إلى قاعدة البيانات'
 
     def handle(self, *args, **options):
-        self.stdout.write('🔍 إضافة Have I Been Pwned (HIBP)...')
+        self.stdout.write('🔍 إضافة Password Pwned Checker (HIBP)...')
         
         tool, created = OSINTTool.objects.update_or_create(
             slug='hibp',
             defaults={
-                'name': 'Have I Been Pwned',
-                'description': 'محرك بحث عن التسريبات الأمنية وقواعد البيانات المخترقة. يحتوي على أكثر من 12 مليار حساب مسرب من آلاف التسريبات الأمنية. يوفر معلومات تفصيلية عن كل تسريب والبحث في مواقع Paste وفحص كلمات المرور المخترقة. مجاني 100% ولا يحتاج API key.',
-                'tool_type': 'email',
+                'name': 'Password Pwned Checker',
+                'description': 'فحص كلمات المرور في قاعدة بيانات Have I Been Pwned - أكثر من 850 مليون كلمة مرور مخترقة. يستخدم k-Anonymity لحماية خصوصيتك (لا يرسل كلمة المرور كاملة). مجاني 100% ولا يحتاج API key.',
+                'tool_type': 'general',
                 'source_type': 'open',
                 'required_clearance': 'L1',
                 'status': 'active',
-                'icon': 'fas fa-shield-alt',
-                'color': '#00a8cc',
+                'icon': 'fas fa-key',
+                'color': '#e74c3c',
                 'requires_auth': False,
                 'api_key_required': False,
-                'rate_limit': 40,
+                'rate_limit': 100,
                 'timeout': 30,
-                'tool_path': 'hibp_scraper',  # يعمل عبر scraper مباشر
-                'executable_name': 'HIBPScraper',  # اسم الـ class
-                'command_template': 'python_scraper',  # علامة أنه scraper مباشر
-                'config_schema': {
-                    'check_breaches': {
-                        'type': 'boolean',
-                        'default': True,
-                        'description': 'البحث في قاعدة بيانات التسريبات'
-                    },
-                    'check_pastes': {
-                        'type': 'boolean',
-                        'default': True,
-                        'description': 'البحث في مواقع Paste'
-                    },
-                    'include_unverified': {
-                        'type': 'boolean',
-                        'default': True,
-                        'description': 'تضمين التسريبات غير المؤكدة'
-                    }
-                }
+                'tool_path': 'hibp_scraper',
+                'executable_name': 'HIBPScraper',
+                'command_template': 'python_scraper',
+                'config_schema': {}
             }
         )
         
