@@ -47,97 +47,63 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
 
-                <!-- Main Navigation - في الوسط بترتيب عكسي -->
-                <ul class="navbar-nav mx-auto">
+                <!-- Platform Architecture Navigation -->
+                <ul class="navbar-nav mx-auto cyber-nav-menu">
+                    <!-- Home -->
                     <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'main:home' %}">
-                            <i class="fas fa-home me-1"></i>الرئيسية
+                        <a class="nav-link interactive-element {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'main:home' %}">
+                            <i class="fas fa-satellite-dish me-1"></i>الرئيسية
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'osint_tools:simple_search' %}">
-                            <i class="fas fa-search me-1"></i>البحث السريع
+
+                    <!-- Module 1: Recon Engine -->
+                    <li class="nav-item dropdown dropdown-mega">
+                        <a class="nav-link dropdown-toggle" href="#" id="reconDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-radar me-1"></i>محرك الاستطلاع
                         </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'osint_tools:sessions_list' %}">
-                            <i class="fas fa-history me-1"></i>الجلسات السابقة
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'osint_tools:reports_list' %}">
-                            <i class="fas fa-file-alt me-1"></i>التقارير
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'osint_tools:analytics' %}">
-                            <i class="fas fa-chart-line me-1"></i>التحليلات
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="osintToolsDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-tools me-1"></i>أدوات OSINT
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="osintToolsDropdown">
-                            <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:dashboard' %}">
-                                    <i class="fas fa-tachometer-alt me-2"></i>لوحة التحكم
-                                </a></li>
-                            <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:cases_list' %}">
-                                    <i class="fas fa-folder-open me-2"></i>القضايا (Cases)
-                                </a></li>
-                            <li><a class="dropdown-item interactive-element" href="{% url 'osint_tools:tools_list' %}">
-                                    <i class="fas fa-tools me-2"></i>جميع المصادر والأدوات
-                                </a></li>
-                            <li><a class="dropdown-item interactive-element"
-                                    href="{% url 'osint_tools:results_list' %}">
-                                    <i class="fas fa-search me-2"></i>النتائج المكتشفة
-                                </a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item interactive-element"
-                                    href="{% url 'osint_tools:cybersecurity_resources' %}">
-                                    <i class="fas fa-newspaper me-2"></i>مصادر الأمن السيبراني
-                                </a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#" id="intelligenceToolsDropdown">
-                                    <i class="fas fa-crosshairs me-2"></i>أدوات الاستخبارات
-                                </a>
-                                <ul class="dropdown-menu dropdown-submenu-menu">
-                                    <li><a class="dropdown-item" href="{% url 'osint_tools:ip_lookup' %}">
-                                            <i class="fas fa-map-marker-alt me-2"></i>IP Lookup
-                                        </a></li>
-                                    <li><a class="dropdown-item" href="{% url 'osint_tools:domain_recon' %}">
-                                            <i class="fas fa-globe me-2"></i>Domain Recon
-                                        </a></li>
-                                    <li><a class="dropdown-item" href="{% url 'osint_tools:email_scanner' %}">
-                                            <i class="fas fa-envelope-open-text me-2"></i>Email Scanner
-                                        </a></li>
-                                    <li><a class="dropdown-item" href="{% url 'osint_tools:virustotal_scan' %}">
-                                            <i class="fas fa-shield-virus me-2"></i>VirusTotal Scan
-                                        </a></li>
-                                    <li><a class="dropdown-item" href="{% url 'osint_tools:threat_intel' %}">
-                                            <i class="fas fa-satellite me-2"></i>Threat Intelligence
-                                        </a></li>
-                                </ul>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item interactive-element"
-                                    href="{% url 'osint_tools:utilities_dashboard' %}">
-                                    <i class="fas fa-toolbox me-2"></i>مركز الأدوات
-                                </a></li>
+                        <ul class="dropdown-menu dropdown-menu-dark cyber-dropdown" aria-labelledby="reconDropdown">
+                            <li class="dropdown-header text-primary"><i class="fas fa-microchip me-2"></i>أدوات جمع البيانات</li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:simple_search' %}"><i class="fas fa-search me-2"></i>بحث استخباراتي سريع</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:tools_list' %}"><i class="fas fa-toolbox me-2"></i>ترسانة أدوات OSINT كاملة</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li class="dropdown-header text-primary"><i class="fas fa-crosshairs me-2"></i>استطلاع مخصص</li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:domain_recon' %}"><i class="fas fa-globe me-2"></i>تحليل النطاقات (Domain)</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:ip_lookup' %}"><i class="fas fa-map-marker-alt me-2"></i>تتبع العناوين (IP Lookup)</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:email_scanner' %}"><i class="fas fa-envelope-open-text me-2"></i>فحص البريد الإلكتروني</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:threat_intel' %}"><i class="fas fa-shield-virus me-2"></i>تحليل الروابط (Threat Intel)</a></li>
                         </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link interactive-element" href="{% url 'main:contact' %}">
-                            <i class="fas fa-bug me-1"></i>التواصل
+
+                    <!-- Module 2: Investigation Management -->
+                    <li class="nav-item dropdown dropdown-mega">
+                        <a class="nav-link dropdown-toggle" href="#" id="investigationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-folder-tree me-1"></i>إدارة التحقيقات
                         </a>
+                        <ul class="dropdown-menu dropdown-menu-dark cyber-dropdown" aria-labelledby="investigationDropdown">
+                            <li class="dropdown-header text-success"><i class="fas fa-archive me-2"></i>ملفات القضايا</li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:cases_list' %}"><i class="fas fa-briefcase me-2"></i>سجل القضايا المفتوحة والمغلقة</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:sessions_list' %}"><i class="fas fa-history me-2"></i>سجل الجلسات (Sessions Log)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li class="dropdown-header text-success"><i class="fas fa-database me-2"></i>قاعدة البيانات والمخرجات</li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:results_list' %}"><i class="fas fa-table me-2"></i>قاعدة بيانات النتائج (Data Lake)</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:reports_list' %}"><i class="fas fa-file-signature me-2"></i>إصدار وتصدير التقارير الرسمية</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Module 3: Analytics & Utilities -->
+                    <li class="nav-item dropdown dropdown-mega">
+                        <a class="nav-link dropdown-toggle" href="#" id="analyticsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-network-wired me-1"></i>التحليلات والموارد
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark cyber-dropdown" aria-labelledby="analyticsDropdown">
+                            <li class="dropdown-header text-warning"><i class="fas fa-chart-pie me-2"></i>تحليلات البيانات</li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:analytics' %}"><i class="fas fa-chart-line me-2"></i>لوحة التحليلات المرئية المتقدمة</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>شاشة المراقبة الرئيسية للعمليات</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li class="dropdown-header text-warning"><i class="fas fa-shield-alt me-2"></i>الأدوات والمصادر الأمنية</li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:utilities_dashboard' %}"><i class="fas fa-fingerprint me-2"></i>مركز الهندسة العكسية والتشفير</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:cybersecurity_resources' %}"><i class="fas fa-newspaper me-2"></i>موجز التهديدات ومصادر السايبر</a></li>
+                        </ul>
                     </li>
                 </ul>
 
