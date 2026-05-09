@@ -1341,35 +1341,82 @@ def api_domain_recon(request):
 
         results = {'domain': domain}
 
-        # --- WHOIS via hackertarget (free, no key required) ---
-        try:
-            whois_raw = urllib.request.urlopen(
-                f'https://api.hackertarget.com/whois/?q={urllib.parse.quote(domain)}',
-                timeout=12
-            ).read().decode('utf-8', errors='replace')
-            results['whois'] = whois_raw[:3000]  # limit size
-        except Exception:
-            results['whois'] = 'تعذّر جلب بيانات WHOIS'
-
-        # --- DNS Records via hackertarget ---
-        dns_types = {'A': 'dnslookup', 'MX': 'mxlookup'}
-        results['dns'] = {}
-        for record_type, endpoint in dns_types.items():
-            try:
-                dns_raw = urllib.request.urlopen(
-                    f'https://api.hackertarget.com/{endpoint}/?q={urllib.parse.quote(domain)}',
-                    timeout=10
-                ).read().decode('utf-8', errors='replace')
-                results['dns'][record_type] = dns_raw[:2000]
-            except Exception:
-                results['dns'][record_type] = 'تعذّر الاستعلام'
-
-        # --- IP resolution ---
+        # --- IP resolution (أولاً لأنه لا يحتاج API) ---
         try:
             resolved_ip = socket.gethostbyname(domain)
             results['resolved_ip'] = resolved_ip
-        except Exception:
-            results['resolved_ip'] = 'تعذّر الحل'
+        except Exception as e:
+            results['resolved_ip'] = f'تعذّر الحل: {str(e)}'
+
+        # --- WHOIS via hackertarget (مع معالجة الأخطاء المحسّنة) ---
+        try:
+            req = urllib.request.Request(
+                f'https://api.hackertarget.com/whois/?q={urllib.parse.quote(domain)}'
+            )
+            req.add_header('User-Agent', 'Coriza-OSINT/1.0')
+            
+            with urllib.request.urlopen(req, timeout=12) as response:
+                whois_raw = response.read().decode('utf-8', errors='replace')
+                
+            # التحقق من رسائل الخطأ من hackertarget
+            if 'error' in whois_raw.lower() and 'valid key required' in whois_raw.lower():
+                # استخدام طريقة بديلة - WHOIS مباشر
+                results['whois'] = 'خدمة WHOIS محدودة - استخدم أدوات WHOIS خارجية للحصول على معلومات كاملة'
+            elif len(whois_raw.strip()) < 10:
+                results['whois'] = 'لا توجد معلومات WHOIS متاحة'
+            else:
+                results['whois'] = whois_raw[:3000]  # limit size
+        except Exception as e:
+            logger.warning(f'WHOIS lookup failed for {domain}: {e}')
+            results['whois'] = f'تعذّر جلب بيانات WHOIS'
+
+        # --- DNS Records (استخدام Python DNS بدلاً من API) ---
+        results['dns'] = {}
+        
+        # DNS A Records
+        try:
+            import socket
+            ip_list = socket.getaddrinfo(domain, None)
+            a_records = list(set([ip[4][0] for ip in ip_list if ':' not in ip[4][0]]))  # IPv4 only
+            results['dns']['A'] = '\n'.join(a_records) if a_records else 'لا توجد سجلات A'
+        except Exception as e:
+            results['dns']['A'] = f'تعذّر الاستعلام: {str(e)}'
+
+        # DNS MX Records (استخدام nslookup بديل)
+        try:
+            import subprocess
+            mx_result = subprocess.run(
+                ['nslookup', '-type=MX', domain],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            if mx_result.returncode == 0 and 'mail exchanger' in mx_result.stdout.lower():
+                # استخراج سجلات MX
+                mx_lines = [line.strip() for line in mx_result.stdout.split('\n') 
+                           if 'mail exchanger' in line.lower()]
+                results['dns']['MX'] = '\n'.join(mx_lines) if mx_lines else 'لا توجد سجلات MX'
+            else:
+                results['dns']['MX'] = 'لا توجد سجلات MX'
+        except Exception as e:
+            # محاولة بديلة باستخدام hackertarget
+            try:
+                req = urllib.request.Request(
+                    f'https://api.hackertarget.com/mxlookup/?q={urllib.parse.quote(domain)}'
+                )
+                req.add_header('User-Agent', 'Coriza-OSINT/1.0')
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    mx_raw = response.read().decode('utf-8', errors='replace')
+                    
+                if 'error' not in mx_raw.lower():
+                    results['dns']['MX'] = mx_raw[:2000]
+                else:
+                    results['dns']['MX'] = 'لا توجد سجلات MX'
+            except:
+                results['dns']['MX'] = 'تعذّر الاستعلام'
+
+        # إضافة معلومات إضافية
+        results['note'] = 'بعض الخدمات قد تكون محدودة بدون مفاتيح API'
 
         return JsonResponse({'success': True, 'data': results})
 
