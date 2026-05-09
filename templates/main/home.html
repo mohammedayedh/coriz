@@ -127,88 +127,163 @@
         </div>
     </section>
 
-    <!-- OSINT Tools Categories -->
-    <section class="tools-categories py-5">
+    <!-- OSINT Tools Categories (Replaced with Platform Architecture Map) -->
+    <section class="platform-architecture py-5" id="architecture-map">
         <div class="container">
-            <div class="section-head">
-                <h2 class="section-title">أدوات OSINT المتخصصة</h2>
-                <p class="section-lead">27 أداة احترافية مصنفة حسب نوع البحث - من البريد الإلكتروني إلى الثغرات الأمنية</p>
+            <div class="section-head text-center mb-5">
+                <div class="d-inline-block px-3 py-1 rounded-pill mb-3" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9; border: 1px solid rgba(14, 165, 233, 0.2);">
+                    <i class="fas fa-project-diagram me-2"></i>هيكلية المنصة (Platform Architecture)
+                </div>
+                <h2 class="section-title fw-bold" style="font-size: 2.5rem;">الخريطة الشاملة لقدرات المنصة</h2>
+                <p class="section-lead mx-auto" style="max-width: 800px; line-height: 1.8;">
+                    تم تصميم منصة "كوريزا" بناءً على معمارية استخباراتية ثلاثية الأبعاد، تضمن تدفقاً منطقياً للعمليات بدءاً من جمع البيانات، مروراً بإدارة التحقيقات، وصولاً إلى التحليل والتشفير.
+                </p>
             </div>
-            <div class="row g-4">
-                <!-- Email Tools -->
-                <div class="col-lg-3 col-md-6">
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <i class="fas fa-envelope"></i>
+            
+            <div class="row g-4 mb-5">
+                <!-- Module 1: Reconnaissance -->
+                <div class="col-lg-4">
+                    <div class="architecture-card h-100 p-4 rounded-4" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(14, 165, 233, 0.3); position: relative; overflow: hidden; transition: all 0.3s ease;">
+                        <div class="position-absolute top-0 end-0 p-3 opacity-25">
+                            <i class="fas fa-radar fa-5x text-primary"></i>
                         </div>
-                        <h5>أدوات البريد الإلكتروني</h5>
-                        <p class="category-count">6 أدوات</p>
-                        <ul class="tool-list">
-                            <li><i class="fas fa-check"></i> GHunt (Gmail)</li>
-                            <li><i class="fas fa-check"></i> Holehe</li>
-                            <li><i class="fas fa-check"></i> EmailRep</li>
-                            <li><i class="fas fa-check"></i> HudsonRock</li>
-                        </ul>
-                        <a href="{% url 'osint_tools:dashboard' %}" class="btn btn-sm btn-outline-primary w-100 mt-3">
-                            استكشف الأدوات
+                        <div class="icon-circle mb-4" style="width: 60px; height: 60px; background: rgba(14, 165, 233, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(14, 165, 233, 0.2);">
+                            <i class="fas fa-search-location fa-2x text-primary"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3 text-white">1. محرك الاستطلاع وجمع البيانات</h4>
+                        <p class="text-secondary mb-4">يحتوي على ترسانة من 27+ أداة متخصصة لجمع المعلومات المفتوحة (OSINT) من مصادر متعددة بدقة عالية.</p>
+                        
+                        <div class="module-features">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-envelope-open-text text-primary me-3 fs-5"></i>
+                                <div>
+                                    <h6 class="mb-0 text-light">استخبارات البريد الإلكتروني</h6>
+                                    <small class="text-secondary">تحليل Gmail، تسريبات، وحالة الحسابات (GHunt, Holehe)</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-user-secret text-primary me-3 fs-5"></i>
+                                <div>
+                                    <h6 class="mb-0 text-light">تتبع الهويات الرقمية</h6>
+                                    <small class="text-secondary">البحث عن أسماء المستخدمين في آلاف المواقع (Sherlock, Maigret)</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-globe-americas text-primary me-3 fs-5"></i>
+                                <div>
+                                    <h6 class="mb-0 text-light">استطلاع الشبكات والنطاقات</h6>
+                                    <small class="text-secondary">تتبع النطاقات الفرعية، IP، وتحليل DNS (Harvester, ViewDNS)</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-shield-virus text-primary me-3 fs-5"></i>
+                                <div>
+                                    <h6 class="mb-0 text-light">فحص التهديدات (Threat Intel)</h6>
+                                    <small class="text-secondary">تحليل الروابط والملفات الخبيثة (VirusTotal API)</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'osint_tools:tools_list' %}" class="btn btn-outline-primary w-100 mt-4 rounded-pill">
+                            عرض جميع أدوات الاستطلاع <i class="fas fa-arrow-left ms-2"></i>
                         </a>
                     </div>
                 </div>
 
-                <!-- Username Tools -->
-                <div class="col-lg-3 col-md-6">
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <i class="fas fa-user"></i>
+                <!-- Module 2: Investigation Management -->
+                <div class="col-lg-4">
+                    <div class="architecture-card h-100 p-4 rounded-4" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(34, 197, 94, 0.3); position: relative; overflow: hidden; transition: all 0.3s ease;">
+                        <div class="position-absolute top-0 end-0 p-3 opacity-25">
+                            <i class="fas fa-folder-tree fa-5x text-success"></i>
                         </div>
-                        <h5>أدوات اسم المستخدم</h5>
-                        <p class="category-count">3 أدوات</p>
-                        <ul class="tool-list">
-                            <li><i class="fas fa-check"></i> Sherlock (300+ موقع)</li>
-                            <li><i class="fas fa-check"></i> Maigret (2500+ موقع)</li>
-                            <li><i class="fas fa-check"></i> CheckNames</li>
-                        </ul>
-                        <a href="{% url 'osint_tools:dashboard' %}" class="btn btn-sm btn-outline-primary w-100 mt-3">
-                            استكشف الأدوات
+                        <div class="icon-circle mb-4" style="width: 60px; height: 60px; background: rgba(34, 197, 94, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);">
+                            <i class="fas fa-folder-open fa-2x text-success"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3 text-white">2. نظام إدارة التحقيقات والقضايا</h4>
+                        <p class="text-secondary mb-4">نظام مركزي آمن لحفظ العمليات، تنظيم الأدلة المكتشفة، وإصدار التقارير الرسمية للإدارة.</p>
+                        
+                        <div class="module-features">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-briefcase text-success me-3 fs-5"></i>
+                                <div>
+                                    <h6 class="mb-0 text-light">إدارة ملفات القضايا (Cases)</h6>
+                                    <small class="text-secondary">إنشاء قضايا مستقلة وتجميع كل الاستعلامات المتعلقة بهدف واحد</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-history text-success me-3 fs-5"></i>
+                                <div>
+                                    <h6 class="mb-0 text-light">سجل الجلسات (Sessions Log)</h6>
+                                    <small class="text-secondary">تتبع دقيق لكل أداة تم تشغيلها، حالتها، والبيانات الناتجة عنها</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-database text-success me-3 fs-5"></i>
+                                <div>
+                                    <h6 class="mb-0 text-light">قاعدة بيانات النتائج</h6>
+                                    <small class="text-secondary">تخزين آلي (JSON/Structured) لكل استعلام للرجوع إليه دون إعادة الفحص</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-signature text-success me-3 fs-5"></i>
+                                <div>
+                                    <h6 class="mb-0 text-light">توليد التقارير المتقدمة</h6>
+                                    <small class="text-secondary">تصدير تقارير استخباراتية جاهزة بصيغ PDF, CSV, و JSON</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'osint_tools:cases_list' %}" class="btn btn-outline-success w-100 mt-4 rounded-pill">
+                            استكشاف نظام إدارة القضايا <i class="fas fa-arrow-left ms-2"></i>
                         </a>
                     </div>
                 </div>
 
-                <!-- Domain Tools -->
-                <div class="col-lg-3 col-md-6">
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <i class="fas fa-globe"></i>
+                <!-- Module 3: Analytics & Utilities -->
+                <div class="col-lg-4">
+                    <div class="architecture-card h-100 p-4 rounded-4" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(245, 158, 11, 0.3); position: relative; overflow: hidden; transition: all 0.3s ease;">
+                        <div class="position-absolute top-0 end-0 p-3 opacity-25">
+                            <i class="fas fa-network-wired fa-5x text-warning"></i>
                         </div>
-                        <h5>أدوات النطاق والـ DNS</h5>
-                        <p class="category-count">5 أدوات</p>
-                        <ul class="tool-list">
-                            <li><i class="fas fa-check"></i> Harvester</li>
-                            <li><i class="fas fa-check"></i> Subdomain Enum</li>
-                            <li><i class="fas fa-check"></i> MxToolbox</li>
-                            <li><i class="fas fa-check"></i> ViewDNS</li>
-                        </ul>
-                        <a href="{% url 'osint_tools:dashboard' %}" class="btn btn-sm btn-outline-primary w-100 mt-3">
-                            استكشف الأدوات
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Special Tools -->
-                <div class="col-lg-3 col-md-6">
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <i class="fas fa-shield-alt"></i>
+                        <div class="icon-circle mb-4" style="width: 60px; height: 60px; background: rgba(245, 158, 11, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);">
+                            <i class="fas fa-chart-line fa-2x text-warning"></i>
                         </div>
-                        <h5>أدوات متخصصة</h5>
-                        <p class="category-count">3 أدوات</p>
-                        <ul class="tool-list">
-                            <li><i class="fas fa-check"></i> CVE-Stalker</li>
-
-                            <li><i class="fas fa-check"></i> OverpassMap</li>
-                        </ul>
-                        <a href="{% url 'osint_tools:dashboard' %}" class="btn btn-sm btn-outline-primary w-100 mt-3">
-                            استكشف الأدوات
+                        <h4 class="fw-bold mb-3 text-white">3. مركز التحليلات والتشفير المساعد</h4>
+                        <p class="text-secondary mb-4">طبقة إضافية لتوضيح البيانات المرئية وتوفير أدوات هندسة عكسية آمنة لا تتطلب اتصالاً بالإنترنت.</p>
+                        
+                        <div class="module-features">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-chart-pie text-warning me-3 fs-5"></i>
+                                <div>
+                                    <h6 class="mb-0 text-light">التحليل البصري (Analytics)</h6>
+                                    <small class="text-secondary">رسوم بيانية توضح كثافة العمليات وأنواع التهديدات المكتشفة</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-fingerprint text-warning me-3 fs-5"></i>
+                                <div>
+                                    <h6 class="mb-0 text-light">أدوات التشفير والهندسة (Crypto)</h6>
+                                    <small class="text-secondary">مولد هاشات (MD5/SHA)، محلل JWT، محول طوابع زمنية (Client-Side)</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-shield-alt text-warning me-3 fs-5"></i>
+                                <div>
+                                    <h6 class="mb-0 text-light">نظام أمن وحماية المنصة</h6>
+                                    <small class="text-secondary">مراقبة الجلسات النشطة، مستويات تصريح أمني، ومحاولات الدخول</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-newspaper text-warning me-3 fs-5"></i>
+                                <div>
+                                    <h6 class="mb-0 text-light">مصادر الأمن السيبراني</h6>
+                                    <small class="text-secondary">تجميع لحظي لأحدث الأخبار الأمنية وخلاصات التهديدات العالمية</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'osint_tools:utilities_dashboard' %}" class="btn btn-outline-warning w-100 mt-4 rounded-pill">
+                            فتح مركز الأدوات المساعدة <i class="fas fa-arrow-left ms-2"></i>
                         </a>
                     </div>
                 </div>
@@ -216,94 +291,45 @@
         </div>
     </section>
 
-    <!-- Platform Features -->
-    <section class="platform-features py-5">
+    <!-- Platform Features (System & Operations) -->
+    <section class="platform-features py-5 bg-dark">
         <div class="container">
-            <div class="section-head">
-                <h2 class="section-title">ميزات المنصة المتقدمة</h2>
-                <p class="section-lead">نظام متكامل لإدارة عمليات الاستخبارات مفتوحة المصدر</p>
+            <div class="section-head text-center mb-5">
+                <h3 class="fw-bold cyber-text">لماذا "كوريزا" هي الخيار الأمثل للعمليات الاستخباراتية؟</h3>
             </div>
-            <div class="row g-4">
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-folder-open"></i>
-                        </div>
-                        <h5>إدارة القضايا</h5>
-                        <p>نظام متقدم لإدارة القضايا الاستخباراتية مع ربط الجلسات والنتائج</p>
-                        <a href="{% url 'osint_tools:cases_list' %}" class="feature-link">
-                            <i class="fas fa-arrow-left me-2"></i>استكشف
-                        </a>
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center p-4 rounded-4" style="background: rgba(255,255,255,0.02);">
+                        <i class="fas fa-server fa-3x text-primary mb-3"></i>
+                        <h5 class="text-white">معمارية Adapter Pattern</h5>
+                        <p class="text-secondary small">توحيد المخرجات (JSON) من أدوات مختلفة (Python, Bash, JS) لضمان تجانس البيانات وسهولة عرضها.</p>
                     </div>
                 </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                        <h5>تقارير احترافية</h5>
-                        <p>إنشاء تقارير مفصلة بصيغ متعددة (PDF, HTML, JSON, CSV)</p>
-                        <a href="{% url 'osint_tools:reports_list' %}" class="feature-link">
-                            <i class="fas fa-arrow-left me-2"></i>استكشف
-                        </a>
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center p-4 rounded-4" style="background: rgba(255,255,255,0.02);">
+                        <i class="fas fa-bolt fa-3x text-warning mb-3"></i>
+                        <h5 class="text-white">معالجة غير متزامنة (Asynchronous)</h5>
+                        <p class="text-secondary small">تشغيل أدوات OSINT الثقيلة في الخلفية (Background Tasks) دون تعطيل واجهة المستخدم أو تجميد المنصة.</p>
                     </div>
                 </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <h5>تحليلات متقدمة</h5>
-                        <p>لوحات تحكم تفاعلية لتحليل النتائج وتتبع الأنماط</p>
-                        <a href="{% url 'osint_tools:analytics' %}" class="feature-link">
-                            <i class="fas fa-arrow-left me-2"></i>استكشف
-                        </a>
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center p-4 rounded-4" style="background: rgba(255,255,255,0.02);">
+                        <i class="fas fa-lock fa-3x text-success mb-3"></i>
+                        <h5 class="text-white">أمان وخصوصية (Client-Side)</h5>
+                        <p class="text-secondary small">معالجة بيانات التشفير الحساسة في المتصفح فقط دون إرسالها للسيرفر لضمان السرية المطلقة.</p>
                     </div>
                 </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-toolbox"></i>
-                        </div>
-                        <h5>أدوات التشفير</h5>
-                        <p>6 أدوات احترافية: Hash, Password Gen, JWT, Timestamp, JSON, Text Diff</p>
-                        <a href="{% url 'osint_tools:utilities_dashboard' %}" class="feature-link">
-                            <i class="fas fa-arrow-left me-2"></i>استكشف
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-newspaper"></i>
-                        </div>
-                        <h5>مصادر الأمن السيبراني</h5>
-                        <p>50+ مصدر للأخبار، الأدوات، والموارد التعليمية</p>
-                        <a href="{% url 'osint_tools:cybersecurity_resources' %}" class="feature-link">
-                            <i class="fas fa-arrow-left me-2"></i>استكشف
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <h5>بحث مبسط</h5>
-                        <p>واجهة بحث سريعة وسهلة للمبتدئين</p>
-                        <a href="{% url 'osint_tools:simple_search' %}" class="feature-link">
-                            <i class="fas fa-arrow-left me-2"></i>استكشف
-                        </a>
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center p-4 rounded-4" style="background: rgba(255,255,255,0.02);">
+                        <i class="fas fa-code-branch fa-3x text-info mb-3"></i>
+                        <h5 class="text-white">قابلية التوسع (Scalability)</h5>
+                        <p class="text-secondary small">نظام Plugin-based يسمح بإضافة العشرات من أدوات الاستخبارات الجديدة مستقبلاً بجهد برمجي بسيط.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
 
     <!-- How It Works -->
     <section class="how-it-works py-5">
