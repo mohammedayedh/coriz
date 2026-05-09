@@ -32,6 +32,9 @@ class OSINTToolRunner:
         'cvestalker-pro': ('osint_tools.scrapers.cve_stalker', 'CVEStalkerScraper', 'search'),
         # GHunt - Google Intelligence
         'ghunt': ('osint_tools.scrapers.ghunt_scraper', 'GHuntScraper', 'investigate_email'),
+        # Have I Been Pwned - Breach Detection
+        'hibp': ('osint_tools.scrapers.hibp_scraper', 'HIBPScraper', 'investigate_email'),
+        'haveibeenpwned': ('osint_tools.scrapers.hibp_scraper', 'HIBPScraper', 'investigate_email'),
     }
 
     def __init__(self, session):
