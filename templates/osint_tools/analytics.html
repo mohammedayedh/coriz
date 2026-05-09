@@ -8,11 +8,9 @@
 <style>
     .analytics-container {
         background: #0b0f19;
-        padding: 40px 0 100px;
-        min-height: calc(100vh - 200px); /* ضمان ارتفاع كافٍ */
-        display: flow-root;
-        position: relative;
-        z-index: 1;
+        padding: 40px 0;
+        min-height: calc(100vh - 300px); /* ضمان ارتفاع كافٍ */
+        margin-bottom: 0; /* إزالة أي margin سفلي */
     }
 
     .glass-card {
@@ -293,8 +291,8 @@
         </div>
 
     </div>
-    <!-- Spacer to prevent footer overlap -->
-    <div class="py-5"></div>
+    <!-- Spacer to push footer down -->
+    <div style="height: 80px;"></div>
 </div>
 {% endblock %}
 
