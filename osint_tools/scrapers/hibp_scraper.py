@@ -111,16 +111,8 @@ class HIBPScraper:
             elif e.code == 401:
                 # HIBP يتطلب API key الآن - نستخدم طريقة بديلة
                 logger.warning('HIBP يتطلب API key - استخدام الطريقة البديلة')
-                # إرجاع رسالة توضيحية بدلاً من خطأ
-                return {
-                    'success': True,
-                    'email': '',
-                    'breached': None,
-                    'breach_count': 0,
-                    'breaches': [],
-                    'message': '⚠️ HIBP يتطلب API key للوصول الكامل. يمكنك الحصول على مفتاح مجاني من haveibeenpwned.com',
-                    'note': 'للحصول على نتائج كاملة، أضف HIBP_API_KEY في إعدادات النظام'
-                }
+                # إرجاع dict بدلاً من string
+                raise Exception('HIBP يتطلب API key للوصول الكامل')
             elif e.code == 429:
                 logger.warning('تم تجاوز حد الطلبات - Rate Limited')
                 raise Exception('تم تجاوز حد الطلبات. يرجى المحاولة لاحقاً')
@@ -412,13 +404,30 @@ class HIBPScraper:
         # البحث في التسريبات
         breaches_result = self.search_breaches(email)
         
-        # إذا كان هناك مشكلة في API، نعرض رسالة توضيحية
-        if isinstance(breaches_result, dict) and breaches_result.get('note'):
+        # البحث في Pastes
+        pastes_result = self.search_pastes(email)
+        
+        # التحقق من وجود خطأ API key
+        api_key_required = False
+        if not breaches_result.get('success', True):
+            error_msg = breaches_result.get('error', '')
+            if 'API key' in error_msg or 'API' in error_msg:
+                api_key_required = True
+        
+        # إذا كان API key مطلوب، نعرض رسالة توضيحية
+        if api_key_required:
             return {
                 'success': True,
                 'email': email,
                 'investigated_at': datetime.now().isoformat(),
-                'breaches': breaches_result,
+                'breaches': {
+                    'success': True,
+                    'breached': None,
+                    'breach_count': 0,
+                    'breaches': [],
+                    'message': '⚠️ HIBP يتطلب API key للبحث عن التسريبات',
+                    'note': 'يمكنك الحصول على مفتاح مجاني من haveibeenpwned.com'
+                },
                 'pastes': {
                     'success': True,
                     'found_in_pastes': False,
@@ -426,24 +435,25 @@ class HIBPScraper:
                     'pastes': [],
                     'note': 'يتطلب API key'
                 },
+                'password_check': {
+                    'available': True,
+                    'message': '✅ فحص كلمات المرور متاح بدون API key'
+                },
                 'summary': {
                     'total_breaches': 0,
                     'found_in_pastes': False,
                     'paste_count': 0,
-                    'overall_status': 'unknown',
+                    'overall_status': 'api_required',
                     'recommendations': [
                         'للحصول على نتائج كاملة، احصل على API key مجاني من haveibeenpwned.com',
                         'يمكنك فحص كلمات المرور بدون API key',
-                        'استخدم أدوات بديلة مثل Breach Detector'
+                        'استخدم أدوات بديلة مثل Breach Detector أو Email OSINT'
                     ],
                     'note': 'HIBP يتطلب API key للبحث عن البريد الإلكتروني'
                 }
             }
         
-        # البحث في Pastes
-        pastes_result = self.search_pastes(email)
-        
-        # تجميع النتائج
+        # تجميع النتائج العادية
         report = {
             'success': True,
             'email': email,
