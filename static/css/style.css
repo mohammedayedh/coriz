@@ -76,10 +76,21 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     position: relative;
     overflow-x: hidden;
     font-weight: 400;
     letter-spacing: 0.2px;
+}
+
+.main-content {
+    flex: 1 0 auto;
+    padding-top: 80px; /* المسافة لشريط التنقل الثابت */
+}
+
+footer {
+    flex-shrink: 0;
 }
 
 /* خلفية متحركة للثيم */
