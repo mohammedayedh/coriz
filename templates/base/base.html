@@ -37,7 +37,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
             <a class="navbar-brand fw-bold cyber-text hacker-glow" href="{% url 'main:home' %}">
-                <img src="{% static 'images/logo.png' %}" alt="كوريزا OSINT" class="logo-img me-2">
+                <img src="{% static 'images/logo.png' %}" alt="كوريزا OSINT" class="logo-img ms-2">
                 كوريزا OSINT
             </a>
 
@@ -52,57 +52,57 @@
                     <!-- Home -->
                     <li class="nav-item">
                         <a class="nav-link interactive-element {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'main:home' %}">
-                            <i class="fas fa-satellite-dish me-1"></i>الرئيسية
+                            <i class="fas fa-satellite-dish ms-1"></i>الرئيسية
                         </a>
                     </li>
 
                     <!-- Module 1: Recon Engine -->
                     <li class="nav-item dropdown dropdown-mega">
                         <a class="nav-link dropdown-toggle" href="#" id="reconDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-radar me-1"></i>محرك الاستطلاع
+                            <i class="fas fa-radar ms-1"></i>محرك الاستطلاع
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark cyber-dropdown" aria-labelledby="reconDropdown">
-                            <li class="dropdown-header text-primary"><i class="fas fa-microchip me-2"></i>أدوات جمع البيانات</li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:simple_search' %}"><i class="fas fa-search me-2"></i>بحث استخباراتي سريع</a></li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:tools_list' %}"><i class="fas fa-toolbox me-2"></i>ترسانة أدوات OSINT كاملة</a></li>
+                            <li class="dropdown-header text-primary"><i class="fas fa-microchip ms-2"></i>أدوات جمع البيانات</li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:simple_search' %}"><i class="fas fa-search ms-2"></i>بحث استخباراتي سريع</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:tools_list' %}"><i class="fas fa-toolbox ms-2"></i>ترسانة أدوات OSINT كاملة</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li class="dropdown-header text-primary"><i class="fas fa-crosshairs me-2"></i>استطلاع مخصص</li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:domain_recon' %}"><i class="fas fa-globe me-2"></i>تحليل النطاقات (Domain)</a></li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:ip_lookup' %}"><i class="fas fa-map-marker-alt me-2"></i>تتبع العناوين (IP Lookup)</a></li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:email_scanner' %}"><i class="fas fa-envelope-open-text me-2"></i>فحص البريد الإلكتروني</a></li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:threat_intel' %}"><i class="fas fa-shield-virus me-2"></i>تحليل الروابط (Threat Intel)</a></li>
+                            <li class="dropdown-header text-primary"><i class="fas fa-crosshairs ms-2"></i>استطلاع مخصص</li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:domain_recon' %}"><i class="fas fa-globe ms-2"></i>تحليل النطاقات (Domain)</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:ip_lookup' %}"><i class="fas fa-map-marker-alt ms-2"></i>تتبع العناوين (IP Lookup)</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:email_scanner' %}"><i class="fas fa-envelope-open-text ms-2"></i>فحص البريد الإلكتروني</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:threat_intel' %}"><i class="fas fa-shield-virus ms-2"></i>تحليل الروابط (Threat Intel)</a></li>
                         </ul>
                     </li>
 
                     <!-- Module 2: Investigation Management -->
                     <li class="nav-item dropdown dropdown-mega">
                         <a class="nav-link dropdown-toggle" href="#" id="investigationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-folder-tree me-1"></i>إدارة التحقيقات
+                            <i class="fas fa-folder-tree ms-1"></i>إدارة التحقيقات
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark cyber-dropdown" aria-labelledby="investigationDropdown">
-                            <li class="dropdown-header text-success"><i class="fas fa-archive me-2"></i>ملفات القضايا</li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:cases_list' %}"><i class="fas fa-briefcase me-2"></i>سجل القضايا المفتوحة والمغلقة</a></li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:sessions_list' %}"><i class="fas fa-history me-2"></i>سجل الجلسات (Sessions Log)</a></li>
+                            <li class="dropdown-header text-success"><i class="fas fa-archive ms-2"></i>ملفات القضايا</li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:cases_list' %}"><i class="fas fa-briefcase ms-2"></i>سجل القضايا المفتوحة والمغلقة</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:sessions_list' %}"><i class="fas fa-history ms-2"></i>سجل الجلسات (Sessions Log)</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li class="dropdown-header text-success"><i class="fas fa-database me-2"></i>قاعدة البيانات والمخرجات</li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:results_list' %}"><i class="fas fa-table me-2"></i>قاعدة بيانات النتائج (Data Lake)</a></li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:reports_list' %}"><i class="fas fa-file-signature me-2"></i>إصدار وتصدير التقارير الرسمية</a></li>
+                            <li class="dropdown-header text-success"><i class="fas fa-database ms-2"></i>قاعدة البيانات والمخرجات</li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:results_list' %}"><i class="fas fa-table ms-2"></i>قاعدة بيانات النتائج (Data Lake)</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:reports_list' %}"><i class="fas fa-file-signature ms-2"></i>إصدار وتصدير التقارير الرسمية</a></li>
                         </ul>
                     </li>
 
                     <!-- Module 3: Analytics & Utilities -->
                     <li class="nav-item dropdown dropdown-mega">
                         <a class="nav-link dropdown-toggle" href="#" id="analyticsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-network-wired me-1"></i>التحليلات والموارد
+                            <i class="fas fa-network-wired ms-1"></i>التحليلات والموارد
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark cyber-dropdown" aria-labelledby="analyticsDropdown">
-                            <li class="dropdown-header text-warning"><i class="fas fa-chart-pie me-2"></i>تحليلات البيانات</li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:analytics' %}"><i class="fas fa-chart-line me-2"></i>لوحة التحليلات المرئية المتقدمة</a></li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>شاشة المراقبة الرئيسية للعمليات</a></li>
+                            <li class="dropdown-header text-warning"><i class="fas fa-chart-pie ms-2"></i>تحليلات البيانات</li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:analytics' %}"><i class="fas fa-chart-line ms-2"></i>لوحة التحليلات المرئية المتقدمة</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:dashboard' %}"><i class="fas fa-tachometer-alt ms-2"></i>شاشة المراقبة الرئيسية للعمليات</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li class="dropdown-header text-warning"><i class="fas fa-shield-alt me-2"></i>الأدوات والمصادر الأمنية</li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:utilities_dashboard' %}"><i class="fas fa-fingerprint me-2"></i>مركز الهندسة العكسية والتشفير</a></li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:cybersecurity_resources' %}"><i class="fas fa-newspaper me-2"></i>موجز التهديدات ومصادر السايبر</a></li>
+                            <li class="dropdown-header text-warning"><i class="fas fa-shield-alt ms-2"></i>الأدوات والمصادر الأمنية</li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:utilities_dashboard' %}"><i class="fas fa-fingerprint ms-2"></i>مركز الهندسة العكسية والتشفير</a></li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:cybersecurity_resources' %}"><i class="fas fa-newspaper ms-2"></i>موجز التهديدات ومصادر السايبر</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -128,24 +128,24 @@
                                 <div class="id-name-minimal">{{ user.first_name|default:user.username }}</div>
                                 <div class="d-flex align-items-center gap-2 mt-2">
                                     <span class="badge clr-badge-{{ user.profile.clearance_level|lower }} badge-minimal">LEVEL {{ user.profile.clearance_level }}</span>
-                                    <span class="id-status-minimal"><i class="fas fa-check-circle me-1"></i>VERIFIED</span>
+                                    <span class="id-status-minimal"><i class="fas fa-check-circle ms-1"></i>VERIFIED</span>
                                 </div>
                             </div>
                             <div class="dropdown-divider-minimal"></div>
                             <li><a class="dropdown-item clean-item" href="{% url 'dashboard:index' %}">
-                                    <i class="fas fa-terminal me-2"></i>لوحة التحكم
+                                    <i class="fas fa-terminal ms-2"></i>لوحة التحكم
                                 </a></li>
                             <li><a class="dropdown-item clean-item" href="{% url 'osint_tools:dashboard' %}">
-                                    <i class="fas fa-tools me-2"></i>أدوات OSINT
+                                    <i class="fas fa-tools ms-2"></i>أدوات OSINT
                                 </a></li>
                             <li><a class="dropdown-item clean-item" href="{% url 'authentication:profile' %}">
-                                    <i class="fas fa-user-secret me-2"></i>الملف الشخصي
+                                    <i class="fas fa-user-secret ms-2"></i>الملف الشخصي
                                 </a></li>
                             <li>
                                 <div class="dropdown-divider-minimal my-1"></div>
                             </li>
                             <li><a class="dropdown-item clean-item text-danger" href="{% url 'authentication:logout' %}">
-                                    <i class="fas fa-power-off me-2"></i>تسجيل الخروج
+                                    <i class="fas fa-power-off ms-2"></i>تسجيل الخروج
                                 </a></li>
                         </ul>
                     </li>
@@ -155,12 +155,12 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a class="nav-link interactive-element" href="{% url 'authentication:login' %}">
-                            <i class="fas fa-key me-1"></i>تسجيل الدخول
+                            <i class="fas fa-key ms-1"></i>تسجيل الدخول
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link interactive-element" href="{% url 'authentication:register' %}">
-                            <i class="fas fa-user-plus me-1"></i>انضمام للفريق
+                            <i class="fas fa-user-plus ms-1"></i>انضمام للفريق
                         </a>
                     </li>
                 </ul>
@@ -180,7 +180,7 @@
             <div class="row">
                 <div class="col-lg-5 mb-4">
                     <div class="footer-brand mb-3">
-                        <img src="{% static 'images/logo.png' %}" alt="كوريزا OSINT" class="footer-logo me-2">
+                        <img src="{% static 'images/logo.png' %}" alt="كوريزا OSINT" class="footer-logo ms-2">
                         <h5 class="fw-bold cyber-text d-inline">كوريزا OSINT</h5>
                     </div>
                     <p class="text-secondary">
@@ -243,13 +243,13 @@
         <div class="toast show" role="alert">
             <div class="toast-header">
                 {% if message.tags == 'error' %}
-                <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                <i class="fas fa-exclamation-circle text-danger ms-2"></i>
                 {% elif message.tags == 'warning' %}
-                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                <i class="fas fa-exclamation-triangle text-warning ms-2"></i>
                 {% elif message.tags == 'success' %}
-                <i class="fas fa-check-circle text-success me-2"></i>
+                <i class="fas fa-check-circle text-success ms-2"></i>
                 {% else %}
-                <i class="fas fa-info-circle text-info me-2"></i>
+                <i class="fas fa-info-circle text-info ms-2"></i>
                 {% endif %}
                 <strong class="me-auto">تنبيه أمني</strong>
                 <button type="button" class="btn-close" data-bs-dismiss="toast"></button>

@@ -7,14 +7,14 @@
 <div class="container py-5 mt-5">
     <!-- Academic / Presentation Module Header -->
     <div class="module-presentation-header mb-5 p-4 rounded-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(2, 6, 23, 0.95) 100%); border: 1px solid rgba(34, 197, 94, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-        <div class="position-absolute top-0 end-0 p-4 opacity-10">
+        <div class="position-absolute top-0 end-0 p-4" style="opacity: 0.05;">
             <i class="fas fa-archive fa-8x text-success"></i>
         </div>
         
         <div class="row position-relative z-2 align-items-center">
             <div class="col-lg-8">
                 <div class="d-inline-block px-3 py-1 rounded-pill mb-3" style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2);">
-                    <i class="fas fa-layer-group me-2"></i>الوحدة الثانية: إدارة التحقيقات
+                    <i class="fas fa-layer-group ms-2"></i>الوحدة الثانية: إدارة التحقيقات
                 </div>
                 <h2 class="fw-bold text-white mb-3" style="font-size: 2.2rem;">نظام إدارة ملفات القضايا (Case Management)</h2>
                 <p class="text-secondary mb-4" style="line-height: 1.8; font-size: 1.1rem;">
@@ -22,19 +22,19 @@
                 </p>
                 <div class="d-flex gap-3">
                     <button class="btn btn-success px-4 py-2" data-bs-toggle="modal" data-bs-target="#newCaseModal" style="box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);">
-                        <i class="fas fa-plus me-2"></i>تأسيس ملف قضية جديد
+                        <i class="fas fa-plus ms-2"></i>تأسيس ملف قضية جديد
                     </button>
                     <a href="#cases-grid" class="btn btn-outline-secondary px-4 py-2">
-                        <i class="fas fa-arrow-down me-2"></i>استعراض القضايا
+                        <i class="fas fa-arrow-down ms-2"></i>استعراض القضايا
                     </a>
                 </div>
             </div>
             <div class="col-lg-4 d-none d-lg-block border-start border-secondary ps-4">
-                <h6 class="text-success fw-bold mb-3"><i class="fas fa-cogs me-2"></i>كيف تعمل هذه الوحدة؟</h6>
+                <h6 class="text-success fw-bold mb-3"><i class="fas fa-cogs ms-2"></i>كيف تعمل هذه الوحدة؟</h6>
                 <ul class="list-unstyled text-secondary small" style="line-height: 1.8;">
-                    <li><i class="fas fa-check-circle text-success me-2"></i><strong>العزل:</strong> فصل بيئة عمل كل تحقيق عن الآخر.</li>
-                    <li><i class="fas fa-check-circle text-success me-2"></i><strong>التتبع:</strong> ربط تلقائي لمئات الاستعلامات بالهدف الأساسي.</li>
-                    <li><i class="fas fa-check-circle text-success me-2"></i><strong>الحفظ التلقائي:</strong> أرشفة النتائج بقاعدة البيانات لتقليل الاستعلام الخارجي (Rate Limits).</li>
+                    <li><i class="fas fa-check-circle text-success ms-2"></i><strong>العزل:</strong> فصل بيئة عمل كل تحقيق عن الآخر.</li>
+                    <li><i class="fas fa-check-circle text-success ms-2"></i><strong>التتبع:</strong> ربط تلقائي لمئات الاستعلامات بالهدف الأساسي.</li>
+                    <li><i class="fas fa-check-circle text-success ms-2"></i><strong>الحفظ التلقائي:</strong> أرشفة النتائج بقاعدة البيانات لتقليل الاستعلام الخارجي (Rate Limits).</li>
                 </ul>
             </div>
         </div>
@@ -47,12 +47,12 @@
                 <form method="POST">
                     {% csrf_token %}
                     <div class="modal-header border-secondary">
-                        <h5 class="modal-title text-success"><i class="fas fa-folder-plus me-2"></i>تأسيس ملف قضية جديد</h5>
+                        <h5 class="modal-title text-success"><i class="fas fa-folder-plus ms-2"></i>تأسيس ملف قضية جديد</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4">
                         <div class="alert alert-dark border-secondary text-secondary small mb-4">
-                            <i class="fas fa-info-circle me-2"></i>سيتم إنشاء بيئة معزولة لهذا التحقيق. جميع عمليات البحث القادمة ضمن هذه القضية سيتم ربطها آلياً لتسهيل بناء التقارير.
+                            <i class="fas fa-info-circle ms-2"></i>سيتم إنشاء بيئة معزولة لهذا التحقيق. جميع عمليات البحث القادمة ضمن هذه القضية سيتم ربطها آلياً لتسهيل بناء التقارير.
                         </div>
                         <div class="mb-4">
                             <label class="form-label text-light">الهدف الأساسي / المسمى الرمزي للقضية</label>
@@ -74,7 +74,7 @@
 
     <!-- Title and Filters -->
     <div class="d-flex justify-content-between align-items-center mb-4 mt-5" id="cases-grid">
-        <h4 class="text-white m-0"><i class="fas fa-database text-secondary me-2"></i>الأرشيف الاستخباراتي (Cases Archive)</h4>
+        <h4 class="text-white m-0"><i class="fas fa-database text-secondary ms-2"></i>الأرشيف الاستخباراتي (Cases Archive)</h4>
         <div class="badge bg-dark border border-secondary p-2 text-secondary">
             إجمالي الملفات: {{ page_obj.paginator.count }}
         </div>
@@ -86,7 +86,7 @@
             <div class="card h-100" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease;">
                 <!-- Status Header -->
                 <div class="card-header border-bottom border-secondary d-flex justify-content-between align-items-center py-3" style="background: rgba(0,0,0,0.2);">
-                    <span class="text-secondary small fw-bold"><i class="fas fa-fingerprint me-1"></i> ID: {{ case.id|stringformat:"04d" }}</span>
+                    <span class="text-secondary small fw-bold"><i class="fas fa-fingerprint ms-1"></i> ID: {{ case.id|stringformat:"04d" }}</span>
                     {% if case.status == 'open' %}
                         <span class="badge" style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">قضية مفتوحة</span>
                     {% elif case.status == 'in_progress' %}
@@ -136,7 +136,7 @@
                     لم يتم إنشاء أي ملفات قضايا حتى الآن. ابدأ بتأسيس ملف قضية جديد لتنظيم استعلاماتك وعمليات البحث التي ستقوم بها.
                 </p>
                 <button class="btn btn-success px-4 py-2" data-bs-toggle="modal" data-bs-target="#newCaseModal">
-                    <i class="fas fa-plus me-2"></i>إنشاء القضية الأولى
+                    <i class="fas fa-plus ms-2"></i>إنشاء القضية الأولى
                 </button>
             </div>
         </div>
