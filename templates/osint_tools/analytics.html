@@ -6,13 +6,30 @@
 {% block meta_description %}عرض وإدارة جميع التحليلات والإحصائيات من أدوات OSINT{% endblock %}
 
 {% block content %}
+<!-- Override dashboard content completely -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.css">
+
 <style>
-    /* Main Content Wrapper */
-    .analytics-page-wrapper {
-        min-height: calc(100vh - 120px);
-        background: #0b0f19;
-        padding-bottom: 60px;
+    /* Override dashboard container to fix footer */
+    .dashboard-container {
+        display: block !important;
+        flex-direction: column !important;
+        min-height: 100vh;
+    }
+    
+    .dashboard-main-content {
+        width: 100% !important;
+        margin-right: 0 !important;
+        padding: 20px;
+    }
+    
+    /* Hide sidebar on analytics page */
+    .sidebar {
+        display: none !important;
+    }
+    
+    .sidebar-overlay {
+        display: none !important;
     }
 
     /* Glass Cards */
@@ -77,7 +94,6 @@
     }
 
     .trend-up { color: #48bb78; }
-    .trend-down { color: #f56565; }
 
     /* Section Titles */
     .analytics-section-title {
@@ -161,8 +177,8 @@
     }
 </style>
 
-<div class="analytics-page-wrapper">
-    <div class="container">
+<div class="dashboard-main-content">
+    <div class="container-fluid">
         
         <!-- Page Header -->
         <div class="content-header mb-4">
