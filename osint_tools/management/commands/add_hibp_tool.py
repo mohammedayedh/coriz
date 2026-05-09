@@ -27,9 +27,9 @@ class Command(BaseCommand):
                 'api_key_required': False,
                 'rate_limit': 40,
                 'timeout': 30,
-                'tool_path': '',
-                'executable_name': '',
-                'command_template': '',
+                'tool_path': 'hibp_scraper',  # يعمل عبر scraper مباشر
+                'executable_name': 'HIBPScraper',  # اسم الـ class
+                'command_template': 'python_scraper',  # علامة أنه scraper مباشر
                 'config_schema': {
                     'check_breaches': {
                         'type': 'boolean',
