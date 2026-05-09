@@ -61,24 +61,20 @@
                         <label for="report_type" class="form-label">نوع التقرير</label>
                         <select name="report_type" id="report_type" class="form-select">
                             <option value="">جميع الأنواع</option>
-                            <option value="summary" {% if request.GET.report_type=="summary" %}selected{% endif %}>ملخص
-                            </option>
-                            <option value="detailed" {% if request.GET.report_type=="detailed" %}selected{% endif %}>
-                                مفصل</option>
-                            <option value="executive" {% if request.GET.report_type=="executive" %}selected{% endif %}>
-                                تنفيذي</option>
-                            <option value="technical" {% if request.GET.report_type=="technical" %}selected{% endif %}>
-                                تقني</option>
+                            <option value="summary" {% if request.GET.report_type == "summary" %}selected{% endif %}>ملخص</option>
+                            <option value="detailed" {% if request.GET.report_type == "detailed" %}selected{% endif %}>مفصل</option>
+                            <option value="executive" {% if request.GET.report_type == "executive" %}selected{% endif %}>تنفيذي</option>
+                            <option value="technical" {% if request.GET.report_type == "technical" %}selected{% endif %}>تقني</option>
                         </select>
                     </div>
                     <div class="col-md-3">
                         <label for="format" class="form-label">التنسيق</label>
                         <select name="format" id="format" class="form-select">
                             <option value="">جميع التنسيقات</option>
-                            <option value="pdf" {% if request.GET.format=="pdf" %}selected{% endif %}>PDF</option>
-                            <option value="html" {% if request.GET.format=="html" %}selected{% endif %}>HTML</option>
-                            <option value="csv" {% if request.GET.format=="csv" %}selected{% endif %}>CSV</option>
-                            <option value="json" {% if request.GET.format=="json" %}selected{% endif %}>JSON</option>
+                            <option value="pdf" {% if request.GET.format == "pdf" %}selected{% endif %}>PDF</option>
+                            <option value="html" {% if request.GET.format == "html" %}selected{% endif %}>HTML</option>
+                            <option value="csv" {% if request.GET.format == "csv" %}selected{% endif %}>CSV</option>
+                            <option value="json" {% if request.GET.format == "json" %}selected{% endif %}>JSON</option>
                         </select>
                     </div>
                     <div class="col-md-3">
