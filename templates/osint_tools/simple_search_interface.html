@@ -239,38 +239,100 @@
 
 {% block content %}
 <div class="interface-container container">
-    <!-- عنوان الهوية البصرية -->
-    <div class="d-flex align-items-center mb-4">
-        <div style="width: 4px; height: 30px; background: var(--coriza-blue); margin-left: 15px; border-radius: 2px;">
+    <!-- Academic / Presentation Module Header -->
+    <div class="module-presentation-header mb-5 p-4 rounded-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(2, 6, 23, 0.95) 100%); border: 1px solid rgba(14, 165, 233, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div class="position-absolute top-0 end-0 p-4" style="opacity: 0.05;">
+            <i class="fas fa-radar fa-8x text-primary"></i>
         </div>
-        <h3 class="m-0 fw-bold">مركز البحث والاستخبارات</h3>
+        
+        <div class="row position-relative z-2 align-items-center">
+            <div class="col-lg-8">
+                <div class="d-inline-block px-3 py-1 rounded-pill mb-3" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9; border: 1px solid rgba(14, 165, 233, 0.2);">
+                    <i class="fas fa-microchip ms-2"></i>الوحدة الأولى: محرك الاستطلاع (Recon Engine)
+                </div>
+                <h2 class="fw-bold text-white mb-3" style="font-size: 2.2rem;">مركز البحث والاستخبارات المفتوح</h2>
+                <p class="text-secondary mb-4" style="line-height: 1.8; font-size: 1.1rem;">
+                    تمثل هذه الواجهة خط المبادرة الأول في المنصة. تم تصميمها لمحاكاة عمليات الاستطلاع السريع، حيث تعتمد على <strong>خوارزمية تعرف تلقائي (Auto-Detection)</strong> لتحليل الإدخال الخام وتصنيفه (بريد، نطاق، أو عنوان إنترنت) وتوجيهه تلقائياً نحو محركات البحث المناسبة، مما يقلل من الوقت المستغرق في التوجيه اليدوي للهدف.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="#search-panel" class="btn btn-primary px-4 py-2" style="box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);">
+                        <i class="fas fa-search ms-2"></i>بدء الاستطلاع
+                    </a>
+                    <div class="badge bg-dark border border-secondary p-2 px-3 text-secondary d-flex align-items-center">
+                        <i class="fas fa-server ms-2"></i> المحركات الجاهزة: {{ total_tools|default:"27" }} محرك
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 d-none d-lg-block border-start border-secondary ps-4">
+                <h6 class="text-primary fw-bold mb-3"><i class="fas fa-cogs ms-2"></i>آلية العمل التقنية</h6>
+                <ul class="list-unstyled text-secondary small" style="line-height: 1.8;">
+                    <li><i class="fas fa-check-circle text-primary ms-2"></i><strong>التحليل الدلالي:</strong> فلترة المدخلات باستخدام تعبيرات قياسية (Regex) معقدة.</li>
+                    <li><i class="fas fa-check-circle text-primary ms-2"></i><strong>المعالجة المتوازية:</strong> إرسال طلبات غير متزامنة لعدة أدوات OSINT في وقت واحد.</li>
+                    <li><i class="fas fa-check-circle text-primary ms-2"></i><strong>التفتيش المباشر:</strong> عرض النتائج الخام لحظياً عبر المفتش الجانبي (Inspector).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Stats Bar -->
+    <div class="row g-3 mb-4" id="search-panel">
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded-3 text-center" style="background: rgba(14, 165, 233, 0.05); border: 1px solid rgba(14, 165, 233, 0.2);">
+                <div class="text-primary fw-bold" style="font-size: 1.5rem; font-family: monospace;">{{ total_tools|default:"27" }}</div>
+                <div class="text-secondary small">محرك استطلاع نشط</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded-3 text-center" style="background: rgba(168, 85, 247, 0.05); border: 1px solid rgba(168, 85, 247, 0.2);">
+                <div class="fw-bold" style="font-size: 1.5rem; font-family: monospace; color: #a855f7;">{{ total_searches|default:"0" }}</div>
+                <div class="text-secondary small">إجمالي جلسات الفحص</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded-3 text-center" style="background: rgba(34, 197, 94, 0.05); border: 1px solid rgba(34, 197, 94, 0.2);">
+                <div class="text-success fw-bold" style="font-size: 1.5rem; font-family: monospace;">{{ completed_searches|default:"0" }}</div>
+                <div class="text-secondary small">جلسات مكتملة بنجاح</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded-3 text-center" style="background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2);">
+                <div class="text-warning fw-bold" style="font-size: 1.5rem; font-family: monospace;">{{ total_results|default:"0" }}</div>
+                <div class="text-secondary small">نتيجة استخباراتية مكتشفة</div>
+            </div>
+        </div>
     </div>
 
     <!-- لوحة البحث الرئيسية -->
     <div class="glass-card search-hero mb-4">
+        <div class="mb-3 d-flex align-items-center gap-2">
+            <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25 px-3 py-2">
+                <i class="fas fa-crosshairs ms-2"></i>تعريف الهدف (Target Definition)
+            </span>
+            <span class="text-secondary small">أدخل أي معرف رقمي وسيتم تحليله وتوجيهه تلقائياً</span>
+        </div>
         <div class="row g-3">
             <div class="col-md-7">
-                <input type="text" id="targetInput" class="search-control w-100" placeholder="أدخل المعرف للبحث...">
+                <input type="text" id="targetInput" class="search-control w-100" placeholder="example@email.com | username | example.com | 192.168.1.1">
                 <!-- شريط الاقتراحات الذكي -->
                 <div id="suggestionsBar" class="mt-2 d-flex flex-wrap gap-2 align-items-center">
-                    <span class="small text-muted me-2"><i class="fas fa-lightbulb"></i> اقتراحات:</span>
+                    <span class="small text-muted ms-2"><i class="fas fa-lightbulb"></i> أمثلة سريعة:</span>
                     <div id="suggestionsList" class="d-flex flex-wrap gap-2">
                         <!-- تظهر هنا برمجياً -->
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
+                <label class="text-secondary small d-block mb-1">نوع الهدف</label>
                 <select id="typeSelector" class="search-control w-100">
-                    <option value="auto">تعرف تلقائي</option>
-                    <option value="email">بريد إلكتروني</option>
-                    <option value="username">اسم مستخدم</option>
-                    <option value="domain">نطاق / موقع</option>
-                    <option value="ip">عنوان IP</option>
-
+                    <option value="auto">🤖 تعرف تلقائي (Auto-Detect)</option>
+                    <option value="email">📧 بريد إلكتروني (Email)</option>
+                    <option value="username">👤 اسم مستخدم (Username)</option>
+                    <option value="domain">🌐 نطاق / موقع (Domain)</option>
+                    <option value="ip">🔗 عنوان IP (IPv4)</option>
                 </select>
             </div>
-            <div class="col-md-2">
-                <button id="scanBtn" class="btn-coriza w-100"><i class="fas fa-search me-2"></i> تنفيذ</button>
+            <div class="col-md-2 d-flex align-items-end">
+                <button id="scanBtn" class="btn-coriza w-100"><i class="fas fa-play ms-2"></i> تنفيذ الاستطلاع</button>
             </div>
         </div>
     </div>
@@ -279,7 +341,12 @@
     <div class="workspace-grid">
         <!-- القائمة الجانبية -->
         <div class="glass-card side-history">
-            <div class="fw-bold small text-muted text-uppercase mb-3 px-2">عمليات سابقة</div>
+            <div class="fw-bold small text-uppercase mb-3 px-2" style="color: #64748b; letter-spacing: 1px;">
+                <i class="fas fa-history ms-1"></i> سجل العمليات
+            </div>
+            <div class="text-secondary small px-2 mb-3" style="font-size: 0.72rem; line-height: 1.6;">
+                تُحفظ هنا جلسات الاستطلاع تلقائياً لاسترجاعها دون إعادة إرسال طلبات خارجية جديدة.
+            </div>
             <div id="historyList"></div>
         </div>
 
@@ -292,19 +359,20 @@
                     <thead>
                         <tr>
                             <th>المعرف / العنوان</th>
-                            <th>النوع</th>
-                            <th>المصدر</th>
-                            <th>الثقة</th>
-                            <th>التاريخ</th>
+                            <th>نوع البيانات</th>
+                            <th>المصدر / الأداة</th>
+                            <th>مستوى الثقة</th>
+                            <th>توقيت الاكتشاف</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
                         <!-- النتائج ستظهر هنا -->
                     </tbody>
                 </table>
-                <div id="emptyState" style="text-align: center; padding: 100px; color: #4a5568;">
-                    <i class="fas fa-satellite fa-3x mb-3 opacity-20"></i>
-                    <p>في انتظار إدخال الهدف للبدء بالتحليل...</p>
+                <div id="emptyState" style="text-align: center; padding: 80px 40px; color: #4a5568;">
+                    <i class="fas fa-satellite fa-3x mb-3" style="opacity: 0.15;"></i>
+                    <h5 class="text-secondary mb-2">محرك الاستطلاع جاهز</h5>
+                    <p class="small text-muted mb-0">أدخل أي هدف في الحقل أعلاه وسيقوم النظام بتوجيه الاستعلام تلقائياً نحو محركات OSINT المناسبة، وعرض النتائج في هذه القاعدة لحظياً.</p>
                 </div>
             </div>
         </div>
