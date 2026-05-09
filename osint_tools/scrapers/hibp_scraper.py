@@ -390,15 +390,47 @@ class HIBPScraper:
     
     def investigate_email(self, email):
         """
-        تحقيق شامل عن البريد الإلكتروني
-        يجمع معلومات من Breaches و Pastes
+        تحقيق شامل عن البريد الإلكتروني أو فحص كلمة مرور
+        يكتشف تلقائياً نوع المدخل
         
         Args:
-            email: عنوان البريد الإلكتروني
+            email: عنوان البريد الإلكتروني أو كلمة مرور
             
         Returns:
             dict: تقرير شامل
         """
+        # التحقق من نوع المدخل
+        if not email or not email.strip():
+            return {
+                'success': False,
+                'error': 'المدخل فارغ',
+                'type': 'unknown'
+            }
+        
+        email = email.strip()
+        
+        # إذا لم يحتوي على @ فهو كلمة مرور
+        if '@' not in email:
+            # هذه كلمة مرور وليست بريد إلكتروني
+            logger.info(f'Detected password check for: {email[:3]}***')
+            password_result = self.check_password(email)
+            
+            return {
+                'success': True,
+                'type': 'password_check',
+                'input': email[:3] + '***',  # إخفاء كلمة المرور
+                'investigated_at': datetime.now().isoformat(),
+                'password_check': password_result,
+                'summary': {
+                    'check_type': 'password',
+                    'pwned': password_result.get('pwned', False),
+                    'count': password_result.get('count', 0),
+                    'severity': password_result.get('severity', 'unknown'),
+                    'recommendations': self._get_password_recommendations(password_result)
+                }
+            }
+        
+        # البحث عن بريد إلكتروني
         logger.info(f'Starting comprehensive investigation for: {email}')
         
         # البحث في التسريبات
@@ -418,6 +450,7 @@ class HIBPScraper:
         if api_key_required:
             return {
                 'success': True,
+                'type': 'email_check',
                 'email': email,
                 'investigated_at': datetime.now().isoformat(),
                 'breaches': {
@@ -456,6 +489,7 @@ class HIBPScraper:
         # تجميع النتائج العادية
         report = {
             'success': True,
+            'type': 'email_check',
             'email': email,
             'investigated_at': datetime.now().isoformat(),
             'breaches': breaches_result,
@@ -464,6 +498,34 @@ class HIBPScraper:
         }
         
         return report
+    
+    def _get_password_recommendations(self, password_result):
+        """توليد توصيات بناءً على نتيجة فحص كلمة المرور"""
+        if not password_result.get('success'):
+            return ['حدث خطأ في فحص كلمة المرور']
+        
+        if password_result.get('pwned'):
+            count = password_result.get('count', 0)
+            severity = password_result.get('severity', 'unknown')
+            
+            recommendations = [
+                f'⚠️ كلمة المرور هذه ظهرت في {count:,} تسريب!',
+                '🔴 لا تستخدم هذه الكلمة أبداً',
+                '✅ استخدم كلمة مرور قوية وفريدة',
+                '✅ استخدم مدير كلمات مرور',
+                '✅ فعّل المصادقة الثنائية (2FA)'
+            ]
+            
+            if severity == 'critical':
+                recommendations.insert(1, '🚨 خطر شديد: هذه من أكثر كلمات المرور شيوعاً!')
+            
+            return recommendations
+        else:
+            return [
+                '✅ كلمة المرور آمنة - لم تظهر في أي تسريبات معروفة',
+                '💡 استمر في استخدام كلمات مرور قوية وفريدة',
+                '💡 فعّل المصادقة الثنائية للحماية الإضافية'
+            ]
     
     def _calculate_severity(self, breaches):
         """حساب مستوى الخطورة بناءً على التسريبات"""
