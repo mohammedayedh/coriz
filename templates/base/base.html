@@ -74,11 +74,11 @@
                             <i class="fas fa-folder-tree ms-1"></i>إدارة التحقيقات
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark cyber-dropdown" aria-labelledby="investigationDropdown">
-                            <li class="dropdown-header text-success"><i class="fas fa-archive ms-2"></i>ملفات القضايا</li>
+                            <li class="dropdown-header text-success"><i class="fas fa-archive ms-2"></i>إدارة ملفات القضايا</li>
                             <li><a class="dropdown-item" href="{% url 'osint_tools:cases_list' %}"><i class="fas fa-briefcase ms-2"></i>سجل القضايا المفتوحة والمغلقة</a></li>
-                            <li><a class="dropdown-item" href="{% url 'osint_tools:sessions_list' %}"><i class="fas fa-history ms-2"></i>سجل الجلسات (Sessions Log)</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li class="dropdown-header text-success"><i class="fas fa-file-signature ms-2"></i>إدارة التقارير</li>
+                            <li class="dropdown-header text-success"><i class="fas fa-database ms-2"></i>إدارة التقارير وسجلات الجلسات والنتائج</li>
+                            <li><a class="dropdown-item" href="{% url 'osint_tools:sessions_list' %}"><i class="fas fa-history ms-2"></i>سجل الجلسات (Sessions Log)</a></li>
                             <li><a class="dropdown-item" href="{% url 'osint_tools:reports_list' %}"><i class="fas fa-file-signature ms-2"></i>إصدار وتصدير التقارير الرسمية</a></li>
                         </ul>
                     </li>
