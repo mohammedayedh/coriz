@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفعيل حسابك - كوريزا OSINT</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f1419;
+            color: #e1e8ed;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+            border: 1px solid #667eea;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .header .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .content h2 {
+            color: #667eea;
+            margin-top: 0;
+            font-size: 20px;
+        }
+        .content p {
+            line-height: 1.8;
+            color: #8899a6;
+            margin: 15px 0;
+        }
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        .info-box {
+            background: rgba(102, 126, 234, 0.1);
+            border-right: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .info-box p {
+            margin: 5px 0;
+            color: #e1e8ed;
+        }
+        .footer {
+            background: #0a0e14;
+            padding: 20px 30px;
+            text-align: center;
+            border-top: 1px solid #2a3441;
+        }
+        .footer p {
+            margin: 5px 0;
+            color: #657786;
+            font-size: 14px;
+        }
+        .features {
+            margin: 30px 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 8px;
+        }
+        .feature-icon {
+            font-size: 24px;
+            margin-left: 15px;
+            color: #667eea;
+        }
+        .feature-text {
+            color: #e1e8ed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">🎉</div>
+            <h1>مرحباً بك في كوريزا OSINT</h1>
+        </div>
+        
+        <div class="content">
+            <h2>أهلاً {{ user.first_name|default:user.username }}،</h2>
+            
+            <p>
+                شكراً لانضمامك إلى منصة كوريزا OSINT - منصة الأمن السيبراني وجمع المعلومات المفتوحة.
+            </p>
+            
+            <p>
+                لتفعيل حسابك والاستفادة من جميع الميزات، يرجى النقر على الزر أدناه:
+            </p>
+            
+            <div class="button-container">
+                <a href="{{ verification_url }}" class="button">
+                    تفعيل حسابي الآن
+                </a>
+            </div>
+            
+            <div class="info-box">
+                <p><strong>⏰ صلاحية الرابط:</strong></p>
+                <p>هذا الرابط صالح لمدة 24 ساعة من وقت التسجيل.</p>
+            </div>
+            
+            <div class="features">
+                <h3 style="color: #667eea; margin-bottom: 20px;">ما الذي يمكنك فعله بعد التفعيل؟</h3>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">🔍</div>
+                    <div class="feature-text">الوصول إلى أكثر من 50 أداة OSINT متخصصة</div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-text">إنشاء وإدارة التحقيقات والقضايا</div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">📈</div>
+                    <div class="feature-text">تحليل البيانات وإنشاء التقارير الاحترافية</div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">🛡️</div>
+                    <div class="feature-text">أدوات الأمن السيبراني والتشفير</div>
+                </div>
+            </div>
+            
+            <p style="margin-top: 30px; font-size: 14px; color: #657786;">
+                إذا لم يعمل الزر أعلاه، يمكنك نسخ الرابط التالي ولصقه في متصفحك:
+            </p>
+            <p style="word-break: break-all; font-size: 12px; color: #667eea;">
+                {{ verification_url }}
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>كوريزا OSINT</strong></p>
+            <p>منصة الأمن السيبراني وجمع المعلومات المفتوحة</p>
+            <p style="margin-top: 15px;">
+                هذه رسالة تلقائية، يرجى عدم الرد عليها.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
