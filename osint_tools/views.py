@@ -849,6 +849,96 @@ def result_detail(request, result_id):
 
 
 @login_required
+@require_http_methods(["POST"])
+def link_session_to_case(request, case_id):
+    """ربط جلسة موجودة بقضية"""
+    case = get_object_or_404(InvestigationCase, id=case_id, user=request.user)
+    
+    try:
+        data = json.loads(request.body)
+        session_id = data.get('session_id')
+        
+        if not session_id:
+            return JsonResponse({'success': False, 'message': 'معرف الجلسة مطلوب'}, status=400)
+        
+        # التحقق من أن الجلسة تخص المستخدم
+        session = get_object_or_404(OSINTSession, id=session_id, user=request.user)
+        
+        # ربط الجلسة بالقضية
+        session.investigation_case = case
+        session.save()
+        
+        return JsonResponse({
+            'success': True, 
+            'message': f'تم ربط الجلسة "{session.tool.name} - {session.target}" بالقضية بنجاح',
+            'session': {
+                'id': session.id,
+                'tool_name': session.tool.name,
+                'target': session.target,
+                'status': session.get_status_display(),
+                'results_count': session.results_count
+            }
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'بيانات JSON غير صالحة'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def unlink_session_from_case(request, case_id, session_id):
+    """فك ربط جلسة من قضية"""
+    case = get_object_or_404(InvestigationCase, id=case_id, user=request.user)
+    session = get_object_or_404(OSINTSession, id=session_id, user=request.user, investigation_case=case)
+    
+    try:
+        session.investigation_case = None
+        session.save()
+        
+        return JsonResponse({
+            'success': True, 
+            'message': 'تم فك ربط الجلسة من القضية بنجاح'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+@login_required
+def get_available_sessions(request, case_id):
+    """الحصول على الجلسات المتاحة للربط بالقضية"""
+    case = get_object_or_404(InvestigationCase, id=case_id, user=request.user)
+    
+    # جلب الجلسات التي لا تنتمي لأي قضية أو تنتمي لقضايا أخرى
+    available_sessions = OSINTSession.objects.filter(
+        user=request.user,
+        status='completed'  # فقط الجلسات المكتملة
+    ).exclude(
+        investigation_case=case  # استبعاد الجلسات المرتبطة بالقضية الحالية
+    ).select_related('tool').order_by('-created_at')[:50]
+    
+    sessions_data = []
+    for session in available_sessions:
+        sessions_data.append({
+            'id': session.id,
+            'tool_name': session.tool.name,
+            'tool_icon': session.tool.icon,
+            'target': session.target,
+            'status': session.get_status_display(),
+            'results_count': session.results_count,
+            'created_at': session.created_at.strftime('%Y-%m-%d %H:%M'),
+            'is_linked': session.investigation_case is not None,
+            'linked_case': session.investigation_case.title if session.investigation_case else None
+        })
+    
+    return JsonResponse({
+        'success': True,
+        'sessions': sessions_data,
+        'total': len(sessions_data)
+    })
+
+
+@login_required
 def reports_list(request):
     """قائمة التقارير"""
     reports = OSINTReport.objects.filter(user=request.user).order_by('-generated_at')
